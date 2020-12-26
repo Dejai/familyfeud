@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+		<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+	<style type="text/css">	
+
+		.test_section{ border:1px solid black; width:80%; margin:auto; margin-top:2%; }
+	</style>
+</head>
+<body>
+	
+	<div style="text-align:center;">
+		<h3>Testing with Trello</h3>
+		<p>Use this page to test the trello calls</p>
+	</div>
+	<hr/>
+	<div class="test_section">
+		<label>Select Entity: </label>
+		<select id="entity">
+			<option value="boards">Get Boards</option>
+			<option value="custom-fields">Get Custom Fields</option>
+			<option value="lists">Get Lists</option>
+			<option value="list-create">Create a List</option>
+			<option value="cards">Get Cards</option>
+			<option value="checklists">Get Checklists</option>
+			<option value="card">Get Single Card</option>
+			<option value="card-actions">Get Card Actions</option>
+			<option value="card-create">Create New Card</option>
+			<option value="card-update">Update Existing Card</option>
+			<option value="list-create">Create a List</option>
+			<!-- <option value="boards">Get Boards</option> -->
+		</select>
+		<br/>
+		<label>Enter ID (if applicable)</label>
+		<input id="entity_id" type="entity_id" name="entity_id">
+		<br/><br/>
+		<button onclick="test_trello()">Test Trello</button>
+
+		<div id="test_results"></div>
+	</div>
+
+	<div class="test_section">
+		<label>Create Family Feud Cards</label>
+		<br/><br/>
+		<p><span id="curr">0</span> of <span id="total"></span></p>
+		<label>Starting Index</label>
+		<input id="starting_index" type="number" name="starting_index" value="1">
+		<br/><br/>
+
+		<button onclick="getCardData()">Get Card Data</button>
+		&nbsp;
+		<button id="addCardButton" onclick="createIndividualCard()">Create Card</button>
+		&nbsp;
+		<button id="addCardButton2" onclick="automateClick()">Automate</button>
+		&nbsp;
+		<button id="addCardButton2" onclick="getDuplicates()">Get Duplicates</button>
+		&nbsp;
+		<button id="addCardButton3" onclick="getBadChecklists()">Get Bad Checklists</button>
+		<div id="test_results2"></div>
+	</div>
+
+
+	
+</body>
+	<!-- Common Code -->
+	<script src="../src/common.js"></script>
+	<!-- My Trello code -->
+	<script src="../src/trello.js"></script>
+	<script src="./test_trello.js"></script>
+</html>

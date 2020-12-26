@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Family Feud - Board</title>
+
+	<link rel="stylesheet" type="text/css" href="../src/game.css">
+</head>
+<body>
+	<div id="menu">
+		<table id="menu_table" style="width:100%;">
+			<colgroup>
+				<col style="width:33%"/>
+				<col style="width:33%"/>
+				<col style="width:33%"/>
+			</colgroup>
+			<tr>
+				<td >
+					<div id="team_one" class="team_score">
+						<h2 contenteditable="true" class="team_name_box">Team Name #1</h2>
+						<div id="team_one_score" class="score_value" onclick="setTeamInPlay('one')">0</div>
+						<p>
+							<button onclick="onAssignScore('one')">Assign Score</button>
+						</p>
+					</div>
+				</td>
+				<td>
+					<h1 id="game_name">Family Feud</h1>
+				</td>
+				<td style="text-align:right;padding-right:5%;">
+					<div id="team_two" class = "team_score">
+						<h2 contenteditable="true" class="team_name_box">Team Name #2</h2>	
+						<div id="team_two_score"  class="score_value" onclick="setTeamInPlay('two')"">0</div>
+						<p>
+							<button onclick="onAssignScore('two')">Assign Score</button>
+						</p>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<hr>
+	<!-- <div id="instructions">
+		<h2>Instructions</h2>
+		<ul>
+			<li>Click <span>START GAME</span> when ready to begin </li>
+			<li>Press the <span>DELETE</span> or <span>BACKSPACE</span> button if the team gets it wrong</li>
+		</ul>
+	</div> -->
+	<div id="game_table_section">
+
+		<h1 id="round_name" class="centered">Round #0</h1>
+
+		<h3 style="margin:0px;">Current Score:</h3>
+		<div id="current_score" class="score_value">0</div>
+
+		<table id="game_table" cellpadding="0">
+			<colgroup>
+				<col width="250">
+				<col width="21">
+				<col width="250">
+				<col width="21">
+			</colgroup>
+			<tbody>
+				<tr>
+					<td id="game_cell_1" class="game_cell">
+						<p class="game_cell_number hidden">1</p>
+						<p class="answer hidden"></p>
+					</td>
+					<td id="game_cell_count_1" class="game_cell_count unseen">
+						<p class="hidden"></p>
+					</td>
+					<td id="game_cell_5" class="game_cell">
+						<p class="game_cell_number hidden">5</p>
+						<p class="answer hidden"></p>
+					</td>
+					<td id="game_cell_count_5" class="game_cell_count unseen">
+						<p class="hidden"></p>
+					</td>
+				</tr>
+				<tr>
+					<td id="game_cell_2" class="game_cell">
+						<p class="game_cell_number hidden">2</p>
+						<p class="answer hidden"></p>
+					</td>
+					<td id="game_cell_count_2" class="game_cell_count unseen">
+						<p class="hidden"></p>
+					</td>
+					<td id="game_cell_6" class="game_cell">
+						<p class="game_cell_number hidden">6</p>
+						<p class="answer hidden"></p>
+					</td>
+					<td id="game_cell_count_6" class="game_cell_count unseen">
+						<p class="hidden"></p>
+					</td>
+				</tr>
+				<tr>
+					<td id="game_cell_3" class="game_cell">
+						<p class="game_cell_number hidden">3</p>
+						<p class="answer hidden"></p>
+					</td>
+					<td id="game_cell_count_3" class="game_cell_count unseen">
+						<p class="hidden"></p>
+					</td>
+					<td id="game_cell_7" class="game_cell">
+						<p class="game_cell_number hidden">7</p>
+						<p class="answer hidden"></p>
+					</td>
+					<td id="game_cell_count_7" class="game_cell_count unseen">
+						<p class="hidden"></p>
+					</td>
+				</tr>
+				<tr>
+					<td id="game_cell_4" class="game_cell">
+						<p class="game_cell_number hidden">4</p>
+						<p class="answer hidden"></p>
+					</td>
+					<td id="game_cell_count_4" class="game_cell_count unseen">
+						<p class="hidden"></p>
+					</td>
+					<td id="game_cell_8" class="game_cell">
+						<p class="game_cell_number hidden">8</p>
+						<p class="answer hidden"></p>
+					</td>
+					<td id="game_cell_count_8" class="game_cell_count unseen">
+						<p class="hidden"></p>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div id="wrong_answer_section"></div>
+	<div id="sound_section">
+		<audio id="wrong_answer_sound">
+			<source src="../assets/audio/wrong_answer.mp3" type="audio/mpeg">
+		</audio>
+		<audio id="right_answer_sound">
+			<source src="../assets/audio/right_answer.mp3" type="audio/mpeg">
+		</audio>
+	</div>
+	<br/>
+	<div id="game_action_buttons">
+		<button id="retryButton" onclick="tryAnotherQuestion()" class="button_mash hidden">RETRY</button>	
+		<button id="next_round_button" onclick="onNextRound()" class="button_mash hidden">NEXT ROUND</button>	
+		<button id="startGameButton" onclick="onStartGame()" class="button_mash">START GAME</button>
+	</div>
+</body>
+		<!-- Common Code -->
+	<script src="../src/common.js"></script>
+	<!-- My Trello code -->
+	<script src="../src/trello.js"></script>
+	<!-- My Source JS -->
+	<script src="../src/board.js"></script>
+</html>

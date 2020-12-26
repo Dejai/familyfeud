@@ -1,0 +1,54 @@
+
+/* GENERAL */
+	body { background-color:black; color:white; }
+	
+	#menu { text-align: center; }
+	#menu_table { text-align:center; }
+	body{ font-family:Arial, sans-serif; }
+	.centered{ text-align:center; }
+	.hidden { display:none; }
+	.button_mash { font-size:140%; cursor:pointer;  }
+
+/* HOME PAGE */
+	.identify_yourself { display:block; text-align:center; padding:2%; width:40%; margin:auto; cursor:pointer;
+							 background-color:lightgray; margin-bottom:2%;
+			 }
+	.identify_yourself:hover{background-color:blue; color:yellow; }
+
+
+/* ADMIN VIEW */
+	
+	#current_question_section{ border:1px solid white; }
+	#current_question { color:red; }
+
+	#game_table_admin { border:none; width:100%; border-collapse: collapse; font-size:100%; }
+	#game_table_admin td { border:2px solid white; }
+
+/* GAME VIEW */
+	/*Game Scores*/
+	.in_play { border:2px solid limegreen; }
+
+	.team_score { text-align:center; cursor:pointer; }
+	.team_score h2 { margin-bottom:0px; }
+	.score_value { background-color:#000072; color:#ffffff; width:40%; margin:auto; font-size:300%; }
+	#current_score { margin-bottom:2%; }
+
+	/* Round Details*/
+	.multiplier_phrase { font-size:80%; }
+
+
+	/* Game Table */
+	#game_table_section { width:60%; margin:auto; text-align:center; }
+	#game_table { border:none; width:100%; border-collapse: collapse; font-size:150%; }
+	#game_table td { border:2px solid white; }	
+	.game_cell { width:250px; height:49px; background-color:#000072; cursor:pointer; }
+	.game_cell p { text-align:center; color:#ffffff; font-family:Arial, sans-serif; font-weight:bolder; }
+	.circled_number { height: 25px; width: 25px; padding:1%; background-color: #0046b7; border-radius: 50%; display: inline-block; }
+	.game_cell_count { width:21px; background-color:#0046b7;}
+	.game_cell_count.unseen {  background-color:#000072; border:0px; border-left:2px solid #000072; }
+	.game_cell_count p { text-align:center; color:#ffffff; font-family:Arial, sans-serif; font-weight:bolder; }
+
+	/* Additional Things*/
+	#game_action_buttons { width:40%; margin-top:5%; margin:auto; text-align:center; }
+	#wrong_answer_section { margin:auto; width:50%; text-align:center; margin-top:2%; }
+	.wrong_answer_img { width:100px; height:100px; margin-right:3%; }
