@@ -1,4 +1,5 @@
-
+// Use this script for the following seasons = { 16, }
+// Used for seasons = {16}
 function mytest(){
 	let centered = document.querySelectorAll("center");
 
@@ -38,6 +39,8 @@ function mytest(){
 
 	console.log(CSV);
 }
+
+
 
 
 

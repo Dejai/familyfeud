@@ -16,22 +16,28 @@
 			<tr>
 				<td >
 					<div id="team_one" class="team_score">
-						<h2 contenteditable="true" class="team_name_box">Team Name #1</h2>
-						<div id="team_one_score" class="score_value" onclick="setTeamInPlay('one')">0</div>
+						<h2 contenteditable="true" data-team="team_one" class="team_name_box">Team Name #1</h2>
+						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
+						<div id="team_one_score" class="score_value">0</div>
 						<p>
-							<button onclick="onAssignScore('one')">Assign Score</button>
+							<button class="assign_score hidden" onclick="onAssignScore('one')">Assign Score</button>
+							<button class="team_in_play" onclick="setTeamInPlay('one')">PLAY</button>
 						</p>
 					</div>
 				</td>
 				<td>
 					<h1 id="game_name">Family Feud</h1>
+					<h3 style="margin:0px;">Current Score:</h3>
+					<div id="current_score" class="score_value">0</div>
 				</td>
 				<td style="text-align:right;padding-right:5%;">
 					<div id="team_two" class = "team_score">
-						<h2 contenteditable="true" class="team_name_box">Team Name #2</h2>	
-						<div id="team_two_score"  class="score_value" onclick="setTeamInPlay('two')"">0</div>
+						<h2 contenteditable="true" data-team="team_two" class="team_name_box">Team Name #2</h2>	
+						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
+						<div id="team_two_score" class="score_value">0</div>
 						<p>
-							<button onclick="onAssignScore('two')">Assign Score</button>
+							<button class="assign_score hidden" onclick="onAssignScore('two')">Assign Score</button>
+							<button class="team_in_play" onclick="setTeamInPlay('two')">PLAY</button>
 						</p>
 					</div>
 				</td>
@@ -39,19 +45,9 @@
 		</table>
 	</div>
 	<hr>
-	<!-- <div id="instructions">
-		<h2>Instructions</h2>
-		<ul>
-			<li>Click <span>START GAME</span> when ready to begin </li>
-			<li>Press the <span>DELETE</span> or <span>BACKSPACE</span> button if the team gets it wrong</li>
-		</ul>
-	</div> -->
 	<div id="game_table_section">
 
 		<h1 id="round_name" class="centered">Round #0</h1>
-
-		<h3 style="margin:0px;">Current Score:</h3>
-		<div id="current_score" class="score_value">0</div>
 
 		<table id="game_table" cellpadding="0">
 			<colgroup>
@@ -140,9 +136,11 @@
 	</div>
 	<br/>
 	<div id="game_action_buttons">
-		<button id="retryButton" onclick="tryAnotherQuestion()" class="button_mash hidden">RETRY</button>	
-		<button id="next_round_button" onclick="onNextRound()" class="button_mash hidden">NEXT ROUND</button>	
 		<button id="startGameButton" onclick="onStartGame()" class="button_mash">START GAME</button>
+		<button id="next_round_button" onclick="onNextRound()" class="button_mash hidden">NEXT ROUND</button>
+		<a href="../fastmoney/" target="_blank">
+			<button id="fast_money_button" class="button_mash hidden">FAST MONEY</button>	
+		</a>
 	</div>
 </body>
 		<!-- Common Code -->

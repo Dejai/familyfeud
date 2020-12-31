@@ -1,8 +1,8 @@
 <!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
 <head>
-	<title>Family Feud - Board</title>
-
+	<title>Family Feud - Admin</title>
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
 </head>
 <body>
@@ -13,12 +13,18 @@
 	<div id="game_table_section">
 		<h2>Admin View</h2>
 
+		<div id="game_action_buttons2">
+			<button id="next_round_button" onclick="onGetCurrentQuestion()" class="button_mash">REFRESH</button>
+			<a href="../fastmoney/questions.html">
+				<button id="fast_money_button" class="button_mash">FAST MONEY</button>	
+			</a>	
+		</div>
 
 		<div id="current_question_section">
 			<h3>Question:</h3>
 			<h2 id="current_question"></h2>
 		</div>
-		
+
 
 		<h3>Answers:</h3>
 
@@ -97,9 +103,7 @@
 			</tbody>
 		</table>
 	</div>
-	<div id="game_action_buttons">
-		<button id="next_round_button" onclick="onGetCurrentQuestion()" class="button_mash">REFRESH</button>	
-	</div>
+	
 </body>
 		<!-- Common Code -->
 	<script src="../src/common.js"></script>

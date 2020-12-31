@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+<head>
+	<title>Family Feud - Fast Money</title>
+	<link rel="stylesheet" type="text/css" href="../src/game.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+	<div id="menu">
+		<h1 id="game_name">Family Feud <br/> Fast Money</h1>
+	</div>
+	<hr>
+	<div id="game_table_section">
+		<!-- <h2>Fast Money</h2> -->
+
+		<div style="margin-bottom:2%;">
+			<button onclick="addFastMoneyListeners(event,'one')" class="button_mash">Player One</button>
+			<button onclick="addFastMoneyListeners(event,'two')" class="button_mash">Player Two</button>
+		</div>
+
+		<div id="time_view">
+			<div id="time_view_regular">
+				<!-- <span id="timer_minute" class="timer_value">00:</span> -->
+				<span id="timer_second" class="timer_value" contenteditable="true">20</span>
+				<span>&nbsp;</span>
+				<span onclick="onStartTimer()" id="timer_start" class="timer_buttons fa fa-play" style="font-size:45px;"></span>
+				<span onclick="onStopTimer()" id="timer_stop" class="timer_buttons fa fa-pause" style="display:none; font-size:45px;"></span>
+				<span onclick="onResetTimer()" id="timer_reset" class="timer_buttons fa fa-refresh" style="display:none; font-size:45px;"></span>
+			</div>
+		</div>
+		
+		<table id="game_table_admin" cellpadding="0">
+			<tbody>
+				<tr>
+					<td id="fast_money_player_one">
+						<table style="width:100%;">
+							<colgroup>
+								<col width="250">
+								<col width="21">
+								<col width="250">
+								<col width="21">
+							</colgroup>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+						</table>
+					</td>
+					<td id="fast_money_player_two">
+						<table style="width:100%;">
+							<colgroup>
+								<col width="250">
+								<col width="21">
+								<col width="250">
+								<col width="21">
+							</colgroup>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+							<tr>
+								<td class="game_cell"></td>
+								<td class="game_cell_count"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div style="text-align:left;">
+			<button onclick="toggleFastMoneyAnswers('hide')">Hide All</button>
+			<button onclick="toggleFastMoneyAnswers('show')">Show All</button>
+		</div>		
+		<div class="score_value" style="margin-bottom:2%;">
+			<span>Score:</span><span id="fast_money_total_score" class="">000</span>
+		</div>
+	</div>
+	<div id="sound_section">
+		<audio id="wrong_answer_sound">
+			<source src="../assets/audio/wrong_answer.mp3" type="audio/mpeg">
+		</audio>
+		<audio id="duplicate_answer_sound">
+			<source src="../assets/audio/duplicate_answer.mp3" type="audio/mpeg">
+		</audio>
+	</div>
+</body>
+		<!-- Common Code -->
+	<script src="../src/common.js"></script>
+	<!-- My Trello code -->
+	<script src="../src/trello.js"></script>
+	<!-- My Source JS -->
+	<script src="../src/board.js"></script>
+</html>

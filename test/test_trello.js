@@ -10,6 +10,9 @@ function test_trello()
 		case "custom-fields":
 			MyTrello.get_custom_fields(print_data);
 			break;
+		case "labels":
+			MyTrello.get_labels(print_data);
+			break;
 		case "lists":
 			MyTrello.get_lists(print_data);
 			break;
@@ -56,8 +59,8 @@ function test_trello()
 		case "card-create":
 			if(id != undefined && id != "")
 			{
-				MyTrello.list_id = id;
-				MyTrello.create_card("Trello Testing", print_data);
+				MyTrello.list_id = MyTrello.recently_added_list_id;
+				MyTrello.create_card("Trello Testing", undefined, print_data);
 			} else
 			{
 				alert("Need List ID");
@@ -106,81 +109,106 @@ function print_data(data){
 
 var CARDS = [];
 
-
-function getCardData()
+function clean_data(data)
 {
-	myajax.AJAX({
-		method:"GET",
-		path: "./create_cards.csv",
-		success: function(data){
-			card_data = data.responseText;
-
-			rows = card_data.split("\n");
-
-			let starting_idx_ele = document.getElementById("starting_index")
-			console.log(starting_idx_ele)
-			starting_index = Number(starting_idx_ele.value)
-			console.log("Starting Index : " + starting_index);
-
-			rows.forEach(function(obj, idx){
-				if(idx != 0) {
-
-					splits = obj.split(",");
-
-					question = splits[0].replaceAll("\"","");
-
-					let a1 = splits[1].replaceAll("\"","");
-					let c1 = splits[2].replaceAll("\"","");
-					let item1 = a1 + " ~ " + c1;
-
-					let a2 = splits[5].replaceAll("\"","");
-					let c2 = splits[6].replaceAll("\"","");
-					let item2 = a2 + " ~ " + c2;
-
-					
-					let a3 = splits[9].replaceAll("\"","");
-					let c3 = splits[10].replaceAll("\"","");
-					let item3 = a3 + " ~ " + c3;
-
-
-					let a4 = splits[13].replaceAll("\"","");
-					let c4 = splits[14].replaceAll("\"","");
-					let item4 = a4 + " ~ " + c4;
-
-					let a5 = splits[3].replaceAll("\"","");
-					let c5 = splits[4].replaceAll("\"","");
-					let item5 = a5 + " ~ " + c5;
-
-					let a6 = splits[7].replaceAll("\"","");
-					let c6 = splits[8].replaceAll("\"","");
-					let item6 = a6 + " ~ " + c6;
-
-					let a7 = splits[11].replaceAll("\"","");
-					let c7 = splits[12].replaceAll("\"","");
-					let item7 = a7 + " ~ " + c7;
-
-					let a8 = splits[15].replaceAll("\"","");
-					let c8 = splits[16].replaceAll("\"","");
-					let item8 = a8 + " ~ " + c8;
-
-
-					let items = [item1, item2, item3, item4, item5, item6, item7, item8];
-
-					card_obj = { 
-									"question": encodeURIComponent(question), 
-									"answers" : items
-								};
-
-					CARDS.push(card_obj);
-				}
-			});
-
-			console.log(CARDS);
-			document.getElementById("total").innerText = CARDS.length;
-		}
-	});
+	let cleaned_data = "";
+	if(data != undefined)
+	{
+		cleaned_data = data.replaceAll("\"","").replaceAll("\&","AND").replaceAll("NULL", "");
+	}
+	return cleaned_data;
 }
 
+// Get the card data as formulated in the CSV; Store in local JS Object
+function getCardData()
+{
+
+	let numAnswersValue = document.getElementById("number_of_answers").value;
+
+	if(numAnswersValue != undefined && Number(numAnswersValue) > 0)
+	{
+		document.getElementById("addCardButton").disabled = false;
+		document.getElementById("addCardAutomatedButton").disabled = false;
+
+		myajax.AJAX({
+			method:"GET",
+			path: "./create_cards.csv",
+			success: function(data){
+				card_data = data.responseText;
+
+				rows = card_data.split("\n");
+
+				rows.forEach(function(obj, idx){
+
+					if(idx != 0 && obj != "") 
+					{
+
+						splits = obj.split(",");
+
+						question = clean_data(splits[0]);
+
+						let a1 = clean_data(splits[1]);
+						let c1 = clean_data(splits[2]);
+						let item1 = a1 + " ~ " + c1;
+
+						let a2 = clean_data(splits[5]);
+						let c2 = clean_data(splits[6]);
+						let item2 = a2 + " ~ " + c2;
+
+						
+						let a3 = clean_data(splits[9]);
+						let c3 = clean_data(splits[10]);
+						let item3 = a3 + " ~ " + c3;
+
+
+						let a4 = clean_data(splits[13]);
+						let c4 = clean_data(splits[14]);
+						let item4 = a4 + " ~ " + c4;
+
+						let a5 = clean_data(splits[3]);
+						let c5 = clean_data(splits[4]);
+						let item5 = a5 + " ~ " + c5;
+
+						let a6 = clean_data(splits[7]);
+						let c6 = clean_data(splits[8]);
+						let item6 = a6 + " ~ " + c6;
+
+						let a7 = clean_data(splits[11]);
+						let c7 = clean_data(splits[12]);
+						let item7 = a7 + " ~ " + c7;
+
+						let a8 = clean_data(splits[15]);
+						let c8 = clean_data(splits[16]);
+						let item8 = a8 + " ~ " + c8;
+
+
+						let items = [item1, item2, item3, item4, item5, item6, item7, item8];
+
+						card_obj = { 
+										"question": question, 
+										"answers" : items
+									};
+
+						CARDS.push(card_obj);
+					}
+				});
+
+				console.log(CARDS);
+				document.getElementById("total1").innerText = CARDS.length + " Questions";
+				document.getElementById("total2").innerText = CARDS.length;
+			}
+		});
+	}
+	else
+	{
+		document.getElementById("addCardButton").disabled = true;
+		document.getElementById("addCardAutomatedButton").disabled = true;
+
+		alert("Please enter valid Number of Answers");
+	}
+}
+
+// Automate the clicking of the add card button
 function automateClick()
 {
 	setInterval(function(){
@@ -188,11 +216,14 @@ function automateClick()
 	}, 3000);
 }
 
-
+// Creates an individual card -- along with Checklist and answers
 function createIndividualCard(){
 
 	document.getElementById("addCardButton").disabled = true;
 	document.getElementById("test_results2").innerHTML = "";
+
+	// The number of answers expected
+	let numAnswersValue = document.getElementById("number_of_answers").value;
 
 
 	value = document.getElementById("curr").innerText;
@@ -200,11 +231,9 @@ function createIndividualCard(){
 
 	card_data = CARDS[idx];
 
-	title = card_data["question"];
+	title = encodeURIComponent(card_data["question"]);
 
-
-
-	MyTrello.create_card(title, function(data){
+	MyTrello.create_card(title, numAnswersValue, function(data){
 		response1 = JSON.parse(data.responseText);
 		card_id = response1["id"];
 
@@ -244,62 +273,95 @@ function createIndividualCard(){
 }
 
 
-function getDuplicates()
+// Validate the recently added cards
+function validateNewlyAddedCards()
 {
-	frequency = [];
-	MyTrello.get_cards(MyTrello.played_list_id, function(data){
-		response = JSON.parse(data.responseText)
-		response.forEach(function(obj){
-			name = obj["name"];
-			if(frequency.includes(name))
-			{
-				document.getElementById("test_results2").innerHTML += `<p>${name}</p>`;
-			}
-			else {
-				frequency.push(name);
-			}
-		});
-	});
-	document.getElementById("test_results2").innerHTML += `<p>DONE</p>`;
+	document.getElementById("test_results2").innerHTML = "";
 
-}
-
-function getBadChecklists()
-{
-	MyTrello.get_cards(MyTrello.played_list_id, function(data){
+	let cards = [];
+	let card_map = {};
+	MyTrello.get_cards(MyTrello.recently_added_list_id, function(data){
 		response = JSON.parse(data.responseText)
 		response.forEach(function(obj){
 			cardID = obj["id"];
 			name = obj["name"];
 			checklist_id = obj["idChecklists"][0];
 
-			MyTrello.get_checklist(checklist_id,function(data){
+			card_obj = {"card_name": name, "checklist_id":checklist_id};
+			cards.push(card_obj);
+			card_map[cardID] = name;
+		});
+		checkDuplicates(cards);
+		checkBadChecklists(cards, card_map);
+		console.log(cards);
+		document.getElementById("test_results2").innerHTML += `<p>DONE</p>`;
+	});
+}
 
-				response = JSON.parse(data.responseText);
-				checklist_items = response["checkItems"];
+// Find any duplicates in the "played_list_id"
+function checkDuplicates(cardsList)
+{
+	frequency = [];
+	cardsList.forEach(function(obj){
+		name = obj["card_name"];
+		if(frequency.includes(name))
+		{
+			document.getElementById("test_results2").innerHTML += `<p>DUPLICATE: ${name}</p>`;
+		}
+		else {
+			frequency.push(name);
+		}
+	});
+}
 
-				checklist_items = checklist_items.sort(function(a,b){
-					return a.pos - b.pos;
-				});
-				console.log(checklist_items);
-
-				checklist_items.forEach(function(obj){
-					value = obj["name"];
-					if(!value.includes("~"))
-					{
-						document.getElementById("test_results2").innerHTML += `<p>${name}</p>`;
-					}
-					else
-					{
-						
-						// Move the card to the current Game List
-						MyTrello.update_card_list(cardID, MyTrello.current_card_list_id, function(data){
-							Logger.log("Card List ID updated");
-						});
-					}
-				});			
-			});
+// Check for bad checklists
+function checkBadChecklists(cardsList, cardMap)
+{
+	cardsList.forEach(function(obj){
+		name = obj["card_name"];
+		checklist_id = obj["checklist_id"]
+		MyTrello.get_checklist(checklist_id,function(data){
+			response = JSON.parse(data.responseText);
+			checklist_items = response["checkItems"];
+			card_id = response["idCard"];
+			checklist_items.forEach(function(obj){
+				value = obj["name"];
+				if(!value.includes("~"))
+				{
+					// console.log(response);
+					card_name = cardMap[card_id];
+					document.getElementById("test_results2").innerHTML += `<p>BAD CHECKLIST: ${card_name}</p>`;
+					// obj = {"card": card_name, "value": value, "og": checklist_items};
+					// console.log(obj);
+				}
+			});			
 		});
 	});
-	document.getElementById("test_results2").innerHTML += `<p>DONE</p>`;
+}
+
+function checkCardsToBeFixed()
+{
+	document.getElementById("test_results2").innerHTML = "";
+
+	let to_be_fixed = [];
+	MyTrello.get_cards(MyTrello.to_be_fixed_list_id, function(data){
+		response = JSON.parse(data.responseText)
+		response.forEach(function(obj){
+			cardID = obj["id"];
+			name = obj["name"];
+			to_be_fixed.push(name);
+		});
+		CARDS.forEach(function(obj){
+			name2 = obj["question"];
+			console.log(name2);
+			if(to_be_fixed.includes(name2))
+			{
+				document.getElementById("test_results2").innerHTML += `<p>TO BE FIXED: ${name2}</p>`;
+				obj["answers"].forEach(function(obj){
+					document.getElementById("test_results2").innerHTML += `<li>${obj}</li>`;
+				});
+			}
+		});
+		document.getElementById("test_results2").innerHTML += `<p>DONE</p>`;
+	});
 }

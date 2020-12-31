@@ -7,9 +7,11 @@
 	<!-- Latest compiled JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
+	<link rel="stylesheet" type="text/css" href="../src/game.css">
+
 	<style type="text/css">	
 
-		.test_section{ border:1px solid black; width:80%; margin:auto; margin-top:2%; }
+		.test_section{ border:1px solid white; width:80%; margin:auto; margin-top:2%; }
 	</style>
 </head>
 <body>
@@ -24,10 +26,11 @@
 		<select id="entity">
 			<option value="boards">Get Boards</option>
 			<option value="custom-fields">Get Custom Fields</option>
+			<option value="labels">Get Labels</option>
 			<option value="lists">Get Lists</option>
 			<option value="list-create">Create a List</option>
 			<option value="cards">Get Cards</option>
-			<option value="checklists">Get Checklists</option>
+			<option value="checklists">Get a Checklist</option>
 			<option value="card">Get Single Card</option>
 			<option value="card-actions">Get Card Actions</option>
 			<option value="card-create">Create New Card</option>
@@ -45,22 +48,27 @@
 	</div>
 
 	<div class="test_section">
-		<label>Create Family Feud Cards</label>
-		<br/><br/>
-		<p><span id="curr">0</span> of <span id="total"></span></p>
-		<label>Starting Index</label>
-		<input id="starting_index" type="number" name="starting_index" value="1">
+		<h3>Create Family Feud Cards</h3>
+		<label>Number of Answers</label>
+		<input id="number_of_answers" type="number" name="number_of_answers"/>
 		<br/><br/>
 
+		<label>Step 1:</label><br/>
 		<button onclick="getCardData()">Get Card Data</button>
+		<span id="total1"></span>
+		<br/><br/>		
+		<label>Step 2: (enabled after entering number of answers) </label><br/>
+		<button id="addCardButton" onclick="createIndividualCard()" disabled>Create Card</button>
 		&nbsp;
-		<button id="addCardButton" onclick="createIndividualCard()">Create Card</button>
+		<button id="addCardAutomatedButton" onclick="automateClick()" disabled>Automate</button>
 		&nbsp;
-		<button id="addCardButton2" onclick="automateClick()">Automate</button>
+		<p>Processing <span id="curr">0</span> of <span id="total2"></span></p>
+		<label>Step 3:</label><br/>
+		<button id="validateNewCards" onclick="validateNewlyAddedCards()">Validate New Cards</button>
+		<br/><br/>		
+		<label>Step 4:</label><br/>
+		<button id="validateNewCards" onclick="checkCardsToBeFixed()">Check Cards to Fix</button>
 		&nbsp;
-		<button id="addCardButton2" onclick="getDuplicates()">Get Duplicates</button>
-		&nbsp;
-		<button id="addCardButton3" onclick="getBadChecklists()">Get Bad Checklists</button>
 		<div id="test_results2"></div>
 	</div>
 

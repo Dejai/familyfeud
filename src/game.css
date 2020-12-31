@@ -5,8 +5,11 @@
 	#menu { text-align: center; }
 	#menu_table { text-align:center; }
 	body{ font-family:Arial, sans-serif; }
+	button { cursor:pointer; }
 	.centered{ text-align:center; }
+	.leftaligned { text-align:left; }
 	.hidden { display:none; }
+	.invisible { visibility:hidden; }
 	.button_mash { font-size:140%; cursor:pointer;  }
 
 /* HOME PAGE */
@@ -15,6 +18,21 @@
 			 }
 	.identify_yourself:hover{background-color:blue; color:yellow; }
 
+/* FAST MONEY */
+	.fastmoney_editable { border-color:limegreen !important; }
+	.fastmoney_hidden { color:#000072; border-color:orange !important; }
+	.fastmoney_curr_player { background-color:blue; color:white; }
+
+	.question_section { border:2px solid white; margin-bottom:2%; padding:1%; width:100%; margin-left:auto; margin-right:auto;}
+	.question_section h3 { text-decoration:underline;}
+	.question_section .question { color:red; }
+
+	#time_view { width:45%; text-align:center; margin:auto; }
+	#time_view table {width: 100%;}
+	#timer_second { margin-right:2%; }
+
+	.timer_value { font-size:65px; }
+	.timer_buttons {  cursor:pointer; font-size:45px; }
 
 /* ADMIN VIEW */
 	
@@ -27,6 +45,7 @@
 /* GAME VIEW */
 	/*Game Scores*/
 	.in_play { border:2px solid limegreen; }
+	.can_steal { color:orange; font-style:italic; }
 
 	.team_score { text-align:center; cursor:pointer; }
 	.team_score h2 { margin-bottom:0px; }
@@ -49,6 +68,7 @@
 	.game_cell_count p { text-align:center; color:#ffffff; font-family:Arial, sans-serif; font-weight:bolder; }
 
 	/* Additional Things*/
-	#game_action_buttons { width:40%; margin-top:5%; margin:auto; text-align:center; }
+	#game_action_buttons { width:40%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
+	#game_action_button2 { width:60%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
 	#wrong_answer_section { margin:auto; width:50%; text-align:center; margin-top:2%; }
 	.wrong_answer_img { width:100px; height:100px; margin-right:3%; }

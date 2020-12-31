@@ -1,7 +1,8 @@
 <!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
 <head>
-	<title>Family Feud - Board</title>
+	<title>Family Feud - Host</title>
 
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
 </head>
@@ -13,92 +14,19 @@
 	<div id="game_table_section">
 		<h2>Host View</h2>
 
+		<div id="game_action_buttons2">
+			<button id="next_round_button" onclick="onGetCurrentQuestion()" class="button_mash">REFRESH</button>
+			<a href="../fastmoney/questions.html">
+				<button id="fast_money_button" class="button_mash">FAST MONEY</button>	
+			</a>
+		</div>
+
 		<div id="current_question_section">
 			<h3>Question:</h3>
 			<h2 id="current_question"></h2>
 		</div>
-		
-
-		<!-- <h3>Answers:</h3> -->
-
-		<!-- <table id="game_table_host" cellpadding="0">
-			<colgroup>
-				<col width="250">
-				<col width="21">
-				<col width="250">
-				<col width="21">
-			</colgroup>
-			<tbody>
-				<tr>
-					<td id="game_cell_1" class="game_cell">
-						<p class="game_cell_number hidden">1</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_1" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-					<td id="game_cell_5" class="game_cell">
-						<p class="game_cell_number hidden">5</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_5" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-				</tr>
-				<tr>
-					<td id="game_cell_2" class="game_cell">
-						<p class="game_cell_number hidden">2</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_2" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-					<td id="game_cell_6" class="game_cell">
-						<p class="game_cell_number hidden">6</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_6" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-				</tr>
-				<tr>
-					<td id="game_cell_3" class="game_cell">
-						<p class="game_cell_number hidden">3</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_3" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-					<td id="game_cell_7" class="game_cell">
-						<p class="game_cell_number hidden">7</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_7" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-				</tr>
-				<tr>
-					<td id="game_cell_4" class="game_cell">
-						<p class="game_cell_number hidden">4</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_4" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-					<td id="game_cell_8" class="game_cell">
-						<p class="game_cell_number hidden">8</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_8" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-				</tr>
-			</tbody>
-		</table> -->
 	</div>
-	<div id="game_action_buttons">
-		<button id="next_round_button" onclick="onGetCurrentQuestion()" class="button_mash">REFRESH</button>	
-	</div>
+	
 </body>
 		<!-- Common Code -->
 	<script src="../src/common.js"></script>
