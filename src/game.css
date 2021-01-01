@@ -35,7 +35,6 @@
 	.timer_buttons {  cursor:pointer; font-size:45px; }
 
 /* ADMIN VIEW */
-	
 	#current_question_section{ border:1px solid white; }
 	#current_question { color:red; }
 
@@ -69,6 +68,6 @@
 
 	/* Additional Things*/
 	#game_action_buttons { width:40%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
-	#game_action_button2 { width:60%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
+	#game_action_buttons2 { width:100%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
 	#wrong_answer_section { margin:auto; width:50%; text-align:center; margin-top:2%; }
 	.wrong_answer_img { width:100px; height:100px; margin-right:3%; }
