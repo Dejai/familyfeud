@@ -29,7 +29,10 @@
 				<span onclick="onResetTimer()" id="timer_reset" class="timer_buttons fa fa-refresh" style="display:none; font-size:45px;"></span>
 			</div>
 		</div>
-		
+		<div style="text-align:left;">
+			<button id="hide_player_one" onclick="toggleFastMoneyAnswers('hide')" class="hidden">Hide Player One</button>
+			<button id="show_player_one" onclick="toggleFastMoneyAnswers('show')" class="hidden">Show Player One</button>
+		</div>	
 		<table id="game_table_admin" cellpadding="0">
 			<tbody>
 				<tr>
@@ -96,13 +99,11 @@
 				</tr>
 			</tbody>
 		</table>
-		<div style="text-align:left;">
-			<button onclick="toggleFastMoneyAnswers('hide')">Hide All</button>
-			<button onclick="toggleFastMoneyAnswers('show')">Show All</button>
-		</div>		
-		<div class="score_value" style="margin-bottom:2%;">
+			
+		<div class="score_value" style="margin-top:5%; margin-bottom:2%;">
 			<span>Score:</span><span id="fast_money_total_score" class="">000</span>
 		</div>
+		<div><span contenteditable="true"></span></div>
 	</div>
 	<div id="sound_section">
 		<audio id="wrong_answer_sound">

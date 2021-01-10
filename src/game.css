@@ -20,7 +20,9 @@
 
 /* FAST MONEY */
 	.fastmoney_editable { border-color:limegreen !important; }
-	.fastmoney_hidden { color:#000072; border-color:orange !important; }
+	/*.fastmoney_hide_player1 { color:#000072; border-color:orange !important; }*/
+	.fastmoney_hide_player1 { visibility:hidden;}
+	.fastmoney_hidden { color:limegreen !important; }
 	.fastmoney_curr_player { background-color:blue; color:white; }
 
 	.question_section { border:2px solid white; margin-bottom:2%; padding:1%; width:100%; margin-left:auto; margin-right:auto;}
