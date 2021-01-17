@@ -24,7 +24,8 @@
 	var CURR_SCORE = 0;
 	var CURR_WRONG = 0;
 	var IS_STEAL = false;
-	var IN_PLAY = true;
+	var IN_PLAY = false;
+	var IS_FACEOFF = false;
 
 /*****************************GETTING STARTED************************************/
 
@@ -123,11 +124,21 @@ function fastMoneyListenerOnKeyUp(){
 function onStartGame()
 {
 	GAME_STARTED = true;
+	IS_FACEOFF = true;
+
 	document.getElementById("startGameButton").classList.add("hidden");
+	document.getElementById("pre_game_instructions").classList.add("hidden");
 
 	// Show buttons
 	document.getElementById("next_round_button").classList.remove("hidden");
 	document.getElementById("fast_money_button").classList.remove("hidden");
+	document.getElementById("game_table_section").classList.remove("hidden");
+	document.getElementById("current_score_label").classList.remove("hidden");
+	document.getElementById("current_score").classList.remove("hidden");
+	document.getElementById("teamOnePlayButton").classList.remove("hidden");
+	document.getElementById("teamTwoPlayButton").classList.remove("hidden");
+	
+
 	// document.getElementById("retryButton").classList.remove("hidden");
 	onNextRound();
 }
@@ -176,6 +187,10 @@ function setTeamInPlay(team)
 	// If team already in play, don't do anything
 	let in_play_already = document.querySelectorAll(".in_play");
 	if(in_play_already.length > 0){ return; }
+
+	// Set IN_PLAY to true and IS_FACEOFF to false
+	IN_PLAY = true; 
+	IS_FACEOFF = false;
 
 
 	identifier = `#team_${team} h2`;
@@ -245,9 +260,7 @@ function onWrongAnswer()
 	CURR_WRONG++;
 	let img = "";
 
-	let amount = (CURR_WRONG > 3 ) ? 1: CURR_WRONG;
-
-	
+	let amount = (CURR_WRONG > 3 || IS_FACEOFF ) ? 1: CURR_WRONG;
 
 	for(var idx = 0; idx < amount; idx++)
 	{
@@ -261,18 +274,17 @@ function onWrongAnswer()
 		document.getElementById("wrong_answer_section").innerHTML = img;
 
 		// Update "steal" bool if 3 wrong
-		if(CURR_WRONG == 3){ 
+		if(IN_PLAY && CURR_WRONG == 3){ 
 			IS_STEAL = true;
 			setStealOpportunity();
 		}
 
 		// Update in-play if steal was wrong too;
-		if (CURR_WRONG > 3){ 
+		if (IN_PLAY && CURR_WRONG > 3){ 
 			IN_PLAY = false; 
 			clearSteal();
 		}
-
-	},1000)	
+	},1000);
 }
 
 // Set the steal opportunity
@@ -342,7 +354,7 @@ function onRevealAnswer(value)
 
 // Update the score
 function onUpdateScore(value){
-	if(IN_PLAY)
+	if(IN_PLAY || IS_FACEOFF)
 	{
 		CURR_SCORE += Number(value) * CURR_ROUND;
 		document.getElementById("current_score").innerText = CURR_SCORE;
@@ -465,6 +477,124 @@ function onNextRound()
 	setTimeout(function(){
 		nextRoundButton.disabled = false;
 	},5000);
+}
+
+/*****************************CLEAR/RESET*******************************************/
+
+
+// Reset the boards ... clearing all values
+function onClearBoard()
+{
+	let can_be_cleared = (CURR_SCORE == 0) ? true : false
+
+	if(can_be_cleared)
+	{
+		
+
+		if(BOARD_VIEW){
+			// Clear current team in play
+			clearInPlay();
+
+			// Clear the steal opportunity
+			clearSteal();
+		}
+
+		if(BOARD_VIEW || FAST_MONEY_VIEW){
+			// Clear the current card list
+			clearCurrentCardList();
+		}
+		
+		// Reset in-play and is-steal and is
+		IN_PLAY = false;
+		IS_STEAL = false;
+		IS_FACEOFF = true;
+
+		// Reset aswer cells;
+		cells = document.querySelectorAll(".game_cell p.answer");
+		cells.forEach(function(obj){
+			obj.classList.add("hidden");
+			obj.innerText = "";
+		});
+
+		// Reset count cells
+		counts = document.querySelectorAll(".game_cell_count p");
+		counts.forEach(function(obj){
+			obj.classList.add("hidden");
+			obj.innerText = "";
+		});
+
+		// Reset game_cell_number cells;
+		numbers = document.querySelectorAll(".game_cell p.game_cell_number");
+		numbers.forEach(function(obj){
+			obj.classList.add("hidden");
+			obj.classList.remove("circled_number");
+		});
+
+		countsCells = document.querySelectorAll(".game_cell_count");
+		countsCells.forEach(function(obj){
+			obj.classList.add("unseen");
+		});
+
+		// Clear the wrong answer
+		clearWrongAnswerCount();
+	}
+	else
+	{
+		alert("Cannot clear board until the current points are assigned to a team!");
+	}
+
+	return can_be_cleared;
+}
+
+// Clear the wrong answer count
+function clearWrongAnswerCount()
+{
+	if(BOARD_VIEW){
+		CURR_WRONG = 0;
+		document.getElementById("wrong_answer_section").innerText = "";
+	}
+}
+
+// Clear the current list if it ever has anything in it
+function clearCurrentCardList()
+{
+	MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
+		response = JSON.parse(data.responseText);
+		if(response.length > 0)
+		{
+			response.forEach(function(obj){
+				moveCard(obj["id"], "Played"); 
+			});
+		}
+	});
+}
+
+function clearInPlay()
+{
+	curr = Array.from(document.querySelectorAll(".in_play"));
+	curr.forEach(function(obj){
+		obj.classList.remove("in_play");
+	});
+
+	// Hide the Assign Score Buttons
+	document.querySelector("#team_one button.assign_score").classList.add("hidden");
+	document.querySelector("#team_two button.assign_score").classList.add("hidden");
+
+	// Show the Play buttons
+	document.querySelector("#team_one button.team_in_play").classList.remove("hidden");
+	document.querySelector("#team_two button.team_in_play").classList.remove("hidden");
+}
+
+function clearSteal()
+{
+	curr = Array.from(document.querySelectorAll(".can_steal"));
+	curr.forEach(function(obj){
+		if(!obj.classList.contains("hidden"))
+		{
+			obj.classList.add("hidden");
+		}
+	});
+	
 }
 
 
@@ -806,120 +936,4 @@ function stopInterval()
 
 
 
-/*****************************CLEAR/RESET*******************************************/
-
-
-// Reset the boards ... clearing all values
-function onClearBoard()
-{
-	let can_be_cleared = (CURR_SCORE == 0) ? true : false
-
-	if(can_be_cleared)
-	{
-		
-
-		if(BOARD_VIEW){
-			// Clear current team in play
-			clearInPlay();
-
-			// Clear the steal opportunity
-			clearSteal();
-		}
-
-		if(BOARD_VIEW || FAST_MONEY_VIEW){
-			// Clear the current card list
-			clearCurrentCardList();
-		}
-		
-		// Reset in-play and is-steal
-		IN_PLAY = true;
-		IS_STEAL = false;
-
-		// Reset aswer cells;
-		cells = document.querySelectorAll(".game_cell p.answer");
-		cells.forEach(function(obj){
-			obj.classList.add("hidden");
-			obj.innerText = "";
-		});
-
-		// Reset count cells
-		counts = document.querySelectorAll(".game_cell_count p");
-		counts.forEach(function(obj){
-			obj.classList.add("hidden");
-			obj.innerText = "";
-		});
-
-		// Reset game_cell_number cells;
-		numbers = document.querySelectorAll(".game_cell p.game_cell_number");
-		numbers.forEach(function(obj){
-			obj.classList.add("hidden");
-			obj.classList.remove("circled_number");
-		});
-
-		countsCells = document.querySelectorAll(".game_cell_count");
-		countsCells.forEach(function(obj){
-			obj.classList.add("unseen");
-		});
-
-		// Clear the wrong answer
-		clearWrongAnswerCount();
-	}
-	else
-	{
-		alert("Cannot clear board until the current points are assigned to a team!");
-	}
-
-	return can_be_cleared;
-}
-
-// Clear the wrong answer count
-function clearWrongAnswerCount()
-{
-	if(BOARD_VIEW){
-		CURR_WRONG = 0;
-		document.getElementById("wrong_answer_section").innerText = "";
-	}
-}
-
-// Clear the current list if it ever has anything in it
-function clearCurrentCardList()
-{
-	MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
-		response = JSON.parse(data.responseText);
-		if(response.length > 0)
-		{
-			response.forEach(function(obj){
-				moveCard(obj["id"], "Played"); 
-			});
-		}
-	});
-}
-
-function clearInPlay()
-{
-	curr = Array.from(document.querySelectorAll(".in_play"));
-	curr.forEach(function(obj){
-		obj.classList.remove("in_play");
-	});
-
-	// Hide the Assign Score Buttons
-	document.querySelector("#team_one button.assign_score").classList.add("hidden");
-	document.querySelector("#team_two button.assign_score").classList.add("hidden");
-
-	// Show the Play buttons
-	document.querySelector("#team_one button.team_in_play").classList.remove("hidden");
-	document.querySelector("#team_two button.team_in_play").classList.remove("hidden");
-}
-
-function clearSteal()
-{
-	curr = Array.from(document.querySelectorAll(".can_steal"));
-	curr.forEach(function(obj){
-		if(!obj.classList.contains("hidden"))
-		{
-			obj.classList.add("hidden");
-		}
-	});
-	
-}
 

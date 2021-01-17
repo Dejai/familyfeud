@@ -21,14 +21,14 @@
 						<div id="team_one_score" class="score_value">0</div>
 						<p>
 							<button class="assign_score hidden" onclick="onAssignScore('one')">Assign Score</button>
-							<button class="team_in_play" onclick="setTeamInPlay('one')">PLAY</button>
+							<button id="teamOnePlayButton" class="team_in_play hidden" onclick="setTeamInPlay('one')">PLAY</button>
 						</p>
 					</div>
 				</td>
 				<td>
 					<h1 id="game_name">Family Feud</h1>
-					<h3 style="margin:0px;">Current Score:</h3>
-					<div id="current_score" class="score_value">0</div>
+					<h3 id="current_score_label" class="hidden" style="margin:0px;">Current Score:</h3>
+					<div id="current_score" class="score_value hidden">0</div>
 				</td>
 				<td style="text-align:right;padding-right:5%;">
 					<div id="team_two" class = "team_score">
@@ -37,7 +37,7 @@
 						<div id="team_two_score" class="score_value">0</div>
 						<p>
 							<button class="assign_score hidden" onclick="onAssignScore('two')">Assign Score</button>
-							<button class="team_in_play" onclick="setTeamInPlay('two')">PLAY</button>
+							<button id="teamTwoPlayButton" class="team_in_play hidden" onclick="setTeamInPlay('two')">PLAY</button>
 						</p>
 					</div>
 				</td>
@@ -45,7 +45,24 @@
 		</table>
 	</div>
 	<hr>
-	<div id="game_table_section">
+	<div id="pre_game_instructions">
+		<h2 class="centered">Instructions</h2>
+		<ul>
+			<li>First team to <span class="emphasis">300 points</span>, wins the rounds and gets to play "Fast Money" round</li>
+			<li>Each round, the points will be multiplied by the number for that round 
+				<ul>
+					<li class="emphasis">(i.e. round 2 is double the points, round 3 is triple, etc.)</li>
+				</ul>
+			</li>
+			<li>During a face off, the person with the higher answer, decides if their team will <span class="emphasis">"Play"</span></li>
+			<li>If the current team gets <span class="emphasis">three (3) wrong answers</span>, the other team gets one chance to steal
+				<ul>
+					<li>If they get it correct, they steal the points. If not, the original team keeps the points</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<div id="game_table_section" class="hidden">
 
 		<h1 id="round_name" class="centered">Round #0</h1>
 

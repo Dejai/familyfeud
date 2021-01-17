@@ -56,6 +56,11 @@
 	/* Round Details*/
 	.multiplier_phrase { font-size:80%; }
 
+	/* Instructions */
+	#pre_game_instructions{ width:60%; margin:auto; text-align:left; font-size:140%; }
+	#pre_game_instructions li { margin-bottom:4%; }
+	#pre_game_instructions .emphasis { color:orange; }
+
 
 	/* Game Table */
 	#game_table_section { width:60%; margin:auto; text-align:center; }
