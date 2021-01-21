@@ -217,7 +217,8 @@ function automateClick()
 }
 
 // Creates an individual card -- along with Checklist and answers
-function createIndividualCard(){
+function createIndividualCard()
+{
 
 	document.getElementById("addCardButton").disabled = true;
 	document.getElementById("test_results2").innerHTML = "";
@@ -344,13 +345,22 @@ function checkCardsToBeFixed()
 	document.getElementById("test_results2").innerHTML = "";
 
 	let to_be_fixed = [];
-	MyTrello.get_cards(MyTrello.to_be_fixed_list_id, function(data){
-		response = JSON.parse(data.responseText)
+
+	let checklists_to_review = [];
+
+	// MyTrello.get_cards(MyTrello.to_be_fixed_list_id, function(data){
+	// MyTrello.get_cards(MyTrello.pool_list_id, function(data){
+	MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
+		response = JSON.parse(data.responseText);
+		console.log(response);
 		response.forEach(function(obj){
 			cardID = obj["id"];
 			name = obj["name"];
 			to_be_fixed.push(name);
+			checklists_to_review.push(obj["idChecklists"][0]);
 		});
+
+		// Compare to be fixed list with list of loaded cards
 		CARDS.forEach(function(obj){
 			name2 = obj["question"];
 			console.log(name2);
@@ -362,6 +372,90 @@ function checkCardsToBeFixed()
 				});
 			}
 		});
+
 		document.getElementById("test_results2").innerHTML += `<p>DONE</p>`;
+
+		// Review checklists
+		reviewChecklists(to_be_fixed, checklists_to_review);
 	});
+
+}
+
+function reviewChecklists(cardnames, checklists)
+{
+	// console.log(cardnames);
+	// console.log(checklists);
+
+	var checklistIsBad = false;
+
+	start = 100;
+	end   = start+50;
+
+
+	document.getElementById("test_results2").innerHTML = "";
+
+	for(var i = start; i <= end; i++){
+
+		console.log("COUNTER = " + i);
+		card_name = cardnames[i];
+		checklist_id = checklists[i];
+
+		// console.log(card_name);
+		// console.log(checklist_id);
+
+		MyTrello.get_checklist(checklist_id, function(data){
+			response = JSON.parse(data.responseText);
+
+			checklistIsBad = false;
+			let idCard = response["idCard"];
+
+			let items = response["checkItems"];
+			items.forEach(function(item){
+
+				// console.log(item["name"]);
+
+				if(!item["name"].includes("~"))
+				{
+					console.log(response);
+					document.getElementById("test_results2").innerHTML += `<p>TO BE FIXED (bad checklist): ${idCard}</p>`;
+					checklistIsBad = true;
+				}
+			});
+		});
+	}
+
+
+
+	// checklists_sub = checklists
+
+	// var card_name = "";
+	// var checklistIsBad = false;
+
+	// for( [key,value] of Object.entries(checklists)){
+
+	// 	card_name = key;
+	// 	let checklist_id = value;
+	// 	MyTrello.get_checklist(checklist_id, function(data){
+	// 		response = JSON.parse(data.responseText);
+
+	// 		let items = response["checkItems"];
+	// 		items.forEach(function(item){
+
+	// 			console.log(item["name"]);
+
+	// 			if(!item["name"].includes("~"))
+	// 			{
+	// 				checklistIsBad = true;
+	// 			}
+	// 		});
+
+	// 		// Update checklist if bad
+	// 		if(checklistIsBad){
+	// 			document.getElementById("test_results2").innerHTML = "";
+	// 			document.getElementById("test_results2").innerHTML += `<p>TO BE FIXED (bad checklist): ${card_name}</p>`;
+	// 		}
+	// 	});
+	// };
+
+	
 }
