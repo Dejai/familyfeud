@@ -202,8 +202,6 @@ function onLoadAnswers(checklist_id)
 			return a.pos - b.pos;
 		});
 
-		// let isValidChecklist = validateChecklistItems(checklist_items)
-
 		try 
 		{
 			checklist_items.forEach(function(obj){
@@ -225,23 +223,12 @@ function onLoadAnswers(checklist_id)
 		} catch(error) 
 		{
 			Logger.log(error);
-			tryAnotherQuestion();
+			if(BOARD_VIEW)
+			{
+				tryAnotherQuestion();
+			}
 		}
 	});
-}
-
-// Validate if the checklist items are all set
-function validateChecklistItems(items)
-{
-	let isValid = true;
-	items.forEach(function(obj){
-		let name = obj["name"];
-		if(!name.includes("~"))
-		{
-			isValid = false;
-		}
-	});
-	return isValid;
 }
 
 // Set which team is in play
@@ -416,7 +403,7 @@ function onGetCurrentQuestion()
 {
 
 	// Clear the board first
-	onClearBoard();
+	// onClearBoard();
 
 	// Get the current card
 	MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
