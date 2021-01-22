@@ -61,6 +61,7 @@ function gameBoardListenerOnKeyUp(){
 		switch(event.code)
 		{
 			case "Enter":
+			case "NumpadEnter":
 				if(GAME_STARTED)
 				{
 					document.getElementById("next_round_button").click();				
@@ -70,9 +71,12 @@ function gameBoardListenerOnKeyUp(){
 					document.getElementById("startGameButton").click();
 				}
 				break;
+
 			case "Escape":
+			case "NumpadSubtract":
 				onWrongAnswer();
 				break;
+
 			case "Digit1":
 			case "Digit2":
 			case "Digit3":
@@ -81,8 +85,17 @@ function gameBoardListenerOnKeyUp(){
 			case "Digit6":
 			case "Digit7":
 			case "Digit8":
+			case "Numpad1":
+			case "Numpad2":
+			case "Numpad3":
+			case "Numpad4":
+			case "Numpad5":
+			case "Numpad6":
+			case "Numpad7":
+			case "Numpad8":
 				onRevealAnswer(event.code);
 				break;
+				
 			default:
 				return;
 		}
@@ -300,7 +313,7 @@ function setStealOpportunity()
 function onRevealAnswer(value)
 {	
 	let rightSound = document.getElementById("right_answer_sound");
-	let digit = value.replace("Digit","");
+	let digit = value.replace("Digit","").replace("Numpad","");
 
 	let number = document.querySelector(`#game_cell_${digit} p.game_cell_number`);
 	let cell = document.querySelector(`#game_cell_${digit} p.answer`);
