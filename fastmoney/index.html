@@ -22,11 +22,11 @@
 		<div id="time_view">
 			<div id="time_view_regular">
 				<!-- <span id="timer_minute" class="timer_value">00:</span> -->
-				<span id="timer_second" class="timer_value" contenteditable="true">20</span>
+				<span id="timer_second" class="timer_value">20</span>
 				<span>&nbsp;</span>
-				<span onclick="onStartTimer()" id="timer_start" class="timer_buttons fa fa-play" style="font-size:45px;"></span>
-				<span onclick="onStopTimer()" id="timer_stop" class="timer_buttons fa fa-pause" style="display:none; font-size:45px;"></span>
-				<span onclick="onResetTimer()" id="timer_reset" class="timer_buttons fa fa-refresh" style="display:none; font-size:45px;"></span>
+				<span onclick="Timer.startTimer()" id="timer_start" class="timer_buttons fa fa-play" style="font-size:45px;"></span>
+				<span onclick="Timer.stopTimer()" id="timer_stop" class="timer_buttons fa fa-pause" style="display:none; font-size:45px;"></span>
+				<span onclick="Timer.resetTimer()" id="timer_reset" class="timer_buttons fa fa-refresh" style="display:none; font-size:45px;"></span>
 			</div>
 		</div>
 		<div style="text-align:left;">
@@ -119,5 +119,6 @@
 	<!-- My Trello code -->
 	<script src="../src/trello.js"></script>
 	<!-- My Source JS -->
-	<script src="../src/board.js"></script>
+	<script src="../src/timer.js"></script>
+	<script src="../src/fastmoney.js"></script>
 </html>
