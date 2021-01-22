@@ -26,6 +26,7 @@
 	var IS_STEAL = false;
 	var IN_PLAY = false;
 	var IS_FACEOFF = false;
+	var TEAM_IN_PLAY = undefined;
 
 /*****************************GETTING STARTED************************************/
 
@@ -127,7 +128,6 @@ function onStartGame()
 	IS_FACEOFF = true;
 
 	document.getElementById("startGameButton").classList.add("hidden");
-	document.getElementById("pre_game_instructions").classList.add("hidden");
 
 	// Show elements
 	mydoc.show_section("face_off");
@@ -158,7 +158,6 @@ function onSelectQuestion()
 		{
 			rand_id = Math.floor(Math.random()*response.length);
 			card = response[rand_id];
-			card = response[0]; //TEMP
 			CURR_CARD = card["id"];
 			CURR_QUEST = card["name"];
 			question = card["name"];
@@ -166,9 +165,6 @@ function onSelectQuestion()
 
 			// Load the answers into the table
 			onLoadAnswers(checklist_id);
-
-			// Move the card to the current card
-			moveCard(CURR_CARD, "Current");
 		}
 		else
 		{
@@ -220,7 +216,18 @@ function onLoadAnswers(checklist_id)
 					onRevealAnswer(String(counter));
 				}
 			});
-		} catch(error) 
+
+			if(BOARD_VIEW)
+			{
+				// Hide the GIF and show the answers
+				mydoc.hide_section("loading_gif");
+				mydoc.show_section("game_table");
+			}
+			
+			// Move the card to the current card
+			moveCard(card_id, "Current");
+		} 
+		catch(error) 
 		{
 			Logger.log(error);
 			if(BOARD_VIEW)
@@ -242,7 +249,8 @@ function setTeamInPlay(team)
 	IN_PLAY = true; 
 	IS_FACEOFF = false;
 
-	// Hide the face off 
+	// Set global team in play;
+	TEAM_IN_PLAY = team;
 
 	identifier = `#team_${team} h2`;
 	team_name = document.querySelector(`#team_${team} h2`);
@@ -252,8 +260,8 @@ function setTeamInPlay(team)
 	clearWrongAnswerCount();
 
 	// Show the Assign Score Buttons
-	document.querySelector("#team_one button.assign_score").classList.remove("hidden");
-	document.querySelector("#team_two button.assign_score").classList.remove("hidden");
+	// document.querySelector("#team_one button.assign_score").classList.remove("hidden");
+	// document.querySelector("#team_two button.assign_score").classList.remove("hidden");
 
 	// Hide the Play buttons
 	document.querySelector("#team_one button.team_in_play").classList.add("hidden");
@@ -296,6 +304,10 @@ function onWrongAnswer()
 			IN_PLAY = false; 
 			clearSteal();
 		}
+
+		// Check to assign score even after wrong answers
+		checkToAssignScore(false)
+
 	},1000);
 }
 
@@ -303,7 +315,6 @@ function onWrongAnswer()
 function setStealOpportunity()
 {
 	let team_in_play = document.querySelector(".in_play");
-	console.log(team_in_play)
 
 	if(team_in_play != undefined)
 	{
@@ -346,19 +357,47 @@ function onRevealAnswer(value)
 				number.classList.remove("circled_number");
 			}
 			
+			// Reveal the content
 			cell.classList.remove("hidden");
-
 			count_val.classList.remove("hidden");
+			count.classList.remove("unseen");
 
 			if(BOARD_VIEW){
 				onUpdateScore(count_val.innerText);
+
+				checkToAssignScore(true);
 			}
-
-			count.classList.remove("unseen");
-		},600)
-		
-
+		},600);
 	}
+}
+
+function checkToAssignScore(isCorrect)
+{
+
+	let hidden_cells = document.querySelectorAll("p.circled_number");
+
+	console.log("IN_PLAY: " + IN_PLAY);
+	console.log("IS_STEAL: " + IS_STEAL);
+	console.log("isCorrect: " + isCorrect);
+	console.log("Hidden Cells: " + hidden_cells.length);
+
+	let assigne_to_team = "";
+	let delay = 2000;  // delay for 3 seconds
+
+	if(!IN_PLAY && IS_STEAL && isCorrect)
+	{
+		let opposite_team = (TEAM_IN_PLAY == "one") ? "two" : "one";
+		setTimeout(function(){onAssignScore(opposite_team)}, delay);
+	}
+	else if(IN_PLAY && hidden_cells.length == 0)
+	{
+		setTimeout(function(){onAssignScore(TEAM_IN_PLAY)}, delay);
+	}
+	else if(!IN_PLAY && CURR_WRONG > 3)
+	{
+		setTimeout(function(){onAssignScore(TEAM_IN_PLAY)}, delay);
+	}
+
 }
 
 
@@ -386,13 +425,21 @@ function onAssignScore(team)
 
 	identifier = `team_${team}_score`;
 
-	team_ele = document.getElementById(identifier);
-	existing_score = Number(team_ele.innerText);
-	team_ele.innerText = Number(existing_score + CURR_SCORE)
+	try
+	{
+		team_ele = document.getElementById(identifier);
+		existing_score = Number(team_ele.innerText);
+		team_ele.innerText = Number(existing_score + CURR_SCORE)
 
-	// Clear the score keeper
-	CURR_SCORE = 0;
-	document.getElementById("current_score").innerText = "0";
+		// Clear the score keeper
+		CURR_SCORE = 0;
+		document.getElementById("current_score").innerText = "0";
+	}
+	catch(error)
+	{
+		Logger.log(error);
+	}
+
 }
 
 
@@ -477,6 +524,13 @@ function onNextRound()
 		return;
 	}
 
+	let hidden_cells = document.querySelectorAll("p.circled_number");
+	if(hidden_cells.length > 0)
+	{
+		alert("Cannot go to next round until all answers are revealed!");
+		return;
+	}
+
 	cleared = onClearBoard(); //Clear the board of current answer
 	if(cleared)
 	{
@@ -506,7 +560,13 @@ function onClearBoard(toBeFixed=false)
 	if(can_be_cleared)
 	{
 		
-		if(BOARD_VIEW){
+
+		if(BOARD_VIEW)
+		{
+			// Show the loading GIF and hide the table
+			mydoc.hide_section("game_table");
+			mydoc.show_section("loading_gif");
+
 			// Clear current team in play
 			clearInPlay();
 
@@ -559,9 +619,8 @@ function onClearBoard(toBeFixed=false)
 	}
 	else
 	{
-		alert("Cannot clear board until the current points are assigned to a team!");
+		alert("Cannot go to the next round until points are assigned!");
 	}
-
 	return can_be_cleared;
 }
 
@@ -598,9 +657,11 @@ function clearInPlay()
 		obj.classList.remove("in_play");
 	});
 
+	TEAM_IN_PLAY = "";
+
 	// Hide the Assign Score Buttons
-	document.querySelector("#team_one button.assign_score").classList.add("hidden");
-	document.querySelector("#team_two button.assign_score").classList.add("hidden");
+	// document.querySelector("#team_one button.assign_score").classList.add("hidden");
+	// document.querySelector("#team_two button.assign_score").classList.add("hidden");
 
 	// Show the Play buttons
 	document.querySelector("#team_one button.team_in_play").classList.remove("hidden");
@@ -609,6 +670,7 @@ function clearInPlay()
 
 function clearSteal()
 {
+	IS_STEAL = false;
 	curr = Array.from(document.querySelectorAll(".can_steal"));
 	curr.forEach(function(obj){
 		if(!obj.classList.contains("hidden"))

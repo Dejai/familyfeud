@@ -20,7 +20,7 @@
 						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
 						<div id="team_one_score" class="score_value">0</div>
 						<p>
-							<button class="assign_score hidden" onclick="onAssignScore('one')">Assign Score</button>
+							<!-- <button class="assign_score hidden" onclick="onAssignScore('one')">Assign Score</button> -->
 							<button id="teamOnePlayButton" class="team_in_play hidden" onclick="setTeamInPlay('one')">PLAY</button>
 						</p>
 					</div>
@@ -36,7 +36,7 @@
 						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
 						<div id="team_two_score" class="score_value">0</div>
 						<p>
-							<button class="assign_score hidden" onclick="onAssignScore('two')">Assign Score</button>
+							<!-- <button class="assign_score hidden" onclick="onAssignScore('two')">Assign Score</button> -->
 							<button id="teamTwoPlayButton" class="team_in_play hidden" onclick="setTeamInPlay('two')">PLAY</button>
 						</p>
 					</div>
@@ -45,50 +45,15 @@
 		</table>
 	</div>
 	<hr>
-	<div id="pre_game_instructions">
-		<h2 class="centered">Instructions</h2>
-		<ol>
-			<li>First team to <span class="emphasis">300 points</span>, wins the main rounds and gets to play "Fast Money"</li>
-			<li>Each round, the points will be multiplied by the number for that round.
-				<ul>
-					<li class="emphasis">(i.e. round 2 is double the points, round 3 is triple, etc.)</li>
-				</ul>
-			</li>
-			<li>During a "Face Off", the person with the higher answer, decides if their team will <span class="emphasis">Play</span></li>
-			<li>If the current team gets <span class="emphasis">three (3) wrong answers</span>, the other team gets one chance to steal.
-				<ul>
-					<li>
-						If the team gets it correct get it correct, they steal the points.
-						<br/>
-						If not, the original team keeps the points
-					</li>
-				</ul>
-			</li>
-			<li>Once a contestant gives a <span class="emphasis">unique answer</span>, they cannot change it.
-
-				<ul>
-					<li>
-						A unique answer means any word/phrase that is <span class="emphasis">not visible on the board</span>.
-					</li>
-				</ul>
-			</li>
-			<li>Spectators <span class="emphasis">CANNOT</span> give suggestions out loud!
-				<ul>
-					<li>
-						Please be respectful of the contestants and the game. <br/>
-						<span class="emphasis">If a spectator violates this rule, they may be asked to leave the game area.</span>
-					</li>
-				</ul>
-			</li>
-		</ol>
-	</div>
 	<div id="game_table_section" class="hidden">
 
 		<h1 id="round_name" class="centered">Round #0</h1>
 
 		<h1 id="face_off" class="emphasis hidden">Face Off!</h1>
 
-		<table id="game_table" cellpadding="0">
+		<img id="loading_gif" src="../assets/img/loading1.gif">
+
+		<table id="game_table" class="hidden" cellpadding="0">
 			<colgroup>
 				<col width="250">
 				<col width="21">
@@ -175,11 +140,17 @@
 	</div>
 	<br/>
 	<div id="game_action_buttons">
-		<button id="startGameButton" onclick="onStartGame()" class="button_mash">START GAME</button>
 		<button id="next_round_button" onclick="onNextRound()" class="button_mash hidden">NEXT ROUND</button>
 		<a href="../fastmoney/" target="_blank">
 			<button id="fast_money_button" class="button_mash hidden">FAST MONEY</button>	
 		</a>
+		<br/><br/>
+		<a href="./instructions.html" target="_blank">
+			<button class="button_mash">REVIEW INSTRUCTIONS</button>
+		</a>
+		<br/><br/>
+		<button id="startGameButton" onclick="onStartGame()" class="button_mash">START GAME</button>
+		
 	</div>
 </body>
 		<!-- Common Code -->

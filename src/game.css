@@ -59,9 +59,12 @@
 	h1.emphasis { color:orange; text-decoration:underline; }
 
 	/* Instructions */
-	#pre_game_instructions{ width:60%; margin:auto; text-align:left; font-size:140%; }
+	#pre_game_instructions{ width:50%; margin:auto; text-align:left; font-size:140%; }
 	#pre_game_instructions li { margin-bottom:4%; }
+	.instruction_block { margin-bottom:4%; border-bottom:3px solid white; }
+	.spaced_list_item li { margin-bottom: 2%; }
 	#pre_game_instructions .emphasis { color:orange; }
+	#pre_game_instructions .warning { color:red; }
 
 
 
