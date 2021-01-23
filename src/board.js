@@ -444,6 +444,8 @@ function onAssignScore(team)
 		// Clear the score keeper
 		CURR_SCORE = 0;
 		document.getElementById("current_score").innerText = "0";
+
+		clearWrongAnswerCount();
 	}
 	catch(error)
 	{
