@@ -1,6 +1,7 @@
 
 // Fast Money variables
 var FAST_MONEY_SCORE = 0;
+var FAST_MONEY_VIEW = false;
 
 // Once doc is ready
 mydoc.ready(function(){
@@ -8,14 +9,15 @@ mydoc.ready(function(){
 	let path = location.pathname;
 
 	// Set fast money path variable
-	if(path.includes("/fastmoney")){ 
+	if(path.endsWith("fastmoney") || path.endsWith("fastmoney/")){ 
 		FAST_MONEY_VIEW = true;
 		window.addEventListener("beforeunload", onFastMoneyClosePage);
 		fastMoneyListenerOnKeyUp();
-	};
 
-	// Set default time
-	Timer.resetTimer();
+		// Set default time
+		Timer.resetTimer();
+	};
+	
 });
 
 // Adds a listener for keystrokes (on keyup);
@@ -25,6 +27,14 @@ function fastMoneyListenerOnKeyUp(){
 		// console.log(event);
 		switch(event.code)
 		{
+			case "ControlLeft":
+			case "ControlRight":
+				if(Timer.countdown_timer == undefined){
+					Timer.startTimer();
+				} else {
+					Timer.resetTimer();
+				}
+				break;
 			case "Escape":
 				onDuplicateAnswer();
 				break;
@@ -43,49 +53,91 @@ function onFastMoneyClosePage(event)
 	event.returnValue='';
 }
 
+// Clear the current list of fast money questions
+function clearFastMoneyQuestions()
+{
+	Array.from(document.querySelectorAll(".question_section")).forEach(function(obj){
+		obj.querySelector(".question").innerText = "";
+		obj.querySelector("ul").innerHTML = "";
+	});
+}
+
+// Just gets the current selected cards for fast money;
+function hostViewFastMoneyQuestions()
+{
+	clearFastMoneyQuestions();
+
+	// Just get the cards from the current list;
+	MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
+		response = JSON.parse(data.responseText);
+
+		let idx = 1;
+		response.forEach(function(card){
+
+			let isFastMoneyCard = card["idLabels"].includes(MyTrello.label_fast_money);
+
+			if(isFastMoneyCard)
+			{
+				let question = card["name"];
+				let checklist_id = card["idChecklists"][0];
+
+				let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
+				quest_ele.innerText = question;
+
+				loadFastMoneyAnswers(checklist_id, idx);
+
+				idx++; //increment counter;
+			}
+		});
+	});
+}
+
 // Select fast money questions
 function getFastMoneyQuestions()
 {
 	// set fast money view
 	let selected_questions = [];
-	let cleared = onClearBoard();
-	if(cleared)
-	{
-		MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
-			response = JSON.parse(data.responseText);
-			if(response.length >= 1)
+
+	// Clear the current list
+	MyTrello.clearCurrentCardList();
+
+	// Clear the question on the board;
+	clearFastMoneyQuestions();
+	
+	MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
+		response = JSON.parse(data.responseText);
+		if(response.length >= 1)
+		{
+			// Select 5 questions
+			while(selected_questions.length < 5)
 			{
-				// Select 5 questions
-				while(selected_questions.length < 5)
+				rand_id = Math.floor(Math.random()*response.length);
+				card = response[rand_id];
+
+				card_id  = card["id"];
+				question = card["name"];
+				checklist_id = card["idChecklists"][0];
+
+				if(!selected_questions.includes(question))
 				{
-					rand_id = Math.floor(Math.random()*response.length);
-					card = response[rand_id];
+					selected_questions.push(question);
 
-					card_id  = card["id"];
-					question = card["name"];
-					checklist_id = card["idChecklists"][0];
+					idx = selected_questions.length;
+					let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
+					quest_ele.innerText = question;
 
-					if(!selected_questions.includes(question))
-					{
-						selected_questions.push(question);
+					loadFastMoneyAnswers(checklist_id, idx);
 
-						idx = selected_questions.length;
-						let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
-						quest_ele.innerText = question;
-
-						loadFastMoneyAnswers(checklist_id, idx);
-
-						// Move card to current list
-						moveCard(card_id, "Current");
-					}
+					// Move card to current list
+					MyTrello.moveCard(card_id, "Current");
 				}
 			}
-			else
-			{
-				alert("NOT ENOUGH CARDS TO SELECT FROM!");
-			}
-		});
-	}
+		}
+		else
+		{
+			alert("NOT ENOUGH CARDS TO SELECT FROM!");
+		}
+	});
 }
 
 // Load the fast money questions
@@ -153,8 +205,8 @@ function indicateFastMoneyPlayer(element)
 // Sets the time based on the player
 function setTimeForFastMoneyPlayer(player)
 {
-	let time = (player == "two") ? 25 : Timer.timer_default;
-	Timer.setTimerSeconds(time);
+	let time = (player == "two") ? 25 : 20;
+	Timer.setTimerDefault(time);
 }
 
 // Empty the answer placeholder on focus
@@ -263,11 +315,38 @@ function toggleFastMoneyAnswers(action)
 	}
 }
 
-
 // Play duplicate sound
 function onDuplicateAnswer()
 {
 	let duplicateAnswerSound = document.getElementById("duplicate_answer_sound");
 	// Play the wrong answer sound
 	duplicateAnswerSound.play();
+}
+
+// Move Card between lists
+function moveCard(cardID, toList)
+{
+	let list_id = MyTrello.current_card_list_id;
+	switch(toList)
+	{
+		case "Current":
+			list_id = MyTrello.current_card_list_id;
+			break;
+		case "Played":
+			list_id = MyTrello.played_list_id;
+			// CURR_CARD = "";
+			break;
+		case "Fix":
+			list_id = MyTrello.to_be_fixed_list_id;
+			// CURR_CARD = "";
+			break;
+		default:
+			Logger.log("No selected moveCard value");
+
+	} 
+
+	// Move the card to the current Game List
+	MyTrello.update_card_list(cardID, list_id, function(data){
+		Logger.log("Card was moved to list = " + toList);
+	});
 }

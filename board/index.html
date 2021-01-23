@@ -16,7 +16,7 @@
 			<tr>
 				<td >
 					<div id="team_one" class="team_score">
-						<h2 contenteditable="true" data-team="team_one" class="team_name_box">Team Name #1</h2>
+						<h1 contenteditable="true" data-team="team_one" class="team_name_box">Team Name #1</h1>
 						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
 						<div id="team_one_score" class="score_value">0</div>
 						<p>
@@ -32,7 +32,7 @@
 				</td>
 				<td style="text-align:right;padding-right:5%;">
 					<div id="team_two" class = "team_score">
-						<h2 contenteditable="true" data-team="team_two" class="team_name_box">Team Name #2</h2>	
+						<h1 contenteditable="true" data-team="team_two" class="team_name_box">Team Name #2</h1>	
 						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
 						<div id="team_two_score" class="score_value">0</div>
 						<p>
@@ -50,6 +50,17 @@
 		<h1 id="round_name" class="centered">Round #0</h1>
 
 		<h1 id="face_off" class="emphasis hidden">Face Off!</h1>
+
+		<div id="time_view" class="hidden">
+			<div id="time_view_regular" style="font-size:50%;">
+				<!-- <span id="timer_minute" class="timer_value">00:</span> -->
+				<span id="timer_second" class="timer_value">20</span>
+				<span>&nbsp;</span>
+				<span onclick="Timer.startTimer()" id="timer_start" class="timer_buttons fa fa-play" style="font-size:45px;"></span>
+				<span onclick="Timer.stopTimer()" id="timer_stop" class="timer_buttons fa fa-pause" style="display:none; font-size:45px;"></span>
+				<span onclick="Timer.resetTimer()" id="timer_reset" class="timer_buttons fa fa-refresh" style="display:none; font-size:45px;"></span>
+			</div>
+		</div>
 
 		<img id="loading_gif" src="../assets/img/loading1.gif">
 
@@ -137,6 +148,9 @@
 		<audio id="right_answer_sound">
 			<source src="../assets/audio/right_answer.mp3" type="audio/mpeg">
 		</audio>
+		<audio id="duplicate_answer_sound">
+			<source src="../assets/audio/duplicate_answer.mp3" type="audio/mpeg">
+		</audio>
 	</div>
 	<br/>
 	<div id="game_action_buttons">
@@ -158,5 +172,6 @@
 	<!-- My Trello code -->
 	<script src="../src/trello.js"></script>
 	<!-- My Source JS -->
+	<script src="../src/timer.js"></script>
 	<script src="../src/board.js"></script>
 </html>

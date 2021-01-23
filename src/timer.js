@@ -34,16 +34,14 @@ const Timer = {
 				} 
 				new_time 	= (time < 10) ? "0" + time : time;
 				time_ele.innerHTML = new_time;
-				if(time == 1)
-				{
-					let wrongAnswerSound = document.getElementById("wrong_answer_sound");
-					wrongAnswerSound.play();
-				}
 				if (time == 0)
 				{
 					Timer.setTimeColor("red");
 					Timer.toggleTimerButtons("timeup");
 					Timer.stopInterval();
+
+					let audioEle = document.getElementById("duplicate_answer_sound");
+					if(audioEle != undefined){ audioEle.play(); }
 				}
 			}, 1100);
 		}		
@@ -102,7 +100,6 @@ const Timer = {
 		this.toggleTimerButtons("reset");
 		this.setTimeColor("white");
 		this.setTimerSeconds(this.timer_default);
-		// document.getElementById("timer_second").innerHTML = this.timer_default;
 	},
 
 	setTimerSeconds: function(value)
@@ -115,6 +112,12 @@ const Timer = {
 		document.getElementById("timer_second").style.color = color;
 	},
 
+	setTimerDefault: function(value)
+	{
+		this.timer_default = value;
+		this.setTimerSeconds(this.timer_default);
+	},
+
 	stopInterval: function()
 	{
 		if(this.countdown_timer)
@@ -123,7 +126,7 @@ const Timer = {
 			this.countdown_timer = undefined;
 		}
 		document.getElementById("timer_second").contentEditable = true;
-	}
+	},
 }
 
 

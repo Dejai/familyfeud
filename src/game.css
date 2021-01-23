@@ -66,10 +66,7 @@
 	#pre_game_instructions .emphasis { color:orange; }
 	#pre_game_instructions .warning { color:red; }
 
-
-
-
-	/* Game Table */
+/* Game Table */
 	#game_table_section { width:60%; margin:auto; text-align:center; }
 	#game_table { border:none; width:100%; border-collapse: collapse; font-size:150%; }
 	#game_table td { border:2px solid white; }	
@@ -85,3 +82,17 @@
 	#game_action_buttons2 { width:100%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
 	#wrong_answer_section { margin:auto; width:50%; text-align:center; margin-top:2%; }
 	.wrong_answer_img { width:100px; height:100px; margin-right:3%; }
+
+/* Face Off */
+	.face_off_section { text-align:center; border:1px solid white; width:95%; margin:auto; height:400px; padding:0.5%; }
+	.face_off_section .answer_button { height:inherit; width:100%; font-size:200%; }
+	.face_off_winner { background-color:blue; color:white; }
+	.card_flipped {
+		  -webkit-transform: rotate( 180deg );
+		  -moz-transform: rotate( 180deg );
+		  -o-transform: rotate( 180deg );
+		  transform: rotate( 180deg );
+		}
+	.face_off_teams label { font-size:200%; }
+	.face_off_teams input { font-size:200%; }
+	.face_off_teams button { font-size:200%; }

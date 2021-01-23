@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+<head>
+	<title>Face Off</title>
+	<link rel="stylesheet" type="text/css" href="../src/game.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+	<div id="sound_section">
+		<audio id="face_off_buzzer_sound">
+			<source src="../assets/audio/face_off_buzzer.mp3" type="audio/mpeg">
+		</audio>
+	</div>
+	<div>
+		<div class="face_off_section card_flipped">
+			<button id="player_one" class="answer_button" onclick="face_off_winner('player_one',this.innerText)">
+			</button>
+		</div>
+		<br/>
+		<div class="face_off_section">
+			<button id="player_two" class="answer_button" onclick="face_off_winner('player_two', this.innerText)">
+			</button>
+		</div>
+	</div>
+</body>
+	<!-- Custom scripts -->
+	<script src="../src/common.js"></script>
+	<script src="../src/faceoff.js"></script>
+</html>
