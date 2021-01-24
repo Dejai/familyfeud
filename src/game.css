@@ -97,15 +97,19 @@
 	.wrong_answer_img { width:100px; height:100px; margin-right:3%; }
 
 /* Face Off */
-	.face_off_section { text-align:center; border:1px solid white; width:95%; margin:auto; height:400px; padding:0.5%; }
+	/*.face_off_section { text-align:center; border:1px solid white; width:95%; margin:auto; height:400px; padding:0.5%; }*/
+	.face_off_section { text-align:center; border:1px solid white; display:inline-block; width:49%; height:400px;}
 	.face_off_section .answer_button { height:inherit; width:100%; font-size:200%; }
-	.face_off_winner { background-color:blue; color:white; }
-	.card_flipped {
+	.face_off_winner { background-color:gold; color:black; }
+	.buzzer_one { margin-right:1%; }
+	.buzzer_two { }
+	/*.card_flipped {
 		  -webkit-transform: rotate( 180deg );
 		  -moz-transform: rotate( 180deg );
 		  -o-transform: rotate( 180deg );
 		  transform: rotate( 180deg );
-		}
+		}*/
+		
 	.face_off_teams label { font-size:200%; }
 	.face_off_teams input { font-size:200%; }
 	.face_off_teams button { font-size:200%; }

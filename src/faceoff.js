@@ -18,72 +18,33 @@ mydoc.ready(function(){
 function setButtonHeight()
 {
 	let innerHeight = window.innerHeight;
-	let half = innerHeight / 2;
+	let heightToSet = (innerHeight > 600) ? innerHeight : innerHeight / 2
 	Array.from(document.querySelectorAll(".face_off_section")).forEach(function(obj){
-		obj.style.height = half + "px";
+		obj.style.height = heightToSet + "px";
 	});
 }
 
 function faceOffListenerOnKeyUp()
 {
 	document.addEventListener("keyup", function(event){
+		// console.log(event.code);
 		switch(event.code)
 		{
-			case "ShiftRight":
-				document.getElementById("player_two").click();
-				break;
+			case "Backquote":
+			case "Tab":
+			case "CapsLock":
 			case "ShiftLeft":
+			case "ControlLeft":
 				document.getElementById("player_one").click();
 				break;
-			default:
-				return;
-		}
-	});	
-}
 
-// Adds a listener for keystrokes (on keyup);
-function gameBoardListenerOnKeyUp(){
-
-	document.addEventListener("keyup", function(event){
-		// console.log(event);
-		switch(event.code)
-		{
+			case "ShiftRight":
 			case "Enter":
-			case "NumpadEnter":
-				if(GAME_STARTED)
-				{
-					document.getElementById("next_round_button").click();				
-				}
-				else
-				{
-					document.getElementById("startGameButton").click();
-				}
+			case "Backslash":
+			case "Backspace":
+			case "ControlRight":
+				document.getElementById("player_two").click();
 				break;
-
-			case "Escape":
-			case "NumpadSubtract":
-				onWrongAnswer();
-				break;
-
-			case "Digit1":
-			case "Digit2":
-			case "Digit3":
-			case "Digit4":
-			case "Digit5":
-			case "Digit6":
-			case "Digit7":
-			case "Digit8":
-			case "Numpad1":
-			case "Numpad2":
-			case "Numpad3":
-			case "Numpad4":
-			case "Numpad5":
-			case "Numpad6":
-			case "Numpad7":
-			case "Numpad8":
-				onRevealAnswer(event.code);
-				break;
-				
 			default:
 				return;
 		}
@@ -92,7 +53,10 @@ function gameBoardListenerOnKeyUp(){
 
 function cleanTeamName(value)
 {
-	let cleanName = value.replaceAll("+", " ");
+	console.log(value);
+	console.log(decodeURIComponent(value));
+
+	let cleanName = decodeURIComponent(value.replaceAll("+", " "));
 	return cleanName
 }
 
