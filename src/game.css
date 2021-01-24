@@ -43,11 +43,7 @@
 	#game_table_admin { border:none; width:100%; border-collapse: collapse; font-size:100%; }
 	#game_table_admin td { border:2px solid white; }
 
-/* INSTRUCTIONS */
-	/*#pre_game_instructions{ width:95%; margin:auto; text-align:left; font-size:140%; }
-	@media screen and (min-width:1200px){ 
-		#pre_game_instructions{ width:50%; margin:auto; text-align:left; font-size:140%; }
-	}*/
+/* RULES */
 	#pre_game_instructions { font-size:140%; }
 	#pre_game_instructions li { margin-bottom:4%; }
 
@@ -58,6 +54,7 @@
 	@media screen and (min-width:1200px){ .instruction_block { width:50%; } }
 
 	.instruction_block .sublist { margin-top:2%; }
+	.instruction_block h3 { cursor:pointer; }
 	.instruction_block .sublist li { margin-bottom:0% !important; }
 
 	.spaced_list_item li { margin-bottom: 2%; }

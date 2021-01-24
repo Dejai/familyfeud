@@ -4,6 +4,7 @@
 <head>
 	<title>Rules</title>
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
 	<div id="menu">
@@ -14,17 +15,21 @@
 	<div id="pre_game_instructions">
 
 		<div class="instruction_block">
-			<h3>How To Win:</h3>
-			<ul>
+			<h3>How To Win:
+				<i class="fa fa-chevron-circle-down icon"></i>
+			</h3>
+			<ul class="mainlist hidden">
 				<li>First family to <span class="emphasis">300 points</span>, wins the rounds</li>
 				<li>This family then nominates <span class="emphasis">two (2) family members</span> to play "Fast Money" </li>
 			</ul>
 		</div>
 		<hr>
-		
+
 		<div class="instruction_block">
-			<h3>The Families:</h3>
-			<ul>
+			<h3>The Family:
+				<i class="fa fa-chevron-circle-down icon"></i>
+			</h3>
+			<ul class="mainlist hidden">
 				<li>You can have family teams of the following combinations
 					<ul class="sublist">
 						<li>3 vs. 3</li>
@@ -51,8 +56,10 @@
 		<hr>
 
 		<div class="instruction_block">
-			<h3>The Face Off:</h3>
-			<ul>
+			<h3>The Face Off:
+				<i class="fa fa-chevron-circle-down icon"></i>
+			</h3>
+			<ul class="mainlist hidden">
 				<li>First contestant to <span class="emphasis">"buzz-in"</span>, gives their answer first.
 					<ul class="sublist">
 						<li>If it is <span class="emphasis">not the #1 answer</span>, the other family gives an answer as well.</li>
@@ -70,10 +77,16 @@
 		<hr>
 
 		<div class="instruction_block">
-			<h4>Giving Answers:</h4>
-			<ul>
+			<h3>Giving Answers:
+				<i class="fa fa-chevron-circle-down icon"></i>
+			</h3>
+			<ul class="mainlist hidden">
 				<li>
 					Once asked for your answer, you have <span class="emphasis">10 seconds</span> to give your answer.
+					<ul class="sublist">
+						<li>If you do not give an answer within this time, you get a <span class="emphasis">STRIKE</span></li>
+						<li>If you are asked to give another answer, you will be given <span class="emphasis">another 10 seconds</span></li>
+					</ul>
 				</li>
 				<li>Family members <span class="emphasis">CANNOT give hints</span> or suggestions to other family members.
 					<ul class="sublist">
@@ -107,8 +120,10 @@
 		<hr>
 
 		<div class="instruction_block">
-			<h3>Stealing Points:</h3>
-			<ul>
+			<h3>Stealing Points:
+				<i class="fa fa-chevron-circle-down icon"></i>
+			</h3>
+			<ul class="mainlist hidden">
 				<li>
 					If the current family gives <span class="emphasis">three (3) wrong answers</span>, the other family gets one chance to steal.
 					<ul class="sublist">
@@ -131,8 +146,10 @@
 		<hr>
 
 		<div class="instruction_block">
-			<h3>Spectators:</h3>
-			<ul>
+			<h3>Spectators:
+				<i class="fa fa-chevron-circle-down icon"></i>
+			</h3>
+			<ul class="mainlist hidden">
 				<li>Spectators <span class="emphasis">CANNOT</span> give suggestions for answers! 
 					<ul class="sublist">
 						<li>
@@ -145,11 +162,43 @@
 		<hr>
 
 		<div class="instruction_block">
-			<h3 class="warning">NO CHEATING!!!:</h3>
-			<ul>
+			<h3>Fast Money:
+				<i class="fa fa-chevron-circle-down icon"></i>
+			</h3>
+			<ul class="mainlist hidden">
+				<li>
+					Both contestants have to answer <span>5 questions</span> in a limited amount of time
+					<ul class="sublist">
+						<li>First contestant gets <span class="emphasis">20 seconds</span></li>
+						<li>Second contestant gets <span class="emphasis">25 seconds</span></li>
+					</ul>
+				</li>
+				<li>
+					Either contestant can say <span class="emphasis">PASS</span> to skip a question, and come back to it.
+					<ul class="sublist">
+						<li>If they do not give an answer before time is up, it will be considered a <span class="emphasis">blank answer.</span> </li>
+					</ul>
+				</li>
+				<li>
+					While the first contestant is answering, the <span class="emphasis">second contestant must be in a different room</span> 
+					<ul class="sublist">
+						<li>
+							They should NOT be able to hear the questions or answers for the first contestant.
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<hr>
+
+		<div class="instruction_block">
+			<h3 class="warning">NO CHEATING!!!:
+				<i class="fa fa-chevron-circle-down icon"></i>
+			</h3>
+			<ul class="mainlist hidden">
 				<li>Any actions deemed cheating by the judges will result in a <span class="emphasis">STRIKE</span> for the offending family.
 				</li>
-				<li>If the cheating offence occurs after a family already has three (3) strikes, the STRIKE is applied to the next "Face Off"
+				<li>If the cheating offence occurs after a family already has three (3) strikes, the STRIKE is <span class="emphasis">applied to the next "Face Off"</span>
 					<ul class="sublist">
 						<li>This would mean that the opposing family would automatically get to decide if they want to "play" or "pass"
 						</li>
@@ -161,4 +210,7 @@
 
 	</div>
 </body>
+	<!-- My Custom Script -->
+	<script src="../src/common.js"></script>
+	<script src="../src/rules.js"></script>
 </html>

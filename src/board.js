@@ -297,6 +297,10 @@ function onWrongAnswer()
 	// Play the wrong answer sound
 	wrongAnswerSound.play();
 
+	// Force stop the timer
+	toggleCountdownTimer(true);
+
+
 	// setTimeout(function(){
 	document.getElementById("wrong_answer_section").innerHTML = img;
 

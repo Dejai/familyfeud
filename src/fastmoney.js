@@ -62,17 +62,32 @@ function clearFastMoneyQuestions()
 	});
 }
 
-// Just gets the current selected cards for fast money;
-function hostViewFastMoneyQuestions()
+function sortFastMoneyQuestions(list)
 {
+	list
+}
+
+// Load the questions (make sure they are sorted)
+function loadFastMoneyQuestions()
+{
+	// Clear the question on the board;
 	clearFastMoneyQuestions();
 
-	// Just get the cards from the current list;
 	MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
 		response = JSON.parse(data.responseText);
 
 		let idx = 1;
+
+		console.log(response);
+
+		response = response.sort(function(a,b){
+			return a.pos - b.pos;
+		});
+		console.log(response);
+
 		response.forEach(function(card){
+
+			console.log(card["pos"]);
 
 			let isFastMoneyCard = card["idLabels"].includes(MyTrello.label_fast_money);
 
@@ -92,55 +107,7 @@ function hostViewFastMoneyQuestions()
 	});
 }
 
-// Select fast money questions
-function getFastMoneyQuestions()
-{
-	// set fast money view
-	let selected_questions = [];
-
-	// Clear the current list
-	MyTrello.clearCurrentCardList();
-
-	// Clear the question on the board;
-	clearFastMoneyQuestions();
-	
-	MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
-		response = JSON.parse(data.responseText);
-		if(response.length >= 1)
-		{
-			// Select 5 questions
-			while(selected_questions.length < 5)
-			{
-				rand_id = Math.floor(Math.random()*response.length);
-				card = response[rand_id];
-
-				card_id  = card["id"];
-				question = card["name"];
-				checklist_id = card["idChecklists"][0];
-
-				if(!selected_questions.includes(question))
-				{
-					selected_questions.push(question);
-
-					idx = selected_questions.length;
-					let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
-					quest_ele.innerText = question;
-
-					loadFastMoneyAnswers(checklist_id, idx);
-
-					// Move card to current list
-					MyTrello.moveCard(card_id, "Current");
-				}
-			}
-		}
-		else
-		{
-			alert("NOT ENOUGH CARDS TO SELECT FROM!");
-		}
-	});
-}
-
-// Load the fast money questions
+// Load the fast money checklist answers based on given checklist ID
 function loadFastMoneyAnswers(checklist_id, idx)
 {
 	MyTrello.get_checklist(checklist_id,function(data){
@@ -156,6 +123,35 @@ function loadFastMoneyAnswers(checklist_id, idx)
 		checklist_items.forEach(function(obj){
 			answers_ele.innerHTML += `<li>${obj["name"]}</li>`
 		})
+	});
+}
+
+// Select fast money questions
+function selectFastMoneyQuestions()
+{
+	// Clear the current list
+	MyTrello.clearCurrentCardList();
+	
+	MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
+		response = JSON.parse(data.responseText);
+		if(response.length >= 5)
+		{
+			// Load 5 questions
+			for(var idx = 0; idx < 5; idx++)
+			{
+				rand_id = Math.floor(Math.random()*response.length);
+				card = response[rand_id];
+				card_id  = card["id"];
+				// Move card to current list
+				MyTrello.moveCard(card_id, "Current");
+			}
+
+			setTimeout(function(){ alert("Ready to Load!");}, 1500);
+		}
+		else
+		{
+			alert("SORRY! Not Enough Cards to Select From. The Admin needs to add more!");
+		}
 	});
 }
 
@@ -209,6 +205,8 @@ function setTimeForFastMoneyPlayer(player)
 	Timer.setTimerDefault(time);
 }
 
+
+/***** Fast Money Listeners for Answers *****/
 // Empty the answer placeholder on focus
 function onFastMoneyFocus(event)
 {
@@ -321,32 +319,4 @@ function onDuplicateAnswer()
 	let duplicateAnswerSound = document.getElementById("duplicate_answer_sound");
 	// Play the wrong answer sound
 	duplicateAnswerSound.play();
-}
-
-// Move Card between lists
-function moveCard(cardID, toList)
-{
-	let list_id = MyTrello.current_card_list_id;
-	switch(toList)
-	{
-		case "Current":
-			list_id = MyTrello.current_card_list_id;
-			break;
-		case "Played":
-			list_id = MyTrello.played_list_id;
-			// CURR_CARD = "";
-			break;
-		case "Fix":
-			list_id = MyTrello.to_be_fixed_list_id;
-			// CURR_CARD = "";
-			break;
-		default:
-			Logger.log("No selected moveCard value");
-
-	} 
-
-	// Move the card to the current Game List
-	MyTrello.update_card_list(cardID, list_id, function(data){
-		Logger.log("Card was moved to list = " + toList);
-	});
 }
