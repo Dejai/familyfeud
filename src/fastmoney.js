@@ -3,6 +3,8 @@
 var FAST_MONEY_SCORE = 0;
 var FAST_MONEY_VIEW = false;
 
+var NUMBER_OF_ANSWERS = 0;
+
 // Once doc is ready
 mydoc.ready(function(){
 
@@ -17,7 +19,6 @@ mydoc.ready(function(){
 		// Set default time
 		Timer.resetTimer();
 	};
-	
 });
 
 // Adds a listener for keystrokes (on keyup);
@@ -156,7 +157,7 @@ function selectFastMoneyQuestions()
 }
 
 // Listeners for fast money
-function addFastMoneyListeners(event, player)
+function setCurrentPlayer(event, player)
 {
 
 	// Indicate the current fast money player;
@@ -164,6 +165,9 @@ function addFastMoneyListeners(event, player)
 
 	// Set the time based on the player
 	setTimeForFastMoneyPlayer(player);
+
+	// Reset count for number of answers
+	NUMBER_OF_ANSWERS = 0;
 
 	// Get the appropriate cells
 	let identifier = `fast_money_player_${player}`
@@ -203,8 +207,31 @@ function setTimeForFastMoneyPlayer(player)
 {
 	let time = (player == "two") ? 25 : 20;
 	Timer.setTimerDefault(time);
+	mydoc.show_section("time_view");
 }
 
+function toggleFastMoneyTimer()
+{
+	if(Timer.countdown_timer == undefined)
+	{
+		mydoc.show_section("time_view");
+		Timer.startTimer();
+	} 
+	else 
+	{
+		mydoc.hide_section("time_view");
+		Timer.resetTimer();
+	}
+}
+
+// If all answers entered, stop the timer
+function checkAnswersAndTimer()
+{
+	if(NUMBER_OF_ANSWERS == 5)
+	{
+		toggleFastMoneyTimer();
+	}
+}
 
 /***** Fast Money Listeners for Answers *****/
 // Empty the answer placeholder on focus
@@ -223,6 +250,10 @@ function onFastMoneyBlur(event)
 	{
 		ele.setAttribute("data-answer", value); 
 		ele.innerText = "ANSWERED";
+		// Increment # of answers & check if all entered
+		NUMBER_OF_ANSWERS++;
+		checkAnswersAndTimer();
+
 		// ("data-answer", value); 
 		ele.contentEditable = false;
 		// ele.classList.remove("fastmoney_editable");

@@ -15,11 +15,11 @@
 		<!-- <h2>Fast Money</h2> -->
 
 		<div style="margin-bottom:2%;">
-			<button onclick="addFastMoneyListeners(event,'one')" class="button_mash">Player One</button>
-			<button onclick="addFastMoneyListeners(event,'two')" class="button_mash">Player Two</button>
+			<button onclick="setCurrentPlayer(event,'one')" class="button_mash">Player One</button>
+			<button onclick="setCurrentPlayer(event,'two')" class="button_mash">Player Two</button>
 		</div>
 
-		<div id="time_view">
+		<div id="time_view" class="hidden">
 			<div id="time_view_regular">
 				<!-- <span id="timer_minute" class="timer_value">00:</span> -->
 				<span id="timer_second" class="timer_value">20</span>
