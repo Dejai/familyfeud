@@ -40,8 +40,10 @@ const Timer = {
 					Timer.toggleTimerButtons("timeup");
 					Timer.stopInterval();
 
-					let audioEle = document.getElementById("duplicate_answer_sound");
-					if(audioEle != undefined){ audioEle.play(); }
+					if(Timer.timeUpCallback)
+					{
+						Timer.timeUpCallback();
+					}
 				}
 			}, 1100);
 		}		
@@ -102,6 +104,8 @@ const Timer = {
 		this.setTimerSeconds(this.timer_default);
 	},
 
+
+	// Setters
 	setTimerSeconds: function(value)
 	{
 		document.getElementById("timer_second").innerHTML = value;
@@ -118,6 +122,16 @@ const Timer = {
 		this.setTimerSeconds(this.timer_default);
 	},
 
+	setTimeUpCallback: function(callback){
+		Timer.timeUpCallback = callback;
+	},
+
+	// Getters
+	timeUpCallback: function(){
+		console.log("Time is up");
+	},
+
+	// Reseters
 	stopInterval: function()
 	{
 		if(this.countdown_timer)

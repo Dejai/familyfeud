@@ -43,6 +43,9 @@ mydoc.ready(function(){
 		gameBoardListenerOnKeyUp(); 
 		// set default timer time
 		Timer.setTimerDefault(10);
+		Timer.setTimeUpCallback(function(){
+			document.getElementById("duplicate_answer_sound").play();
+		});
 	}
 });
 

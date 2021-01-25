@@ -16,8 +16,15 @@ mydoc.ready(function(){
 		window.addEventListener("beforeunload", onFastMoneyClosePage);
 		fastMoneyListenerOnKeyUp();
 
-		// Set default time
+		// Set default time & buzzer sound
 		Timer.resetTimer();
+		if(Timer)
+		{
+			Timer.resetTimer();			
+			Timer.setTimeUpCallback(function(){
+				document.getElementById("wrong_answer_sound").play();
+			});
+		}
 	};
 });
 
