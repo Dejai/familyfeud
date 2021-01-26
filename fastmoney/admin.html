@@ -16,12 +16,15 @@
 		<h2>Fast Money - Questions<br/>(Admin)</h2>
 		
 		<div id="game_action_buttons">
-			<button onclick="selectFastMoneyQuestions()" class="button_mash">
-				STEP ONE: Select Questions
+			<button id="load_fast_money_questions" onclick="selectFastMoneyQuestions()" class="button_mash">
+				LOAD QUESTIONS
 			</button><br/><br/>
-			<button onclick="loadFastMoneyQuestions()" class="button_mash">
+			
+			<img id="loading_gif" class="hidden" src="../assets/img/loading1.gif">
+
+		<!-- 	<button onclick="loadFastMoneyQuestions()" class="button_mash">
 				STEP TWO: Load Questions
-			</button>
+			</button> -->
 		</div>
 
 		<div id="fast_money_question_1" class="question_section leftaligned">

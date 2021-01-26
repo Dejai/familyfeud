@@ -1,27 +1,27 @@
 
 /*****************************VARIABLES****************************************/
 
-	// Game started?
-	var GAME_STARTED = false; 
+// Game started?
+var GAME_STARTED = false; 
 
-	// Check determine which views the game is in
-	var ADMIN_VIEW = false;
-	var BOARD_VIEW = false;
-	var FAST_MONEY_VIEW = false;
+// Check determine which views the game is in
+var ADMIN_VIEW = false;
+var BOARD_VIEW = false;
+var FAST_MONEY_VIEW = false;
 
 
-	// Storing the values of the current card
-	var CURR_CARD  = "";
-	var CURR_QUEST = "";
+// Storing the values of the current card
+var CURR_CARD  = "";
+var CURR_QUEST = "";
 
-	// Game Board variables
-	var CURR_ROUND = 0;
-	var CURR_SCORE = 0;
-	var CURR_WRONG = 0;
-	var IS_STEAL = false;
-	var IN_PLAY = false;
-	var IS_FACEOFF = false;
-	var TEAM_IN_PLAY = "";
+// Game Board variables
+var CURR_ROUND = 0;
+var CURR_SCORE = 0;
+var CURR_WRONG = 0;
+var IS_STEAL = false;
+var IN_PLAY = false;
+var IS_FACEOFF = false;
+var TEAM_IN_PLAY = "";
 
 /*****************************GETTING STARTED************************************/
 
@@ -63,9 +63,15 @@ function onClosePage(event)
 function gameBoardListenerOnKeyUp(){
 
 	document.addEventListener("keyup", function(event){
-		// console.log(event);
+		console.log(event);
 		switch(event.code)
 		{
+			case "Backquote":
+				undoWrongAnswer();
+				break;
+			case "Backslash":
+				toggleThemeSong();
+				break;
 			case "ControlLeft":
 			case "ControlRight":
 				toggleCountdownTimer();
@@ -110,6 +116,21 @@ function gameBoardListenerOnKeyUp(){
 				return;
 		}
 	});	
+}
+
+function toggleThemeSong()
+{
+	theme_song = document.getElementById("theme_song_sound");
+	let is_paused = theme_song.paused;
+	if(is_paused)
+	{
+		theme_song.play();
+	}
+	else
+	{
+		theme_song.pause();
+		theme_song.currentTime = 0;
+	}
 }
 
 /****************************BOARD ACTIONS: QUESTIONS****************************************/
@@ -323,6 +344,32 @@ function onWrongAnswer()
 	checkToAssignScore(false);
 
 	// },1000);
+}
+
+// Undo a wrong answer set
+function undoWrongAnswer()
+{
+	console.log("Undo wrong answer");
+	console.log(CURR_WRONG);
+	if(CURR_WRONG > 0)
+	{
+		CURR_WRONG-=1;
+	}
+	console.log(CURR_WRONG);
+
+	let img = "";
+
+	for(var idx = 0; idx < CURR_WRONG; idx++)
+	{
+		img += `<img class="wrong_answer_img" src="../assets/img/wrong_answer.png" alt="WRONG"/>`;
+	}
+
+	document.getElementById("wrong_answer_section").innerHTML = img;
+
+	if(IS_STEAL && CURR_WRONG == 2)
+	{
+		clearSteal();
+	}
 }
 
 // Set the steal opportunity

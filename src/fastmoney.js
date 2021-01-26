@@ -5,6 +5,9 @@ var FAST_MONEY_VIEW = false;
 
 var NUMBER_OF_ANSWERS = 0;
 
+var active_element = undefined;
+var blinking_interval = undefined;
+
 // Once doc is ready
 mydoc.ready(function(){
 
@@ -29,12 +32,16 @@ mydoc.ready(function(){
 });
 
 // Adds a listener for keystrokes (on keyup);
-function fastMoneyListenerOnKeyUp(){
+function fastMoneyListenerOnKeyUp()
+{
 
 	document.addEventListener("keyup", function(event){
 		// console.log(event);
 		switch(event.code)
 		{
+			case "Backslash":
+				toggleThemeSong();
+				break;
 			case "ControlLeft":
 			case "ControlRight":
 				if(Timer.countdown_timer == undefined){
@@ -46,12 +53,33 @@ function fastMoneyListenerOnKeyUp(){
 			case "Escape":
 				onDuplicateAnswer();
 				break;
+			case "Enter":
+				if(active_element)
+				{
+					event.preventDefault();
+					active_element.blur();
+					active_element = undefined;
+				}
 			default:
 				return;
 		}
 	});	
 }
 
+function toggleThemeSong()
+{
+	theme_song = document.getElementById("theme_song_sound");
+	let is_paused = theme_song.paused;
+	if(is_paused)
+	{
+		theme_song.play();
+	}
+	else
+	{
+		theme_song.pause();
+		theme_song.currentTime = 0;
+	}
+}
 
 /*****************************FAST MONEY LISTENERS**********************************/
 // Prevent the page accidentally closing
@@ -73,6 +101,41 @@ function clearFastMoneyQuestions()
 function sortFastMoneyQuestions(list)
 {
 	list
+}
+
+// Select fast money questions
+function selectFastMoneyQuestions()
+{
+	// Clear the current list
+	MyTrello.clearCurrentCardList();
+
+	// Disable button
+	document.getElementById("load_fast_money_questions").disabled = true;
+
+	// Show loading gif
+	mydoc.show_section("loading_gif");
+	
+	MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
+		response = JSON.parse(data.responseText);
+		if(response.length >= 5)
+		{
+			// Load 5 questions
+			for(var idx = 0; idx < 5; idx++)
+			{
+				rand_id = Math.floor(Math.random()*response.length);
+				card = response[rand_id];
+				card_id  = card["id"];
+				// Move card to current list
+				MyTrello.moveCard(card_id, "Current");
+			}
+
+			setTimeout(function(){ loadFastMoneyQuestions(); }, 1500);
+		}
+		else
+		{
+			alert("SORRY! Not Enough Cards to Select From. The Admin needs to add more!");
+		}
+	});
 }
 
 // Load the questions (make sure they are sorted)
@@ -112,6 +175,9 @@ function loadFastMoneyQuestions()
 				idx++; //increment counter;
 			}
 		});
+		
+		// Hide the loading gif once done;
+		mydoc.hide_section("loading_gif");
 	});
 }
 
@@ -134,34 +200,7 @@ function loadFastMoneyAnswers(checklist_id, idx)
 	});
 }
 
-// Select fast money questions
-function selectFastMoneyQuestions()
-{
-	// Clear the current list
-	MyTrello.clearCurrentCardList();
-	
-	MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
-		response = JSON.parse(data.responseText);
-		if(response.length >= 5)
-		{
-			// Load 5 questions
-			for(var idx = 0; idx < 5; idx++)
-			{
-				rand_id = Math.floor(Math.random()*response.length);
-				card = response[rand_id];
-				card_id  = card["id"];
-				// Move card to current list
-				MyTrello.moveCard(card_id, "Current");
-			}
 
-			setTimeout(function(){ alert("Ready to Load!");}, 1500);
-		}
-		else
-		{
-			alert("SORRY! Not Enough Cards to Select From. The Admin needs to add more!");
-		}
-	});
-}
 
 // Listeners for fast money
 function setCurrentPlayer(event, player)
@@ -217,14 +256,14 @@ function setTimeForFastMoneyPlayer(player)
 	mydoc.show_section("time_view");
 }
 
-function toggleFastMoneyTimer()
+function toggleFastMoneyTimer(forceStop=false)
 {
 	if(Timer.countdown_timer == undefined)
 	{
 		mydoc.show_section("time_view");
 		Timer.startTimer();
 	} 
-	else 
+	if(Timer.countdown_timer || forceStop) 
 	{
 		mydoc.hide_section("time_view");
 		Timer.resetTimer();
@@ -236,7 +275,7 @@ function checkAnswersAndTimer()
 {
 	if(NUMBER_OF_ANSWERS == 5)
 	{
-		toggleFastMoneyTimer();
+		toggleFastMoneyTimer(true);
 	}
 }
 
@@ -265,7 +304,7 @@ function onFastMoneyBlur(event)
 		ele.contentEditable = false;
 		// ele.classList.remove("fastmoney_editable");
 		ele.classList.add("fastmoney_hidden");
-		ele.addEventListener("click", onFastMoneyReveal);
+		ele.addEventListener("click", onFastMoneyRevealAnswer);
 	}
 	else
 	{
@@ -274,7 +313,7 @@ function onFastMoneyBlur(event)
 }
 
 // Reveal the answer
-function onFastMoneyReveal(event)
+function onFastMoneyRevealAnswer(event)
 {
 	let ele = event.srcElement;
 	
@@ -290,33 +329,73 @@ function onFastMoneyReveal(event)
 		let sibling = ele.nextElementSibling;
 		sibling.contentEditable = true;
 
+		document.getElementById("fast_money_answer").play();
 		ele.classList.remove("fastmoney_hidden");
 		// Update the total score after entered
-		sibling.addEventListener("blur", updateFastMoneyScore);
+		sibling.addEventListener("focus", blinkingFastMoneyScore);
+		sibling.addEventListener("blur", onFastMoneyRevealScore);
 		// Focus into the answer element
 		sibling.focus();
 	}	
 }
 
+// Blinking score before reveal
+function blinkingFastMoneyScore(event)
+{
+	let ele = event.srcElement;
+	active_element = ele; 
+	blinking_interval = setInterval(function(){
+		let has_class = ele.classList.contains("blinking");
+		if(!has_class)
+		{ 
+			ele.classList.add("blinking");
+		}
+		else
+		{
+			ele.classList.remove("blinking");
+		}
+	}, 400);
+}
+
 // Update the fast money total score
-function updateFastMoneyScore(event)
+function onFastMoneyRevealScore(event)
 {
 	let ele = event.srcElement;
 
-	let has_space = ele.innerHTML.includes("&nbsp;");
-	let is_empty = ele.innerText == "";
-	let value = Number(ele.innerText.replaceAll("&nbsp;", "~"));
 
-	if(!has_space && !is_empty && !isNaN(value))
+	value = Number(ele.innerText.replaceAll("&nbsp;", "~").replaceAll("<br/>",""));
+
+	console.log(value);
+	ele.innerHTML = value;
+
+	let has_space = ele.innerHTML.includes("&nbsp;");
+	let is_empty = (ele.innerText == "");
+	// let value = Number(ele.innerText.replaceAll("&nbsp;", "~"));
+
+	if(!isNaN(value))
 	{
-		FAST_MONEY_SCORE += Number(value);
-		document.getElementById("fast_money_total_score").innerText = FAST_MONEY_SCORE;
+		ele.style.color = "white";
 		ele.contentEditable = false;
+		
+		// Play the sounds for answer
+		if(value > 0){ document.getElementById("fast_money_points").play(); }
+		if(value == 0){ document.getElementById("fast_money_zero").play(); }
+		// Stop the blinking
+		clearInterval(blinking_interval);
+		ele.classList.remove("blinking");
+		updateFastMoneyScore(value);
 	}
 	else
 	{
 		alert("Enter a valid number, with no alphabet characters or spaces.");
 	}
+}
+
+// Update the fast money total score
+function updateFastMoneyScore(value)
+{
+	FAST_MONEY_SCORE += Number(value);
+	document.getElementById("fast_money_total_score").innerText = FAST_MONEY_SCORE;
 }
 
 // Toggle answers in batch

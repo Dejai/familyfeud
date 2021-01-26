@@ -19,6 +19,7 @@
 	.identify_yourself:hover{background-color:blue; color:yellow; }
 
 /* FAST MONEY */
+	.blinking { color:red !important; background-color:red !important; border:1px solid red!important;}
 	.fastmoney_editable { border-color:limegreen !important; }
 	/*.fastmoney_hide_player1 { color:#000072; border-color:orange !important; }*/
 	.fastmoney_hide_player1 { visibility:hidden;}
@@ -35,6 +36,8 @@
 
 	.timer_value { font-size:65px; }
 	.timer_buttons {  cursor:pointer; font-size:45px; }
+
+	.fast_money_points { width:21px; background-color:#0046b7; color:#0046b7;}
 
 /* ADMIN VIEW */
 	#current_question_section{ border:1px solid white; }
