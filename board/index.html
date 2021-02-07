@@ -2,7 +2,6 @@
 <html>
 <head>
 	<title>Family Feud - Board</title>
-
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
 </head>
 <body>
@@ -49,7 +48,7 @@
 
 		<h1 id="round_name" class="centered">Round #0</h1>
 
-		<h1 id="face_off" class="emphasis hidden">Face Off!</h1>
+		<h1 id="face_off" class="emphasis hidden" onclick="onFaceOff()">Face Off!</h1>	
 
 		<div id="time_view" class="hidden">
 			<div id="time_view_regular" style="font-size:50%;">
@@ -155,19 +154,27 @@
 			<source src="../assets/audio/theme_song.mp3" type="audio/mpeg">
 		</audio>
 	</div>
-	<br/>
-	<div id="game_action_buttons">
-		<button id="next_round_button" onclick="onNextRound()" class="button_mash hidden">NEXT ROUND</button>
-		<a href="../fastmoney/" target="_blank">
-			<button id="fast_money_button" class="button_mash hidden">FAST MONEY</button>	
-		</a>
-		<br/><br/>
-		<button id="startGameButton" onclick="onStartGame()" class="button_mash">START GAME</button>
-		<br/><br/>
-		<a href="../rules/" target="_blank">
-			<button class="button_mash">REVIEW RULES</button>
-		</a>
+	<div id="game_action_button_section">
+		<p>
+			<button id="startGameButton" onclick="onStartGame()" class="button_mash">START GAME</button>
+		</p>
+		<p>
+			<button id="next_round_button" onclick="onNextRound()" class="button_mash hidden">NEXT ROUND</button>		
+		</p>
+		<p>
+			<a href="../fastmoney/" target="_blank">
+				<button id="fast_money_button" class="button_mash hidden">FAST MONEY</button>	
+			</a>
+		</p>
+		<p>
+			<a href="../rules/" target="_blank">
+				<button class="button_mash">REVIEW RULES</button>
+			</a>
+		</p>
+		
 	</div>
+
+	
 </body>
 		<!-- Common Code -->
 	<script src="../src/common.js"></script>

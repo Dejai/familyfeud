@@ -28,7 +28,7 @@ function onClickDetails(event)
 	let section   = (nodeName == "I") ? srcEle.parentElement.parentElement : srcEle.parentElement;
 
 	let icon = section.querySelector(".icon");
-	let list = section.querySelector("ul.mainlist");
+	let list = section.querySelector(".mainlist");
 
 	let isHidden = (list.classList.contains("hidden")) ? true : false;
 

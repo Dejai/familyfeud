@@ -66,8 +66,8 @@ function setTeamNames()
 
 	let queryMap = mydoc.get_query_map();
 
-	let teamOne = (queryMap["team1"] != undefined) ? queryMap["team1"] : "Player One";
-	let teamTwo = (queryMap["team2"] != undefined) ? queryMap["team2"] : "Player Two";
+	let teamOne = (queryMap["team1"] != undefined) ? queryMap["team1"] : "Family One";
+	let teamTwo = (queryMap["team2"] != undefined) ? queryMap["team2"] : "Family Two";
 
 	document.getElementById("player_one").innerText = cleanTeamName(teamOne);
 	document.getElementById("player_two").innerText = cleanTeamName(teamTwo);

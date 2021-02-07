@@ -16,6 +16,7 @@ var CURR_QUEST = "";
 
 // Game Board variables
 var CURR_ROUND = 0;
+var CURR_MULTIPLIER = 1;
 var CURR_SCORE = 0;
 var CURR_WRONG = 0;
 var IS_STEAL = false;
@@ -63,7 +64,7 @@ function onClosePage(event)
 function gameBoardListenerOnKeyUp(){
 
 	document.addEventListener("keyup", function(event){
-		console.log(event);
+		// console.log(event);
 		switch(event.code)
 		{
 			case "Backquote":
@@ -133,6 +134,25 @@ function toggleThemeSong()
 	}
 }
 
+
+function toggleGameSettings()
+{
+	// button = document.getElementById("game_settings_button");
+	section = document.getElementById("game_settings_section");
+
+	if (section.classList.contains('hidden'))
+	{
+		// button.classList.remove("hidden");
+		// button.innerText = "Close";
+		section.classList.remove("hidden");
+	}
+	else
+	{
+		// button.innerText = "Game Settings";
+		section.classList.add("hidden");
+	}
+}
+
 /****************************BOARD ACTIONS: QUESTIONS****************************************/
 
 // Start the game
@@ -158,6 +178,22 @@ function onStartGame()
 
 	// document.getElementById("retryButton").classList.remove("hidden");
 	onNextRound();
+}
+
+// Start the face off window
+function onFaceOff()
+{
+	let height = window.innerHeight;
+	let width = window.innerWidth;
+
+	let team1 = document.querySelector("h1.team_name_box[data-team='team_one']");
+	let team2 = document.querySelector("h1.team_name_box[data-team='team_two']");
+	
+	let team1Name = (mydoc.isValidValue(team1.innerText)) ? team1.innerText : "Team 1";
+	let team2Name = (mydoc.isValidValue(team2.innerText)) ? team2.innerText : "Team 2";
+
+	let path = location.href.replace("/board/", `/faceoff/faceoff.html?team1=${team1Name}&team2=${team2Name}`)
+	window.open(path, "_blank", `toolbar=yes,scrollbars=yes,resizable=yes,top=10,left=100,width=${width},height=${height}`);
 }
 
 // Select question
@@ -471,7 +507,7 @@ function checkToAssignScore(isCorrect)
 function onUpdateScore(value){
 	if(IN_PLAY || IS_FACEOFF)
 	{
-		CURR_SCORE += Number(value) * CURR_ROUND;
+		CURR_SCORE += (Number(value) * CURR_MULTIPLIER);
 		document.getElementById("current_score").innerText = CURR_SCORE;
 		
 		// Don't add score for any remaining if steal was successful and still on board
@@ -575,9 +611,10 @@ function onNextRound()
 		nextRoundButton.disabled = true;
 
 		onSelectQuestion(); // Select the next option
-		nextRound = "Round #" + (CURR_ROUND+1);
 		CURR_ROUND++;
-		phrase = CURR_ROUND > 1 ? `<br/><span class="multiplier_phrase">(${CURR_ROUND}x points)</span>` : "";
+		nextRound = "Round #" + (CURR_ROUND);
+		CURR_MULTIPLIER = (CURR_ROUND <= 1) ? 1 : (CURR_ROUND - 1);
+		phrase = CURR_MULTIPLIER > 1 ? `<br/><span class="multiplier_phrase">(${CURR_MULTIPLIER}x points)</span>` : "";
 		document.getElementById("round_name").innerHTML = nextRound + phrase;
 	}
 

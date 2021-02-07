@@ -7,10 +7,20 @@
 	body{ font-family:Arial, sans-serif; }
 	button { cursor:pointer; }
 	.centered{ text-align:center; }
+	.center_section_50 { width:50%; margin:auto; }
+	.center_section_60 { width:60%; margin:auto; }
+	.center_section_70 { width:70%; margin:auto; }
+	.center_section_80 { width:80%; margin:auto; }
+
 	.leftaligned { text-align:left; }
 	.hidden { display:none; }
 	.invisible { visibility:hidden; }
 	.button_mash { font-size:140%; cursor:pointer;  }
+
+	.keyboardButton { font: bold 14px arial; text-align:center; display:inline-block;padding:15px 10px; background-color:#EFF0F2; color:#5E5E5E;
+						border-radius: 4px;  cursor:default;
+						box-shadow: inset 0 0 25px #E8E8E8, 0 1px 0 #C3C3C3, 0 2px 0 #C9C9C9, 0 2px 3px #333; }
+	
 
 /* HOME PAGE */
 	.identify_yourself { display:block; text-align:center; padding:2%; width:40%; margin:auto; cursor:pointer;
@@ -65,6 +75,10 @@
 	#pre_game_instructions .warning { color:red; }
 
 
+	.shortcuts_table { width:100%; text-align:center; border-spacing:0; }
+	.shortcuts_table td { border-bottom:2px solid white; }
+
+
 
 /* GAME VIEW */
 	/*Game Scores*/
@@ -78,9 +92,9 @@
 
 	/* Round Details*/
 	.multiplier_phrase { font-size:80%; }
-
 	h1.emphasis { color:orange; text-decoration:underline; }
 
+	#face_off { width:50%; margin:auto; cursor:pointer; }
 
 /* Game Table */
 	#game_table_section { width:60%; margin:auto; text-align:center; }
@@ -94,7 +108,8 @@
 	.game_cell_count p { text-align:center; color:#ffffff; font-family:Arial, sans-serif; font-weight:bolder; }
 
 	/* Additional Things*/
-	#game_action_buttons { width:40%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
+	#game_action_button_section { width:40%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
+	#game_action_button_section .game_action_button { margin-top:10%; }
 	#game_action_buttons2 { width:100%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
 	#wrong_answer_section { margin:auto; width:50%; text-align:center; margin-top:2%; }
 	.wrong_answer_img { width:100px; height:100px; margin-right:3%; }
