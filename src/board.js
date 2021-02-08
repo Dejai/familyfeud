@@ -140,7 +140,6 @@ function toggleThemeSong()
 	}
 }
 
-
 function toggleGameSettings()
 {
 	// button = document.getElementById("game_settings_button");
@@ -185,10 +184,9 @@ function onStartGame()
 {
 	GAME_STARTED = true;
 	IS_FACEOFF = true;
-
-	document.getElementById("startGameButton").classList.add("hidden");
-
+	
 	// Hide elements
+	mydoc.hideContent("#startGameButton");
 	mydoc.hideContent(".pregame_action_buttons");
 
 	// Show elements
@@ -200,6 +198,31 @@ function onStartGame()
 
 	// document.getElementById("retryButton").classList.remove("hidden");
 	onNextRound();
+}
+
+function onEndGame()
+{
+	let isEndGame = confirm("Are you sure you want to end the game?");
+	if(isEndGame )
+	{
+		if( onClearBoard() )
+		{
+			CURR_ROUND = 0;
+			document.getElementById("team_one_score").innerText = "0";
+			document.getElementById("team_two_score").innerText = "0";
+
+			// Hide elements
+			mydoc.showContent("#startGameButton");
+			mydoc.showContent(".pregame_action_buttons");
+
+			// Show elements
+			mydoc.hideContent(".face_off_element");
+			mydoc.hideContent(".game_action_buttons");
+			mydoc.hideContent("#game_table_section");
+			mydoc.hideContent(".current_score_section");
+			mydoc.hideContent(".team_in_play");
+		}
+	}
 }
 
 // Start the face off window
