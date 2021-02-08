@@ -4,6 +4,7 @@ var FAST_MONEY_SCORE = 0;
 var FAST_MONEY_VIEW = false;
 
 var NUMBER_OF_ANSWERS = 0;
+var CURRENT_PLAYER = "one";
 
 var active_element = undefined;
 var blinking_interval = undefined;
@@ -89,19 +90,140 @@ function onFastMoneyClosePage(event)
 	event.returnValue='';
 }
 
-// Clear the current list of fast money questions
-function clearFastMoneyQuestions()
+// Hide the answer after entering
+function onFastMoneyAnswerBlur(event)
 {
-	Array.from(document.querySelectorAll(".question_section")).forEach(function(obj){
-		obj.querySelector(".question").innerText = "";
-		obj.querySelector("ul").innerHTML = "";
-	});
+	let ele = event.srcElement;
+	value = ele.innerText;
+	if(value != undefined && value != "")
+	{
+		ele.setAttribute("data-answer", value); 
+		ele.innerText = "ANSWERED";
+		// Increment # of answers & check if all entered
+		NUMBER_OF_ANSWERS++;
+		checkAnswersAndTimer();
+
+		// ("data-answer", value); 
+		ele.contentEditable = false;
+		// ele.classList.remove("fastmoney_editable");
+		ele.classList.add("fastmoney_hidden");
+		ele.addEventListener("click", onFastMoneyRevealAnswer);
+	}
+	else
+	{
+		ele.innerText = "... add answer ...";
+	}
 }
 
-function sortFastMoneyQuestions(list)
+// Empty the answer placeholder on focus
+function onFastMoneyAnswerFocus(event)
 {
-	list
+	let ele = event.srcElement;
+	ele.innerText = "";
 }
+
+// Reveal the answer
+function onFastMoneyRevealAnswer(event)
+{
+	let ele = event.srcElement;
+	
+	let is_hidden = ele.classList.contains("fastmoney_hidden");
+	if(is_hidden)
+	{
+
+		answer = ele.getAttribute("data-answer");
+
+		// Set the answer;
+		ele.innerText = answer.toUpperCase();
+
+		let sibling = ele.nextElementSibling;
+		sibling.contentEditable = true;
+
+		document.getElementById("fast_money_answer").play();
+		ele.classList.remove("fastmoney_hidden");
+		// Update the total score after entered
+		sibling.addEventListener("focus", blinkingFastMoneyScore);
+		sibling.addEventListener("blur", onFastMoneyRevealScore);
+		// Focus into the answer element
+		sibling.focus();
+	}	
+}
+
+
+// Update the fast money total score
+function onFastMoneyRevealScore(event)
+{
+	let ele = event.srcElement;
+	value = Number(ele.innerText.replaceAll("&nbsp;", "~").replaceAll("<br/>",""));
+
+	console.log(value);
+	ele.innerHTML = value;
+
+	let has_space = ele.innerHTML.includes("&nbsp;");
+	let is_empty = (ele.innerText == "");
+	// let value = Number(ele.innerText.replaceAll("&nbsp;", "~"));
+
+	if(!isNaN(value))
+	{
+		ele.style.color = "white";
+		ele.contentEditable = false;
+		
+		// Play the sounds for answer
+		playSoundOnRevealScore(value);
+		
+		// Stop the blinking
+		clearInterval(blinking_interval);
+		ele.classList.remove("blinking");
+
+		ele.addEventListener("click", onFastMoneyEditScore);
+
+		updateFastMoneyScore(value);
+	}
+	else
+	{
+		clearInterval(blinking_interval);
+		alert("Enter a valid number, with no alphabet characters or spaces.");
+	}
+}
+
+function onFastMoneyEditScore(event)
+{
+	let isEdit = confirm("Are you sure you want to edit this score?");
+	if(isEdit)
+	{
+		let ele = event.srcElement;
+		let score = Number(ele.innerText.replaceAll("&nbsp;", "~").replaceAll("<br/>",""));
+
+		let newValue = prompt("What is the new value?");
+		let new_score = Number(newValue);
+
+		if(!isNaN(new_score))
+		{
+			
+			playSoundOnRevealScore(new_score);
+			updateFastMoneyScore(-score);
+			updateFastMoneyScore(new_score);
+			ele.innerHTML = new_score;
+
+			
+		}
+		else
+		{
+			alert("Enter a valid number, with no alphabet characters or spaces.");
+		}
+
+	}
+}
+
+// Play duplicate sound
+function onDuplicateAnswer()
+{
+	let duplicateAnswerSound = document.getElementById("duplicate_answer_sound");
+	// Play the wrong answer sound
+	duplicateAnswerSound.play();
+}
+
+/***************************** LOADING QUESTIONS / ANSWERS **********************************/
 
 // Select fast money questions
 function selectFastMoneyQuestions()
@@ -200,11 +322,67 @@ function loadFastMoneyAnswers(checklist_id, idx)
 	});
 }
 
+/***************************** HELPER FUNCTIONS **********************************/
 
+// Blinking score before reveal
+function blinkingFastMoneyScore(event)
+{
+	let ele = event.srcElement;
+	active_element = ele; 
+	blinking_interval = setInterval(function(){
+		let has_class = ele.classList.contains("blinking");
+		if(!has_class)
+		{ 
+			ele.classList.add("blinking");
+		}
+		else
+		{
+			ele.classList.remove("blinking");
+		}
+	}, 400);
+}
+
+
+// Clear the current list of fast money questions
+function clearFastMoneyQuestions()
+{
+	Array.from(document.querySelectorAll(".question_section")).forEach(function(obj){
+		obj.querySelector(".question").innerText = "";
+		obj.querySelector("ul").innerHTML = "";
+	});
+}
+
+// If all answers entered, stop the timer
+function checkAnswersAndTimer()
+{
+	if(NUMBER_OF_ANSWERS == 5)
+	{
+		toggleFastMoneyTimer(true);
+		if(CURRENT_PLAYER == "one")
+		{
+			mydoc.showContent("#hide_player_one");
+		}
+	}
+}
+
+// Indicate the current fast money player
+function indicateFastMoneyPlayer(element)
+{
+	let alreadySet = Array.from(document.querySelectorAll(".fastmoney_curr_player"));
+	alreadySet.forEach(function(obj){
+		obj.classList.remove("fastmoney_curr_player")
+	});
+
+	// Add it to the clicked element;
+	element.classList.add("fastmoney_curr_player");
+}
 
 // Listeners for fast money
 function setCurrentPlayer(event, player)
 {
+
+	// Current Player variable:
+	CURRENT_PLAYER = player;
 
 	// Indicate the current fast money player;
 	indicateFastMoneyPlayer(event.srcElement);
@@ -225,27 +403,12 @@ function setCurrentPlayer(event, player)
 			obj.contentEditable = true;
 			// obj.classList.add("fastmoney_editable");
 			obj.innerText = "... add answer ...";
-			obj.addEventListener("focus", onFastMoneyFocus);
-			obj.addEventListener("blur", onFastMoneyBlur);
+			obj.addEventListener("focus", onFastMoneyAnswerFocus);
+			obj.addEventListener("blur", onFastMoneyAnswerBlur);
 		});
 
-		if(player == "one")
-		{
-			document.getElementById("hide_player_one").classList.remove("hidden");
-		}
+		
 	}
-}
-
-// Indicate the current fast money player
-function indicateFastMoneyPlayer(element)
-{
-	let alreadySet = Array.from(document.querySelectorAll(".fastmoney_curr_player"));
-	alreadySet.forEach(function(obj){
-		obj.classList.remove("fastmoney_curr_player")
-	});
-
-	// Add it to the clicked element;
-	element.classList.add("fastmoney_curr_player");
 }
 
 // Sets the time based on the player
@@ -253,14 +416,14 @@ function setTimeForFastMoneyPlayer(player)
 {
 	let time = (player == "two") ? 25 : 20;
 	Timer.setTimerDefault(time);
-	mydoc.showSection("#time_view");
+	mydoc.showContent("#time_view");
 }
 
 function toggleFastMoneyTimer(forceStop=false)
 {
 	if(Timer.countdown_timer == undefined)
 	{
-		mydoc.showSection("#time_view");
+		mydoc.showContent("#time_view");
 		Timer.startTimer();
 	} 
 	if(Timer.countdown_timer || forceStop) 
@@ -270,132 +433,18 @@ function toggleFastMoneyTimer(forceStop=false)
 	}
 }
 
-// If all answers entered, stop the timer
-function checkAnswersAndTimer()
-{
-	if(NUMBER_OF_ANSWERS == 5)
-	{
-		toggleFastMoneyTimer(true);
-	}
-}
-
-/***** Fast Money Listeners for Answers *****/
-// Empty the answer placeholder on focus
-function onFastMoneyFocus(event)
-{
-	let ele = event.srcElement;
-	ele.innerText = "";
-}
-
-// Hide the answer after entering
-function onFastMoneyBlur(event)
-{
-	let ele = event.srcElement;
-	value = ele.innerText;
-	if(value != undefined && value != "")
-	{
-		ele.setAttribute("data-answer", value); 
-		ele.innerText = "ANSWERED";
-		// Increment # of answers & check if all entered
-		NUMBER_OF_ANSWERS++;
-		checkAnswersAndTimer();
-
-		// ("data-answer", value); 
-		ele.contentEditable = false;
-		// ele.classList.remove("fastmoney_editable");
-		ele.classList.add("fastmoney_hidden");
-		ele.addEventListener("click", onFastMoneyRevealAnswer);
-	}
-	else
-	{
-		ele.innerText = "... add answer ...";
-	}
-}
-
-// Reveal the answer
-function onFastMoneyRevealAnswer(event)
-{
-	let ele = event.srcElement;
-	
-	let is_hidden = ele.classList.contains("fastmoney_hidden");
-	if(is_hidden)
-	{
-
-		answer = ele.getAttribute("data-answer");
-
-		// Set the answer;
-		ele.innerText = answer.toUpperCase();
-
-		let sibling = ele.nextElementSibling;
-		sibling.contentEditable = true;
-
-		document.getElementById("fast_money_answer").play();
-		ele.classList.remove("fastmoney_hidden");
-		// Update the total score after entered
-		sibling.addEventListener("focus", blinkingFastMoneyScore);
-		sibling.addEventListener("blur", onFastMoneyRevealScore);
-		// Focus into the answer element
-		sibling.focus();
-	}	
-}
-
-// Blinking score before reveal
-function blinkingFastMoneyScore(event)
-{
-	let ele = event.srcElement;
-	active_element = ele; 
-	blinking_interval = setInterval(function(){
-		let has_class = ele.classList.contains("blinking");
-		if(!has_class)
-		{ 
-			ele.classList.add("blinking");
-		}
-		else
-		{
-			ele.classList.remove("blinking");
-		}
-	}, 400);
-}
-
-// Update the fast money total score
-function onFastMoneyRevealScore(event)
-{
-	let ele = event.srcElement;
-
-
-	value = Number(ele.innerText.replaceAll("&nbsp;", "~").replaceAll("<br/>",""));
-
-	console.log(value);
-	ele.innerHTML = value;
-
-	let has_space = ele.innerHTML.includes("&nbsp;");
-	let is_empty = (ele.innerText == "");
-	// let value = Number(ele.innerText.replaceAll("&nbsp;", "~"));
-
-	if(!isNaN(value))
-	{
-		ele.style.color = "white";
-		ele.contentEditable = false;
-		
-		// Play the sounds for answer
-		if(value > 0){ document.getElementById("fast_money_points").play(); }
-		if(value == 0){ document.getElementById("fast_money_zero").play(); }
-		// Stop the blinking
-		clearInterval(blinking_interval);
-		ele.classList.remove("blinking");
-		updateFastMoneyScore(value);
-	}
-	else
-	{
-		alert("Enter a valid number, with no alphabet characters or spaces.");
-	}
-}
-
 // Update the fast money total score
 function updateFastMoneyScore(value)
 {
 	FAST_MONEY_SCORE += Number(value);
 	document.getElementById("fast_money_total_score").innerText = FAST_MONEY_SCORE;
+}
+
+function playSoundOnRevealScore(score)
+{
+	// Play the sounds for answer
+	if(score > 0){ document.getElementById("fast_money_points").play(); }
+	if(score == 0){ document.getElementById("fast_money_zero").play(); }
 }
 
 // Toggle answers in batch
@@ -428,12 +477,4 @@ function toggleFastMoneyAnswers(action)
 		document.getElementById("show_player_one").classList.add("hidden");
 
 	}
-}
-
-// Play duplicate sound
-function onDuplicateAnswer()
-{
-	let duplicateAnswerSound = document.getElementById("duplicate_answer_sound");
-	// Play the wrong answer sound
-	duplicateAnswerSound.play();
 }
