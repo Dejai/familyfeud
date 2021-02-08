@@ -38,15 +38,35 @@ const mydoc = {
 		element.innerHTML = content;
 	},
 
-	// Show a section based on given ID
-	show_section: function(section_id){
-		document.getElementById(section_id).classList.remove("hidden");
+	addTestBanner: function(content=undefined){
+
+		let default_content = `TEST`
+
+		let banner = document.createElement("div");
+		banner.setAttribute("style", "text-align:center;background-color:red; color:white;font-size:200%;");
+		banner.textContent = (content != undefined) ? content : default_content;
+
+		let body = document.querySelector("body");
+		body.insertBefore(banner, body.firstChild);
 	},
 
-	// Hide a section based on given ID
-	hide_section: function(section_id)
-	{
-		document.getElementById(section_id).classList.add("hidden");
+	// Show content based on query selector
+	showContent: function(selector){
+		this._toggleClass(selector, "remove", "hidden");
+	},
+
+	// Hide based on query selector
+	hideContent: function(selector){
+		this._toggleClass(selector, "add", "hidden");
+	},
+
+	addClass: function(selector, className){
+		this._toggleClass(selector, "add", className);
+	},
+
+	removeClass: function(selector, className){
+		console.log(selector + " " + className);
+		this._toggleClass(selector, "remove", className);
 	},
 
 	isValidValue : function(value)
@@ -80,6 +100,30 @@ const mydoc = {
 			query_map[splits[0]] = splits[1];
 		});
 		return query_map;
+	},
+
+	_toggleClass: function(selector, action, className){
+		try
+		{
+			let elements = Array.from(document.querySelectorAll(selector));
+			if(elements != undefined)
+			{
+				elements.forEach(function(obj){
+					if(action == "add")
+					{
+						obj.classList.add(className);
+					}
+					else if(action == "remove")
+					{
+						obj.classList.remove(className);
+					}
+				});
+			}
+		} 
+		catch(error)
+		{
+			Logger.log(error, true);
+		}
 	}
 };
 

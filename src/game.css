@@ -14,6 +14,7 @@
 
 	.leftaligned { text-align:left; }
 	.hidden { display:none; }
+	.pointer { cursor:pointer; }
 	.invisible { visibility:hidden; }
 	.button_mash { font-size:140%; cursor:pointer;  }
 
@@ -94,7 +95,7 @@
 	.multiplier_phrase { font-size:80%; }
 	h1.emphasis { color:orange; text-decoration:underline; }
 
-	#face_off { width:50%; margin:auto; cursor:pointer; }
+	.face_off_element { width:40%; margin:auto; margin-bottom:2%; cursor:pointer;}
 
 /* Game Table */
 	#game_table_section { width:60%; margin:auto; text-align:center; }
@@ -108,7 +109,7 @@
 	.game_cell_count p { text-align:center; color:#ffffff; font-family:Arial, sans-serif; font-weight:bolder; }
 
 	/* Additional Things*/
-	#game_action_button_section { width:40%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
+	#game_action_button_section { width:60%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
 	#game_action_button_section .game_action_button { margin-top:10%; }
 	#game_action_buttons2 { width:100%; padding-top:2%; padding-bottom:2%; margin:auto; text-align:center; }
 	#wrong_answer_section { margin:auto; width:50%; text-align:center; margin-top:2%; }

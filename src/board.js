@@ -9,6 +9,8 @@ var ADMIN_VIEW = false;
 var BOARD_VIEW = false;
 var FAST_MONEY_VIEW = false;
 
+// Is this a a TEST run of the game
+var IS_TEST_RUN = false;
 
 // Storing the values of the current card
 var CURR_CARD  = "";
@@ -39,7 +41,11 @@ mydoc.ready(function(){
 	// Adds listener for game board
 	if(path.includes("/board"))
 	{ 
+
 		BOARD_VIEW = true;
+
+		checkTestRun();
+
 		window.addEventListener("beforeunload", onClosePage);
 		gameBoardListenerOnKeyUp(); 
 		// set default timer time
@@ -155,6 +161,18 @@ function toggleGameSettings()
 
 /****************************BOARD ACTIONS: QUESTIONS****************************************/
 
+
+// Sets a flag if this is a TEST RUN
+function checkTestRun()
+{
+	let queryMap = mydoc.get_query_map();
+	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
+
+	if(IS_TEST_RUN)
+	{
+		mydoc.addTestBanner();
+	}
+}
 // Start the game
 function onStartGame()
 {
@@ -163,18 +181,15 @@ function onStartGame()
 
 	document.getElementById("startGameButton").classList.add("hidden");
 
-	// Show elements
-	mydoc.show_section("face_off");
+	// Hide elements
+	mydoc.hideContent(".pregame_action_buttons");
 
-	document.getElementById("next_round_button").classList.remove("hidden");
-	document.getElementById("fast_money_button").classList.remove("hidden");
-	document.getElementById("game_table_section").classList.remove("hidden");
-	document.getElementById("current_score_label").classList.remove("hidden");
-	document.getElementById("current_score").classList.remove("hidden");
-	document.getElementById("teamOnePlayButton").classList.remove("hidden");
-	document.getElementById("teamTwoPlayButton").classList.remove("hidden");
-	
-	// Show
+	// Show elements
+	mydoc.showContent(".face_off_element");
+	mydoc.showContent(".game_action_buttons");
+	mydoc.showContent("#game_table_section");
+	mydoc.showContent(".current_score_section");
+	mydoc.showContent(".team_in_play");
 
 	// document.getElementById("retryButton").classList.remove("hidden");
 	onNextRound();
@@ -220,6 +235,31 @@ function onSelectQuestion()
 			alert("NOT ENOUGH CARDS TO SELECT FROM!");
 		}
 	});
+}
+
+// When nobody got the correct answer
+function onNoCorrectAnswers()
+{
+
+	let noCorrectAnswers = confirm("CONFIRM: No Correct Answers Were Given?");
+
+	if(noCorrectAnswers)
+	{
+		// Set pseudo IN PLAY
+		TEAM_IN_PLAY = "NOBODY!";
+		
+		// Make sure the points do not get added
+		IN_PLAY = false;
+		IS_FACEOFF = false;
+
+		// Hide the play buttons
+		mydoc.hideContent(".team_in_play");
+
+		// Hide the Face Off things
+		mydoc.hideContent(".face_off_element");
+	}
+
+
 }
 
 // Try another question
@@ -269,12 +309,14 @@ function onLoadAnswers(checklist_id)
 			if(BOARD_VIEW)
 			{
 				// Hide the GIF and show the answers
-				mydoc.hide_section("loading_gif");
-				mydoc.show_section("game_table");
+				mydoc.hideContent("#loading_gif");
+				mydoc.showContent("#game_table");
 			}
 			
-			// Move the card to the current card
-			MyTrello.moveCard(card_id, "Current");
+			// Move the card to the current card; Only if NOT a test run
+			if(!IS_TEST_RUN){
+				MyTrello.moveCard(card_id, "Current");
+			}
 		} 
 		catch(error) 
 		{
@@ -286,6 +328,7 @@ function onLoadAnswers(checklist_id)
 		}
 	});
 }
+
 
 // Set which team is in play
 function setTeamInPlay(team)
@@ -308,14 +351,9 @@ function setTeamInPlay(team)
 	// Clear wrong answer count if any
 	clearWrongAnswerCount();
 
-	// Show the Assign Score Buttons
-	// document.querySelector("#team_one button.assign_score").classList.remove("hidden");
-	// document.querySelector("#team_two button.assign_score").classList.remove("hidden");
-
-	// Hide the Play buttons
-	document.querySelector("#team_one button.team_in_play").classList.add("hidden");
-	document.querySelector("#team_two button.team_in_play").classList.add("hidden");
-	mydoc.hide_section("face_off");
+	// Hide the PLAY buttons & Face Off things
+	mydoc.hideContent(".team_in_play"); 
+	mydoc.hideContent(".face_off_element");
 }
 
 // Set the countdown timer
@@ -428,6 +466,9 @@ function setStealOpportunity()
 function onRevealAnswer(value)
 {	
 	let digit = value.replace("Digit","").replace("Numpad","");
+
+	// Make sure admin can no longer use the No Answers optio
+	mydoc.hideContent("#no_correct_answers");
 
 	// The right sound element;
 	let rightSound = document.getElementById("right_answer_sound");
@@ -645,8 +686,8 @@ function onClearBoard(toBeFixed=false)
 		if(BOARD_VIEW)
 		{
 			// Show the loading GIF and hide the table
-			mydoc.hide_section("game_table");
-			mydoc.show_section("loading_gif");
+			mydoc.hideContent("#game_table");
+			mydoc.showContent("#loading_gif");
 
 			// Clear/reset the key FLAGS
 			clearInPlay();
@@ -746,6 +787,6 @@ function clearSteal()
 function resetFaceOff()
 {
 	// Show the Face Off Section again
-	mydoc.show_section("face_off");
 	IS_FACEOFF = true;
+	mydoc.showContent(".face_off_element");
 }

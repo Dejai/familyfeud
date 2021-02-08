@@ -3,6 +3,8 @@
 <head>
 	<title>Family Feud - Board</title>
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 </head>
 <body>
 	<div id="menu">
@@ -19,15 +21,16 @@
 						<span class="can_steal hidden">THIS FAMILY CAN STEAL!</span>
 						<div id="team_one_score" class="score_value">0</div>
 						<p>
-							<!-- <button class="assign_score hidden" onclick="onAssignScore('one')">Assign Score</button> -->
 							<button id="teamOnePlayButton" class="team_in_play hidden" onclick="setTeamInPlay('one')">PLAY</button>
 						</p>
 					</div>
 				</td>
 				<td>
 					<h1 id="game_name">Family Feud</h1>
-					<h3 id="current_score_label" class="hidden" style="margin:0px;">Current Score:</h3>
-					<div id="current_score" class="score_value hidden">0</div>
+					<h3 id="current_score_label" class="hidden current_score_section" style="margin:0px;">
+						Current Score:
+					</h3>
+					<div id="current_score" class="score_value hidden current_score_section">0</div>
 				</td>
 				<td style="text-align:right;padding-right:5%;">
 					<div id="team_two" class = "team_score">
@@ -35,7 +38,6 @@
 						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
 						<div id="team_two_score" class="score_value">0</div>
 						<p>
-							<!-- <button class="assign_score hidden" onclick="onAssignScore('two')">Assign Score</button> -->
 							<button id="teamTwoPlayButton" class="team_in_play hidden" onclick="setTeamInPlay('two')">PLAY</button>
 						</p>
 					</div>
@@ -48,7 +50,11 @@
 
 		<h1 id="round_name" class="centered">Round #0</h1>
 
-		<h1 id="face_off" class="emphasis hidden" onclick="onFaceOff()">Face Off!</h1>	
+		<h1 id="face_off" class="face_off_element emphasis hidden" onclick="onFaceOff()">Face Off!</h1>
+
+		<p id="no_correct_answers" class="face_off_element hidden pointer" onclick="onNoCorrectAnswers()">
+			No Correct Answers Given
+		</p>
 
 		<div id="time_view" class="hidden">
 			<div id="time_view_regular" style="font-size:50%;">
@@ -137,6 +143,8 @@
 				</tr>
 			</tbody>
 		</table>
+
+		
 	</div>
 	
 	<div id="wrong_answer_section"></div>
@@ -154,23 +162,22 @@
 			<source src="../assets/audio/theme_song.mp3" type="audio/mpeg">
 		</audio>
 	</div>
+
 	<div id="game_action_button_section">
-		<p>
+		<p class="pregame_action_buttons">
 			<button id="startGameButton" onclick="onStartGame()" class="button_mash">START GAME</button>
 		</p>
-		<p>
-			<button id="next_round_button" onclick="onNextRound()" class="button_mash hidden">NEXT ROUND</button>		
-		</p>
-		<p>
-			<a href="../fastmoney/" target="_blank">
-				<button id="fast_money_button" class="button_mash hidden">FAST MONEY</button>	
-			</a>
-		</p>
-		<p>
-			<a href="../rules/" target="_blank">
-				<button class="button_mash">REVIEW RULES</button>
-			</a>
-		</p>
+		<a href="../rules/" target="_blank" class="pregame_action_buttons">
+			<button class="button_mash">REVIEW RULES</button>
+		</a>
+		<hr style="margin-top:10%;" class="game_action_buttons hidden"/>
+		<button id="next_round_button" onclick="onNextRound()" class="button_mash game_action_buttons hidden">
+			NEXT ROUND
+		</button>	
+		<a href="../fastmoney/" target="_blank">
+			<button id="fast_money_button" class="button_mash game_action_buttons hidden">FAST MONEY</button>	
+		</a>
+		
 		
 	</div>
 

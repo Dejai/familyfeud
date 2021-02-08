@@ -113,7 +113,7 @@ function selectFastMoneyQuestions()
 	document.getElementById("load_fast_money_questions").disabled = true;
 
 	// Show loading gif
-	mydoc.show_section("loading_gif");
+	mydoc.showContent("#loading_gif");
 	
 	MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
 		response = JSON.parse(data.responseText);
@@ -177,7 +177,7 @@ function loadFastMoneyQuestions()
 		});
 		
 		// Hide the loading gif once done;
-		mydoc.hide_section("loading_gif");
+		mydoc.hideContent("#loading_gif");
 	});
 }
 
@@ -253,19 +253,19 @@ function setTimeForFastMoneyPlayer(player)
 {
 	let time = (player == "two") ? 25 : 20;
 	Timer.setTimerDefault(time);
-	mydoc.show_section("time_view");
+	mydoc.showSection("#time_view");
 }
 
 function toggleFastMoneyTimer(forceStop=false)
 {
 	if(Timer.countdown_timer == undefined)
 	{
-		mydoc.show_section("time_view");
+		mydoc.showSection("#time_view");
 		Timer.startTimer();
 	} 
 	if(Timer.countdown_timer || forceStop) 
 	{
-		mydoc.hide_section("time_view");
+		mydoc.hideContent("#time_view");
 		Timer.resetTimer();
 	}
 }
