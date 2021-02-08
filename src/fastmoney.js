@@ -3,6 +3,8 @@
 var FAST_MONEY_SCORE = 0;
 var FAST_MONEY_VIEW = false;
 
+var IS_TEST_RUN = false;
+
 var NUMBER_OF_ANSWERS = 0;
 var CURRENT_PLAYER = "one";
 
@@ -19,6 +21,8 @@ mydoc.ready(function(){
 		FAST_MONEY_VIEW = true;
 		window.addEventListener("beforeunload", onFastMoneyClosePage);
 		fastMoneyListenerOnKeyUp();
+
+		checkTestRun();
 
 		// Set default time & buzzer sound
 		Timer.resetTimer();
@@ -79,6 +83,24 @@ function toggleThemeSong()
 	{
 		theme_song.pause();
 		theme_song.currentTime = 0;
+	}
+}
+
+// Sets a flag if this is a TEST RUN
+function checkTestRun()
+{
+	let queryMap = mydoc.get_query_map();
+	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
+
+	if(IS_TEST_RUN)
+	{
+		mydoc.addTestBanner();
+
+		// Setup the element to be passed through to the next page;
+		let links = Array.from(document.querySelectorAll(".pass_through_params"));
+		links.forEach(function(obj){
+			obj.href += location.search;
+		});
 	}
 }
 

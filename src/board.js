@@ -171,8 +171,15 @@ function checkTestRun()
 	if(IS_TEST_RUN)
 	{
 		mydoc.addTestBanner();
+
+		// Setup the element to be passed through to the next page;
+		let links = Array.from(document.querySelectorAll(".pass_through_params"));
+		links.forEach(function(obj){
+			obj.href += location.search;
+		});
 	}
 }
+
 // Start the game
 function onStartGame()
 {
@@ -518,10 +525,10 @@ function checkToAssignScore(isCorrect)
 
 	let hidden_cells = document.querySelectorAll("p.circled_number");
 
-	console.log("IN_PLAY: " + IN_PLAY);
-	console.log("IS_STEAL: " + IS_STEAL);
-	console.log("isCorrect: " + isCorrect);
-	console.log("Hidden Cells: " + hidden_cells.length);
+	Logger.log("IN_PLAY: " + IN_PLAY);
+	Logger.log("IS_STEAL: " + IS_STEAL);
+	Logger.log("isCorrect: " + isCorrect);
+	Logger.log("Hidden Cells: " + hidden_cells.length);
 
 	let assigne_to_team = "";
 	let delay = 2000;  // delay for 3 seconds

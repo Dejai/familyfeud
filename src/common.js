@@ -17,13 +17,27 @@
 
 
 const Logger = { 
-	log: function(content){ 
-		console.log("LOGGER: " + content); 
+	logged_data: [],
+
+	log: function(content, printLog=false){ 
+		this.logged_data.push(content);
+		if(printLog){ this.print_logged_data(content)}
 	},
+
+	show_log: function(){
+		logged_data.forEach(function(obj){
+			console.log(obj);
+		});
+	},
+
+	print_logged_data: function(content){
+		console.log(content);
+	},
+
 	errorHandler: function(err){
-		console.log("ERROR");
-		console.log(err);
-	}
+					console.log("ERROR");
+					console.log(err);
+				}
 };
 
 const mydoc = {
