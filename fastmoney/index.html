@@ -15,8 +15,12 @@
 		<!-- <h2>Fast Money</h2> -->
 
 		<div style="margin-bottom:2%;">
-			<button onclick="setCurrentPlayer(event,'one')" class="button_mash">Player One</button>
-			<button onclick="setCurrentPlayer(event,'two')" class="button_mash">Player Two</button>
+			<button id="player_one_button" onclick="setCurrentPlayer(event,'one')" class="button_mash">
+				Player One
+			</button>
+			<button id="player_two_button" onclick="setCurrentPlayer(event,'two')" class="button_mash" disabled>
+				Player Two
+			</button>
 		</div>
 
 		<div id="time_view" class="hidden">

@@ -383,6 +383,7 @@ function checkAnswersAndTimer()
 		if(CURRENT_PLAYER == "one")
 		{
 			mydoc.showContent("#hide_player_one");
+			document.getElementById("player_two_button").disabled = false;
 		}
 	}
 }
@@ -395,6 +396,8 @@ function indicateFastMoneyPlayer(element)
 		obj.classList.remove("fastmoney_curr_player")
 	});
 
+	mydoc.removeClass(".fastmoney_curr_player", "fastmoney_curr_player");
+
 	// Add it to the clicked element;
 	element.classList.add("fastmoney_curr_player");
 }
@@ -403,11 +406,14 @@ function indicateFastMoneyPlayer(element)
 function setCurrentPlayer(event, player)
 {
 
+	let ele = event.srcElement; 
+	ele.disabled = true; // Prevent someone from pressing the button again; 
+
 	// Current Player variable:
 	CURRENT_PLAYER = player;
 
 	// Indicate the current fast money player;
-	indicateFastMoneyPlayer(event.srcElement);
+	indicateFastMoneyPlayer(ele);
 
 	// Set the time based on the player
 	setTimeForFastMoneyPlayer(player);
