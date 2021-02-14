@@ -40,6 +40,44 @@ const Logger = {
 				}
 };
 
+const Helper = {
+	_getRandomCharacter: function(){
+		characters = "abcdefghijklmnopqrstuvwxyz";
+		randChar = Math.floor(Math.random()*characters.length);
+		return characters[randChar].toUpperCase();
+	},
+
+	_isReservedCode: function(code){
+		var reserved = ["DEMO", "TEST"];
+		return reserved.includes(code.toUpperCase());
+	},
+
+	getCode: function(numChars=4){
+		let chars = "";
+
+		for(var idx = 0; idx < numChars; idx++)
+		{
+			chars += Helper._getRandomCharacter();
+		}
+
+		var code = ( Helper._isReservedCode(chars) ) ? getGameCode() : chars;
+		return code;
+	},
+
+	getDate: function(){
+		let dd = new Date();
+		let year = dd.getFullYear().toString();
+		let monthIdx = dd.getDay()+1;
+		let month = (monthIdx<9) ? "0"+monthIdx : monthIdx;
+		let dayIdx = dd.getDate();
+		let day = (dayIdx < 9 ) ? "0"+dayIdx : dayIdx;
+		let date_code = [year,month,day].join("-");
+
+		var myDateObj = { "year":year, "month":month, "day":day };
+		return myDateObj;
+	}
+}
+
 const mydoc = {
 
 	ready: function(callback){

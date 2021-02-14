@@ -7,15 +7,23 @@
 </head>
 <body>
 	<div id="menu">
-		<h1 id="game_name">Family Feud</h1>
+		<h1 id="game_name">Family Feud<br/>
+			Admin View
+		<p style="font-size:75%;">
+			<span>Game Code: </span><br/>
+			<span id="game_code" class="emphasis_orange"></span></h1>	
+		</p>
 	</div>
 	<hr>
-	<div class="centered">
-		<h2>Admin View</h2>
-
+	<div id="create_game_section" class="centered centere_section_50">
+		<button class="button_mash" onclick="onCreateGame()">New Game</button>
+		<br/><br/>
+		<button class="button_mash" onclick="onExistingGame()">Existing Game</button>
+	</div>
+	<div id="admin_game_section" class="centered hidden">
 		<div id="game_action_buttons2">
-			<button id="next_round_button" onclick="onGetCurrentQuestion()" class="button_mash">REFRESH</button>
-			<a href="../fastmoney/admin.html">
+			<button id="next_round_button" onclick="onGetCurrentCard()" class="button_mash">REFRESH</button>
+			<a href="../fastmoney/questions.html?admin=1" class="pass_through_params">
 				<button id="fast_money_button" class="button_mash">FAST MONEY</button>	
 			</a>	
 		</div>
@@ -111,4 +119,5 @@
 	<script src="../src/trello.js"></script>
 	<!-- My Source JS -->
 	<script src="../src/board.js"></script>
+	<script src="../src/admin.js"></script>
 </html>

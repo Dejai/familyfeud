@@ -46,15 +46,19 @@
 		</table>
 	</div>
 	<hr>
+	
+	<div id="game_code_section" class="hidden center_section_50 centered">
+		<h3>Game Code</h3>
+		<input type="text" name="game_code" class="input_mash input_large centered" placeholder="Enter Game Code">
+		<br/>
+		<button class="button_mash" onclick="onEnterGame()">Enter</button>
+	</div>
+
 	<div id="game_table_section" class="hidden">
 
 		<h1 id="round_name" class="centered">Round #0</h1>
 
 		<h1 id="face_off" class="face_off_element emphasis hidden" onclick="onFaceOff()">Face Off!</h1>
-
-		<p id="no_correct_answers" class="face_off_element hidden pointer" onclick="onNoCorrectAnswers()">
-			No Correct Answers Given
-		</p>
 
 		<div id="time_view" class="hidden">
 			<div id="time_view_regular" style="font-size:50%;">
@@ -144,7 +148,9 @@
 			</tbody>
 		</table>
 
-		
+		<p id="no_correct_answers" class="face_off_element hidden pointer" onclick="onNoCorrectAnswers()">
+			No Correct Answers Given
+		</p>
 	</div>
 	
 	<div id="wrong_answer_section"></div>
@@ -180,9 +186,7 @@
 		<br/><br/>
 		<button id="end_game_button" class="button_mash game_action_buttons hidden" onclick="onEndGame()">
 			END GAME
-		</button>	
-		
-		
+		</button>			
 	</div>
 
 	

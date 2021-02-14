@@ -11,12 +11,18 @@
 		<h1 id="game_name">Family Feud</h1>
 	</div>
 	<hr>
-	<div class="centered">
+	<div id="game_code_section" class="center_section_50 centered">
+		<h3>Game Code</h3>
+		<input type="text" name="game_code" class="input_mash input_large centered" placeholder="Enter Game Code">
+		<br/>
+		<button class="button_mash" onclick="onEnterGame()">Enter</button>
+	</div>
+	<div id="host_view_section" class="centered hidden">
 		<h2>Host View</h2>
 
 		<div id="game_action_buttons2">
-			<button onclick="onGetCurrentQuestion()" class="button_mash">REFRESH</button>
-			<a href="../fastmoney/host.html">
+			<button onclick="onGetCurrentCard()" class="button_mash">REFRESH</button>
+			<a href="../fastmoney/questions.html" class="pass_through_params">
 				<button id="fast_money_button" class="button_mash">FAST MONEY</button>	
 			</a>
 		</div>
@@ -26,12 +32,11 @@
 			<h2 id="current_question"></h2>
 		</div>
 	</div>
-	
 </body>
 		<!-- Common Code -->
 	<script src="../src/common.js"></script>
 	<!-- My Trello code -->
 	<script src="../src/trello.js"></script>
 	<!-- My Source JS -->
-	<script src="../src/board.js"></script>
+	<script src="../src/host.js"></script>
 </html>

@@ -19,6 +19,10 @@ const MyTrello = {
 	played_list_id: "5fe2290b8b5e07528c4ffda7",
 	list_id: "5fe22904a09947446a263ccc",
 
+
+	test_list_id: "5fe2290b8b5e07528c4ffda7",
+	curr_game_list_id: undefined,
+
 	label_eight_answers: "5fe228fd86c6bc9cc5e54510",
 	label_seven_answers: "5fe228fd86c6bc9cc5e54511",
 	label_six_answers: "5fe228fd86c6bc9cc5e54515",
@@ -73,6 +77,10 @@ const MyTrello = {
 		return label_id;
 	},
 
+	setCurrentGameListID: function(id){
+		this.curr_game_list_id = id;
+	},
+
 	moveCard: function(cardID, toList, successCallback){
 		let list_id = this.current_card_list_id;
 
@@ -93,7 +101,9 @@ const MyTrello = {
 		switch(toList)
 		{
 			case "Current":
-				list_id = this.current_card_list_id;
+			case "CurrentGame":
+				list_id = this.curr_game_list_id;
+				// list_id = this.current_card_list_id;
 				break;
 			case "Played":
 				list_id = this.played_list_id;
@@ -108,6 +118,8 @@ const MyTrello = {
 			case "Fast Money Pool":
 				list_id = this.fast_money_pool_list_id;
 				break;
+			
+				break;
 			default:
 				Logger.log("No selected moveCard value");
 		} 
@@ -116,8 +128,28 @@ const MyTrello = {
 		this.update_card_list(cardID, list_id, successCallback);
 	},
 
+
+	// Move all the cards from the current game to a separate list
+	archiveGame: function(list_id, successCallback){
+
+		this.curr_game_list_id = list_id; 
+
+		MyTrello.get_cards(list_id, function(data){
+
+			response = JSON.parse(data.responseText);
+			if(response.length > 0)
+			{
+				response.forEach(function(obj){
+					MyTrello.moveCard(obj["id"], "CurrentGame"); 
+				});
+
+				successCallback(list_id);
+			}
+		});
+	},
+
 	// Clear the current list if it ever has anything in it
-	clearCurrentCardList: function(action="Played"){
+	clearCurrentCardList: function(action="CurrentGame"){
 
 		MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
 			response = JSON.parse(data.responseText);
@@ -141,7 +173,8 @@ const MyTrello = {
 
 	// Gets a single trello cards
 	get_single_card: function(card_id, successCallback){
-		let trello_path = `${this.endpoint}/cards/${card_id}/?key=${this.key}&token=${this.token}`;
+		let param="checklists=all";
+		let trello_path = `${this.endpoint}/cards/${card_id}/?key=${this.key}&token=${this.token}&${param}`;
 		myajax.AJAX({ method: "GET", path : trello_path, success: successCallback, failure : Logger.errorHandler});
 	},
 
@@ -189,7 +222,7 @@ const MyTrello = {
 
 	// Update the Card's list
 	update_card_list: function(card_id, new_list_id, successCallback){
-		let param = `idList=${new_list_id}&pos=1`;
+		let param = `idList=${new_list_id}&pos=top`;
 		let trello_path = `${this.endpoint}/cards/${card_id}/?key=${this.key}&token=${this.token}&${param}`;
 		myajax.AJAX({ method: "PUT", path : trello_path, success:successCallback, failure : Logger.errorHandler});
 	},
@@ -204,7 +237,8 @@ const MyTrello = {
 
 	// Gets the set of Trello Lists
 	get_lists: function(successCallback){
-		let trello_path = `${this.endpoint}/boards/${this.board_id}/lists?key=${this.key}&token=${this.token}`;
+		let param="filter=open";
+		let trello_path = `${this.endpoint}/boards/${this.board_id}/lists?key=${this.key}&token=${this.token}&${param}`;
 		myajax.AJAX({ method: "GET", path : trello_path, success: successCallback, failure : Logger.errorHandler});
 	},
 
@@ -213,5 +247,18 @@ const MyTrello = {
 		let param = `name=${listName}`
 		let trello_path = `${this.endpoint}/boards/${this.board_id}/lists?key=${this.key}&token=${this.token}&${param}`
 		myajax.AJAX({ method: "POST", path : trello_path, data:"", success: successCallback, failure : Logger.errorHandler});
-	}
+	},
+
+
+	update_list_name_and_close: function(list_id, new_name, successCallback){
+		let param = `name=${new_name}&closed=true`;
+		let trello_path = `${this.endpoint}/lists/${list_id}/?key=${this.key}&token=${this.token}&${param}`;
+		myajax.AJAX({ method:"PUT", path:trello_path, success:successCallback, failure:Logger.errorHandler});
+	},
+	// Update list to be archived
+	update_list_to_archive: function(list_id, successCallback){
+		let param = `closed=true`;
+		let trello_path = `${this.endpoint}/lists/${list_id}/?key=${this.key}&token=${this.token}&${param}`;
+		myajax.AJAX({ method:"PUT", path:trello_path, success:successCallback, failure:Logger.errorHandler});
+	},
 }

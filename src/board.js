@@ -3,6 +3,9 @@
 
 // Game started?
 var GAME_STARTED = false; 
+var CURR_GAME_NUMBER = 0;
+var CURR_GAME_CODE = undefined;
+var CURR_GAME_LIST = "";
 
 // Check determine which views the game is in
 var ADMIN_VIEW = false;
@@ -125,38 +128,7 @@ function gameBoardListenerOnKeyUp(){
 	});	
 }
 
-function toggleThemeSong()
-{
-	theme_song = document.getElementById("theme_song_sound");
-	let is_paused = theme_song.paused;
-	if(is_paused)
-	{
-		theme_song.play();
-	}
-	else
-	{
-		theme_song.pause();
-		theme_song.currentTime = 0;
-	}
-}
 
-function toggleGameSettings()
-{
-	// button = document.getElementById("game_settings_button");
-	section = document.getElementById("game_settings_section");
-
-	if (section.classList.contains('hidden'))
-	{
-		// button.classList.remove("hidden");
-		// button.innerText = "Close";
-		section.classList.remove("hidden");
-	}
-	else
-	{
-		// button.innerText = "Game Settings";
-		section.classList.add("hidden");
-	}
-}
 
 /****************************BOARD ACTIONS: QUESTIONS****************************************/
 
@@ -176,27 +148,86 @@ function checkTestRun()
 		links.forEach(function(obj){
 			obj.href += location.search;
 		});
+
+		// Enter the game as a test;
+		onEnterGame(true);
 	}
 }
 
 // Start the game
 function onStartGame()
 {
-	GAME_STARTED = true;
 	IS_FACEOFF = true;
+
+	// Add 1 to whatever the current game number is;
+	CURR_GAME_NUMBER += 1;
 	
 	// Hide elements
 	mydoc.hideContent("#startGameButton");
 	mydoc.hideContent(".pregame_action_buttons");
 
 	// Show elements
+	mydoc.showContent("#game_code_section");	
+}
+
+function onEnterGame(isTest=false)
+{
+	GAME_STARTED = true;
+	
+	if(isTest)
+	{
+		CURR_GAME_CODE = "TEST";
+		MyTrello.setCurrentGameListID(MyTrello.test_list_id);
+		showGameBoard();
+	}
+	else
+	{
+		var ele = document.querySelector("#game_code_section input");
+		let entered_code = ele.value.toUpperCase();
+
+		if(entered_code == "TEST")
+		{
+			let query = (location.search == "") ? "?test=1" : "&test=1";
+			let redirect = location.href + query;
+			location.replace(redirect);
+		}
+
+		MyTrello.get_lists(function(data){
+			response = JSON.parse(data.responseText);
+
+			for(var idx = 0; idx < response.length; idx++)
+			{
+				var obj = response[idx];
+				let list_name = obj["name"].toUpperCase();
+				let card_id = obj["id"];
+
+				if(list_name == entered_code)
+				{
+					CURR_GAME_CODE = list_name;
+					MyTrello.setCurrentGameListID(card_id);
+					showGameBoard();
+					break;
+				}
+			}
+		});
+	}	
+}
+
+function showGameBoard()
+{
+	// Hide things
+	mydoc.hideContent("#game_code_section");
+	mydoc.hideContent("#startGameButton");
+	mydoc.hideContent(".pregame_action_buttons");
+
+	// Show Content
 	mydoc.showContent(".face_off_element");
 	mydoc.showContent(".game_action_buttons");
 	mydoc.showContent("#game_table_section");
 	mydoc.showContent(".current_score_section");
 	mydoc.showContent(".team_in_play");
 
-	// document.getElementById("retryButton").classList.remove("hidden");
+	// Start next round
 	onNextRound();
 }
 
@@ -207,15 +238,49 @@ function onEndGame()
 	{
 		if( onClearBoard() )
 		{
+
+			if(IS_TEST_RUN)
+			{
+				alert("Resetting Cards to their Pools");
+
+				MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
+
+					response = JSON.parse(data.responseText);
+
+					response.forEach(function(obj){
+						console.log(obj);
+						let card_id = obj["id"];
+						let labels = obj["idLabels"];
+						if(labels.includes(MyTrello.label_fast_money))
+						{
+							MyTrello.moveCard(card_id, "FastMoneyPool");
+						}
+						else
+						{
+							MyTrello.moveCard(card_id, "Pool");
+						}
+					});
+				});
+			}
+			else
+			{
+				MyTrello.update_list_name_and_close(MyTrello.curr_game_list_id, function(data){
+					console.log("Game Archived");
+				});
+			}
+			
+			// Reset Round;
 			CURR_ROUND = 0;
+
+			// Reset Team SCore
 			document.getElementById("team_one_score").innerText = "0";
 			document.getElementById("team_two_score").innerText = "0";
 
-			// Hide elements
+			// Show Start Elements
 			mydoc.showContent("#startGameButton");
 			mydoc.showContent(".pregame_action_buttons");
 
-			// Show elements
+			// Hide Board elements
 			mydoc.hideContent(".face_off_element");
 			mydoc.hideContent(".game_action_buttons");
 			mydoc.hideContent("#game_table_section");
@@ -241,7 +306,7 @@ function onFaceOff()
 	window.open(path, "_blank", `toolbar=yes,scrollbars=yes,resizable=yes,top=10,left=100,width=${width},height=${height}`);
 }
 
-// Select question
+// Select random question from pool
 function onSelectQuestion()
 {
 	MyTrello.get_cards(MyTrello.pool_list_id, function(data){
@@ -252,20 +317,79 @@ function onSelectQuestion()
 		{
 			rand_id = Math.floor(Math.random()*response.length);
 			card = response[rand_id];
-			CURR_CARD = card["id"];
-			CURR_QUEST = card["name"];
-			question = card["name"];
-			checklist_id = card["idChecklists"][0];
+			card_id = card["id"];
 
-			// Load the answers into the table
-			onLoadAnswers(checklist_id);
+			MyTrello.moveCard(card_id, "Current");
+
+			getSelectedQuestion(card_id);
 		}
 		else
 		{
-			alert("NOT ENOUGH CARDS TO SELECT FROM!");
+			alert("NOT ENOUGH CARDS TO SELECT FROM THE POOL!");
 		}
 	});
 }
+
+function getSelectedQuestion(card_id)
+{
+	MyTrello.get_single_card(card_id, function(data){		
+		response = JSON.parse(data.responseText);
+
+		CURR_CARD = response["id"];
+		CURR_QUEST = response["name"];
+		checklist = response["checklists"][0].checkItems;
+		loadBoardAnswers(checklist);
+	});	
+}
+
+function loadBoardAnswers(checklist)
+{
+	try
+	{
+		counter = 0;
+
+		checklist_items = checklist.sort(function(a,b){
+			return a.pos - b.pos;
+		});
+
+		checklist_items.forEach(function(obj){
+			counter++;
+			splits = obj["name"].split("~");
+			answer_text = splits[0].trim();
+			answer_count = splits[1].trim();
+
+			let answer = document.querySelector(`#game_cell_${counter} p.answer`);
+			answer.innerText = answer_text;
+
+			let count_val = document.querySelector(`#game_cell_count_${counter} p`);
+			count_val.innerText = answer_count;
+
+			let answer_number = document.querySelector(`#game_cell_${counter} p.game_cell_number`);
+			answer_number.classList.remove("hidden");
+			answer_number.classList.add("circled_number");
+		});
+
+		// Show the board once succesfully loaded
+		showBoard();
+	} 
+	catch(error) 
+	{
+		Logger.log(error, true);
+		if(BOARD_VIEW)
+		{
+			tryAnotherQuestion();
+		}
+	}
+}
+
+
+function showBoard()
+{
+	// Hide the GIF and show the table
+	mydoc.hideContent("#loading_gif");
+	mydoc.showContent("#game_table");
+}
+
 
 // When nobody got the correct answer
 function onNoCorrectAnswers()
@@ -288,8 +412,6 @@ function onNoCorrectAnswers()
 		// Hide the Face Off things
 		mydoc.hideContent(".face_off_element");
 	}
-
-
 }
 
 // Try another question
@@ -350,7 +472,7 @@ function onLoadAnswers(checklist_id)
 		} 
 		catch(error) 
 		{
-			Logger.log(error);
+			Logger.log(error, true);
 			if(BOARD_VIEW)
 			{
 				tryAnotherQuestion();
@@ -453,13 +575,11 @@ function onWrongAnswer()
 // Undo a wrong answer set
 function undoWrongAnswer()
 {
-	console.log("Undo wrong answer");
-	console.log(CURR_WRONG);
+	Logger.log("Undo wrong answer");
 	if(CURR_WRONG > 0)
 	{
 		CURR_WRONG-=1;
 	}
-	console.log(CURR_WRONG);
 
 	let img = "";
 
@@ -543,33 +663,6 @@ function onRevealAnswer(value)
 	}
 }
 
-function checkToAssignScore(isCorrect)
-{
-
-	let hidden_cells = document.querySelectorAll("p.circled_number");
-
-	Logger.log("IN_PLAY: " + IN_PLAY);
-	Logger.log("IS_STEAL: " + IS_STEAL);
-	Logger.log("isCorrect: " + isCorrect);
-	Logger.log("Hidden Cells: " + hidden_cells.length);
-
-	let assigne_to_team = "";
-	let delay = 2000;  // delay for 3 seconds
-
-	if(!IN_PLAY && IS_STEAL && isCorrect)
-	{
-		let opposite_team = (TEAM_IN_PLAY == "one") ? "two" : "one";
-		setTimeout(function(){onAssignScore(opposite_team)}, delay);
-	}
-	else if(IN_PLAY && hidden_cells.length == 0)
-	{
-		setTimeout(function(){onAssignScore(TEAM_IN_PLAY)}, delay);
-	}
-	else if(!IN_PLAY && CURR_WRONG > 3)
-	{
-		setTimeout(function(){onAssignScore(TEAM_IN_PLAY)}, delay);
-	}
-}
 
 
 /**********************BOARD ACTIONS: SCORING*******************************/
@@ -587,7 +680,7 @@ function onUpdateScore(value){
 }
 
 // Give score to a certain team
-function onAssignScore(team)
+function assignScore(team)
 {
 	// alert("Assigning Team Score");
 	// Make sure no more values are calculated
@@ -613,6 +706,35 @@ function onAssignScore(team)
 		Logger.log(error);
 	}
 }
+
+function checkToAssignScore(isCorrect)
+{
+
+	let hidden_cells = document.querySelectorAll("p.circled_number");
+
+	Logger.log("IN_PLAY: " + IN_PLAY);
+	Logger.log("IS_STEAL: " + IS_STEAL);
+	Logger.log("isCorrect: " + isCorrect);
+	Logger.log("Hidden Cells: " + hidden_cells.length);
+
+	let assigne_to_team = "";
+	let delay = 2000;  // delay for 3 seconds
+
+	if(!IN_PLAY && IS_STEAL && isCorrect)
+	{
+		let opposite_team = (TEAM_IN_PLAY == "one") ? "two" : "one";
+		setTimeout(function(){assignScore(opposite_team)}, delay);
+	}
+	else if(IN_PLAY && hidden_cells.length == 0)
+	{
+		setTimeout(function(){assignScore(TEAM_IN_PLAY)}, delay);
+	}
+	else if(!IN_PLAY && CURR_WRONG > 3)
+	{
+		setTimeout(function(){assignScore(TEAM_IN_PLAY)}, delay);
+	}
+}
+
 
 
 
@@ -662,6 +784,7 @@ function onGetCurrentQuestion()
 // Switch to the next round
 function onNextRound()
 {
+	console.log("Going to Next Round");
 	let nextRoundButton = document.getElementById("next_round_button");
 
 	if(nextRoundButton.disabled){
@@ -709,7 +832,7 @@ function onClearBoard(toBeFixed=false)
 
 		if(BOARD_VIEW || FAST_MONEY_VIEW){
 			// Clear the current card list
-			let action = (toBeFixed) ? "Fix" : "Played";
+			var action = (toBeFixed) ? "Fix" : "CurrentGame"; 
 			MyTrello.clearCurrentCardList(action);
 		}
 
@@ -819,4 +942,41 @@ function resetFaceOff()
 	// Show the Face Off Section again
 	IS_FACEOFF = true;
 	mydoc.showContent(".face_off_element");
+}
+
+
+
+/*****************************HELPER FUNCTIONS*******************************************/
+
+function toggleThemeSong()
+{
+	theme_song = document.getElementById("theme_song_sound");
+	let is_paused = theme_song.paused;
+	if(is_paused)
+	{
+		theme_song.play();
+	}
+	else
+	{
+		theme_song.pause();
+		theme_song.currentTime = 0;
+	}
+}
+
+function toggleGameSettings()
+{
+	// button = document.getElementById("game_settings_button");
+	section = document.getElementById("game_settings_section");
+
+	if (section.classList.contains('hidden'))
+	{
+		// button.classList.remove("hidden");
+		// button.innerText = "Close";
+		section.classList.remove("hidden");
+	}
+	else
+	{
+		// button.innerText = "Game Settings";
+		section.classList.add("hidden");
+	}
 }

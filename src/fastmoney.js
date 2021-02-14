@@ -16,6 +16,14 @@ mydoc.ready(function(){
 
 	let path = location.pathname;
 
+	let query_map = mydoc.get_query_map();
+	
+	let is_admin = (query_map.hasOwnProperty("admin") && query_map["admin"] == 1);
+
+	if(is_admin){ mydoc.showContent("#game_action_buttons .fastmoney_admin"); }
+	else { mydoc.showContent("#game_action_buttons .fastmoney_host"); }
+
+
 	// Set fast money path variable
 	if(path.endsWith("fastmoney") || path.endsWith("fastmoney/")){ 
 		FAST_MONEY_VIEW = true;
@@ -33,8 +41,26 @@ mydoc.ready(function(){
 				document.getElementById("wrong_answer_sound").play();
 			});
 		}
-	};
+	}
+	else 
+	{
+		checkGameListID();
+	}
 });
+
+
+function checkGameListID()
+{
+	let query_map = mydoc.get_query_map();
+	if(query_map.hasOwnProperty("listid"))
+	{
+		MyTrello.curr_game_list_id = query_map["listid"];
+	}
+	else
+	{
+		alert("Game ID not provided. :( ");
+	}
+}
 
 // Adds a listener for keystrokes (on keyup);
 function fastMoneyListenerOnKeyUp()
@@ -71,20 +97,6 @@ function fastMoneyListenerOnKeyUp()
 	});	
 }
 
-function toggleThemeSong()
-{
-	theme_song = document.getElementById("theme_song_sound");
-	let is_paused = theme_song.paused;
-	if(is_paused)
-	{
-		theme_song.play();
-	}
-	else
-	{
-		theme_song.pause();
-		theme_song.currentTime = 0;
-	}
-}
 
 // Sets a flag if this is a TEST RUN
 function checkTestRun()
@@ -221,13 +233,10 @@ function onFastMoneyEditScore(event)
 
 		if(!isNaN(new_score))
 		{
-			
 			playSoundOnRevealScore(new_score);
 			updateFastMoneyScore(-score);
 			updateFastMoneyScore(new_score);
 			ele.innerHTML = new_score;
-
-			
 		}
 		else
 		{
@@ -251,34 +260,114 @@ function onDuplicateAnswer()
 function selectFastMoneyQuestions()
 {
 	// Clear the current list
-	MyTrello.clearCurrentCardList();
-
-	// Disable button
-	document.getElementById("load_fast_money_questions").disabled = true;
+	// MyTrello.clearCurrentCardList();
 
 	// Show loading gif
 	mydoc.showContent("#loading_gif");
-	
-	MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
-		response = JSON.parse(data.responseText);
-		if(response.length >= 5)
-		{
-			// Load 5 questions
-			for(var idx = 0; idx < 5; idx++)
-			{
-				rand_id = Math.floor(Math.random()*response.length);
-				card = response[rand_id];
-				card_id  = card["id"];
-				// Move card to current list
-				MyTrello.moveCard(card_id, "Current");
-			}
 
-			setTimeout(function(){ loadFastMoneyQuestions(); }, 1500);
-		}
-		else
-		{
-			alert("SORRY! Not Enough Cards to Select From. The Admin needs to add more!");
-		}
+	selectQuestions2();
+	
+	// MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
+	// 	response = JSON.parse(data.responseText);
+	// 	if(response.length >= 5)
+	// 	{
+	// 		// Load 5 questions
+	// 		counter = 5;
+	// 		for(var idx = 0; idx < 5; idx++)
+	// 		{
+	// 			rand_id = Math.floor(Math.random()*response.length);
+	// 			card = response[rand_id];
+	// 			card_id  = card["id"];
+
+	// 			// Move card to current list
+	// 			loadCard(card_id, counter);
+	// 			MyTrello.moveCard(card_id, "Current");
+
+	// 			counter--;
+	// 		}
+
+	// 		// Hide the loading gif once done;
+	// 		mydoc.hideContent("#loading_gif");
+	// 		// setTimeout(function(){ loadFastMoneyQuestions(); }, 1500);
+	// 	}
+	// 	else
+	// 	{
+	// 		alert("SORRY! Not Enough Cards to Select From. The Admin needs to add more!");
+	// 	}
+	// });
+}
+
+function selectQuestions2(idx=0)
+{
+	console.log(idx);
+	if(idx == 5)
+	{
+		return loadQuestionsForHost();
+	}
+	else
+	{
+		MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
+
+			console.log(data)
+
+			response = JSON.parse(data.responseText);
+
+			rand_id = Math.floor(Math.random()*response.length);
+			card = response[rand_id];
+			console.log(card);
+			card_id  = card["id"];
+			MyTrello.moveCard(card_id, "Current");
+
+			selectQuestions2(idx+1);
+		});
+	}
+}
+
+function loadQuestionsForHost()
+{
+	mydoc.hideContent("#loading_gif");
+
+	setTimeout(function(){
+		MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
+
+			console.log("Loading Questions");
+
+			response = JSON.parse(data.responseText);
+			if(response.length >= 5)
+			{
+				for(var idx = 0; idx < 5; idx++)
+				{
+					card = response[idx];
+					card_id = card["id"];
+					loadCard(card_id, idx+1);
+				}
+			}
+		});
+	}, 2000)
+	
+}
+
+function loadCard(card_id, idx)
+{
+	MyTrello.get_single_card(card_id, function(data){
+
+		response = JSON.parse(data.responseText);
+
+		question = response["name"];
+		answers = response["checklists"][0].checkItems;
+		answers = answers.sort(function(a,b){
+			return a.pos - b.pos;
+		});
+		
+		let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
+		quest_ele.innerText = question;
+
+		let answers_ele = document.querySelector(`#fast_money_question_${idx} ul`);
+		answers.forEach(function(obj){
+			answers_ele.innerHTML += `<li>${obj["name"]}</li>`
+		});
+
+
 	});
 }
 
@@ -320,8 +409,7 @@ function loadFastMoneyQuestions()
 			}
 		});
 		
-		// Hide the loading gif once done;
-		mydoc.hideContent("#loading_gif");
+		
 	});
 }
 
@@ -504,5 +592,21 @@ function toggleFastMoneyAnswers(action)
 		document.getElementById("hide_player_one").classList.remove("hidden");
 		document.getElementById("show_player_one").classList.add("hidden");
 
+	}
+}
+
+
+function toggleThemeSong()
+{
+	theme_song = document.getElementById("theme_song_sound");
+	let is_paused = theme_song.paused;
+	if(is_paused)
+	{
+		theme_song.play();
+	}
+	else
+	{
+		theme_song.pause();
+		theme_song.currentTime = 0;
 	}
 }

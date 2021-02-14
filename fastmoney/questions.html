@@ -3,23 +3,21 @@
 <html>
 <head>
 	<title>Family Feud - Host</title>
-
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
 </head>
 <body>
 	<div id="menu">
-		<h1 id="game_name">Family Feud</h1>
-	</div>
-	<hr>
+		<h1 id="game_name">Family Feud<br/>Fast Money Questions</h1>
 
-	<div class="centered">
-		<h2>Fast Money - Questions<br/>(Admin)</h2>
-		
+	</div>
+	<div class="centered">		
 		<div id="game_action_buttons">
-			<button id="load_fast_money_questions" onclick="selectFastMoneyQuestions()" class="button_mash">
+			<button onclick="selectFastMoneyQuestions()" class="button_mash hidden fastmoney_admin">
 				LOAD QUESTIONS
-			</button><br/><br/>
-			
+			</button>
+			<button onclick="loadQuestionsForHost()" class="button_mash hidden fastmoney_host">
+				REFRESH
+			</button>	
 			<img id="loading_gif" class="hidden" src="../assets/img/loading1.gif">
 		</div>
 
