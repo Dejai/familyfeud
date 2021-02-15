@@ -4,23 +4,30 @@
 <head>
 	<title>Family Feud - Host</title>
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
 	<div id="menu">
-		<h1 id="game_name">Family Feud<br/>Fast Money Questions</h1>
-
+		<h1 id="game_name">Family Feud &mdash; Fast Money</h1>
+		<a href="../"></a>
+		<a id="back_to_host" href="../host/" class="back_button_link hidden">
+      		<button class="fa fa-caret-square-o-left">&nbsp;Back</button>
+      	</a>
+      	<a id="back_to_admin" href="../admin/" class="back_button_link hidden">
+      		<button class="fa fa-caret-square-o-left">&nbsp;Back</button>
+      	</a>
+	</div>
+	<hr style="clear:both;"/>
+	<div id="game_action_buttons" class="centered center_section_50">
+		<button onclick="selectFastMoneyQuestions()" class="button_mash hidden fastmoney_admin">
+			LOAD QUESTIONS
+		</button>
+		<button onclick="loadQuestionsForHost()" class="button_mash hidden fastmoney_host">
+			REFRESH
+		</button>	
+		<img id="loading_gif" class="hidden" src="../assets/img/loading1.gif">
 	</div>
 	<div class="centered">		
-		<div id="game_action_buttons">
-			<button onclick="selectFastMoneyQuestions()" class="button_mash hidden fastmoney_admin">
-				LOAD QUESTIONS
-			</button>
-			<button onclick="loadQuestionsForHost()" class="button_mash hidden fastmoney_host">
-				REFRESH
-			</button>	
-			<img id="loading_gif" class="hidden" src="../assets/img/loading1.gif">
-		</div>
-
 		<div id="fast_money_question_1" class="question_section leftaligned">
 			<h3>Question #1</h3>
 			<h4 class="question"></h4>

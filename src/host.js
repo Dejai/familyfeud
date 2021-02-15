@@ -39,6 +39,10 @@ function indicateTestRun()
 	links.forEach(function(obj){
 		obj.href += location.search;
 	});
+
+	MyTrello.setCurrentGameListID(MyTrello.test_list_id);
+	setGameCode("TEST");
+	setGameListId(MyTrello.test_list_id);
 }
 
 /***************************** LISTENERS**********************************/
@@ -62,13 +66,15 @@ function onEnterGame()
 		{
 			var obj = response[idx];
 			let list_name = obj["name"].toUpperCase();
-			let card_id = obj["id"];
+			let list_id = obj["id"];
 
 			if(list_name == entered_code)
 			{
 				game_found = true;
 				CURR_GAME_CODE = list_name;
-				MyTrello.setCurrentGameListID(card_id);
+				MyTrello.setCurrentGameListID(list_id);
+				setGameListId(list_id);
+				setGameCode(list_name);
 				showHostSection();
 				break;
 			}
@@ -140,6 +146,22 @@ function showHostSection()
 
 
 /*****************************CLEAR/RESET*******************************************/
+function setGameCode(value)
+{
+	CURR_GAME_CODE = value;
+	document.getElementById("game_code").innerText = CURR_GAME_CODE;
+}
+
+function setGameListId(listID)
+{
+	CURR_GAME_LIST_ID = listID
+	let links = Array.from(document.querySelectorAll(".pass_through_params"));
+	console.log(links);
+	links.forEach(function(obj){
+		let query = (obj.href.includes("?")) ? `&listid=${listID}` : `?listid=${listID}`;
+		obj.href += query;
+	});	
+}
 
 
 function setQuestion(value)

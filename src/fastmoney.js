@@ -1,3 +1,4 @@
+/*****************************FAST MONEY VARIABLES **********************************/
 
 // Fast Money variables
 var FAST_MONEY_SCORE = 0;
@@ -11,6 +12,9 @@ var CURRENT_PLAYER = "one";
 var active_element = undefined;
 var blinking_interval = undefined;
 
+
+/***************************** GETTING STARTED **********************************/
+
 // Once doc is ready
 mydoc.ready(function(){
 
@@ -20,8 +24,15 @@ mydoc.ready(function(){
 	
 	let is_admin = (query_map.hasOwnProperty("admin") && query_map["admin"] == 1);
 
-	if(is_admin){ mydoc.showContent("#game_action_buttons .fastmoney_admin"); }
-	else { mydoc.showContent("#game_action_buttons .fastmoney_host"); }
+	if(is_admin){ 
+		mydoc.showContent("#back_to_admin"); 
+		mydoc.showContent("#game_action_buttons .fastmoney_admin"); 
+	}
+	else 
+	{ 
+		mydoc.showContent("#back_to_host"); 
+		mydoc.showContent("#game_action_buttons .fastmoney_host"); 
+	}
 
 
 	// Set fast money path variable
@@ -327,23 +338,23 @@ function loadQuestionsForHost()
 {
 	mydoc.hideContent("#loading_gif");
 
-	setTimeout(function(){
-		MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
+	// setTimeout(function(){
+	MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
 
-			console.log("Loading Questions");
+		console.log("Loading Questions");
 
-			response = JSON.parse(data.responseText);
-			if(response.length >= 5)
+		response = JSON.parse(data.responseText);
+		if(response.length >= 5)
+		{
+			for(var idx = 0; idx < 5; idx++)
 			{
-				for(var idx = 0; idx < 5; idx++)
-				{
-					card = response[idx];
-					card_id = card["id"];
-					loadCard(card_id, idx+1);
-				}
+				card = response[idx];
+				card_id = card["id"];
+				loadCard(card_id, idx+1);
 			}
-		});
-	}, 2000)
+		}
+	});
+	// }, 2000)
 	
 }
 
@@ -490,6 +501,14 @@ function indicateFastMoneyPlayer(element)
 	element.classList.add("fastmoney_curr_player");
 }
 
+
+function playSoundOnRevealScore(score)
+{
+	// Play the sounds for answer
+	if(score > 0){ document.getElementById("fast_money_points").play(); }
+	if(score == 0){ document.getElementById("fast_money_zero").play(); }
+}
+
 // Listeners for fast money
 function setCurrentPlayer(event, player)
 {
@@ -556,13 +575,6 @@ function updateFastMoneyScore(value)
 	document.getElementById("fast_money_total_score").innerText = FAST_MONEY_SCORE;
 }
 
-function playSoundOnRevealScore(score)
-{
-	// Play the sounds for answer
-	if(score > 0){ document.getElementById("fast_money_points").play(); }
-	if(score == 0){ document.getElementById("fast_money_zero").play(); }
-}
-
 // Toggle answers in batch
 function toggleFastMoneyAnswers(action)
 {
@@ -594,7 +606,6 @@ function toggleFastMoneyAnswers(action)
 
 	}
 }
-
 
 function toggleThemeSong()
 {

@@ -26,19 +26,23 @@ function checkTestRun()
 
 	if(IS_TEST_RUN)
 	{
-		mydoc.addTestBanner();
-
-		// Setup the element to be passed through to the next page;
-		let links = Array.from(document.querySelectorAll(".pass_through_params"));
-		links.forEach(function(obj){
-			obj.href += location.search;
-		});
-
+		indicateTestRun();
 
 		MyTrello.setCurrentGameListID(MyTrello.test_list_id);
 		setGameCode("TEST");
 		showAdminSection();
 	}
+}
+
+function indicateTestRun()
+{
+	mydoc.addTestBanner();
+
+	// Setup the element to be passed through to the next page;
+	let links = Array.from(document.querySelectorAll(".pass_through_params"));
+	links.forEach(function(obj){
+		obj.href += location.search;
+	});
 }
 
 /***************************** LISTENERS**********************************/
@@ -71,30 +75,37 @@ function onCreateGame()
 	});
 }
 
-function onExistingGame()
+
+function onEnterGame()
 {
 
-	let entered_code = prompt("What is the Existing Game Code?");
+	var ele = document.querySelector("#game_code_section input");
+	let entered_code = ele.value.toUpperCase();
+
+	if(entered_code == "TEST")
+	{
+		indicateTestRun();
+	}
 
 	MyTrello.get_lists(function(data){
 		response = JSON.parse(data.responseText);
 
 		var game_found;
-
 		for(var idx = 0; idx < response.length; idx++)
 		{
 			var obj = response[idx];
-			let list_name = obj["name"];
+			let list_name = obj["name"].toUpperCase();
 			let list_id = obj["id"];
-			if(list_name.toUpperCase() == entered_code.toUpperCase())
+
+			if(list_name == entered_code)
 			{
 				game_found = true;
-				CURR_GAME_CODE = list_name.toUpperCase();
+				CURR_GAME_CODE = list_name;
 				MyTrello.setCurrentGameListID(list_id);
 				setGameListId(list_id);
-
 				setGameCode(list_name);
 				showAdminSection();
+
 				break;
 			}
 		}
@@ -103,6 +114,44 @@ function onExistingGame()
 			alert("Game Not Found with Given Game Code!");
 		}
 	});
+}
+
+function onExistingGame()
+{
+
+	mydoc.hideContent("#create_game_section");
+	mydoc.showContent("#game_code_section");
+
+
+	// let entered_code = prompt("What is the Existing Game Code?");
+
+	// MyTrello.get_lists(function(data){
+	// 	response = JSON.parse(data.responseText);
+
+	// 	var game_found;
+
+	// 	for(var idx = 0; idx < response.length; idx++)
+	// 	{
+	// 		var obj = response[idx];
+	// 		let list_name = obj["name"];
+	// 		let list_id = obj["id"];
+	// 		if(list_name.toUpperCase() == entered_code.toUpperCase())
+	// 		{
+	// 			game_found = true;
+	// 			CURR_GAME_CODE = list_name.toUpperCase();
+	// 			MyTrello.setCurrentGameListID(list_id);
+	// 			setGameListId(list_id);
+
+	// 			setGameCode(list_name);
+	// 			showAdminSection();
+	// 			break;
+	// 		}
+	// 	}
+	// 	if(!game_found)
+	// 	{
+	// 		alert("Game Not Found with Given Game Code!");
+	// 	}
+	// });
 }
 
 // Get the card that is currently selected
@@ -200,6 +249,7 @@ function loadAdminAnswers(checklist)
 function showAdminSection()
 {
 	mydoc.hideContent("#create_game_section");
+	mydoc.hideContent("#game_code_section");
 	mydoc.showContent("#admin_game_section");
 }
 

@@ -7,10 +7,9 @@
 </head>
 <body>
 	<div id="menu">
-		<h1 id="game_name">Family Feud<br/>
-			Admin View
+		<h1 id="game_name">Family Feud &mdash; Admin View
 		<p style="font-size:75%;">
-			<span>Game Code: </span><br/>
+			<span>Game Code: </span>
 			<span id="game_code" class="emphasis_orange"></span></h1>	
 		</p>
 	</div>
@@ -19,6 +18,11 @@
 		<button class="button_mash" onclick="onCreateGame()">New Game</button>
 		<br/><br/>
 		<button class="button_mash" onclick="onExistingGame()">Existing Game</button>
+	</div>
+	<div id="game_code_section" class="center_section_50 centered hidden">
+		<input type="text" name="game_code" class="input_mash input_large centered" placeholder="Enter Game Code">
+		<br/>
+		<button class="button_mash" onclick="onEnterGame()">Enter</button>
 	</div>
 	<div id="admin_game_section" class="centered hidden">
 		<div id="game_action_buttons2">
