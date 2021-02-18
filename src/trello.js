@@ -15,6 +15,7 @@ const MyTrello = {
 	to_be_fixed_list_id: "5fe77933034d92360d6a3af3",
 	pool_list_id: "5fe22904a09947446a263ccc",
 	fast_money_pool_list_id: "5fede51f5c34c27bba689873",
+	
 	current_card_list_id: "5fe2290943c8477eac558482",
 	played_list_id: "5fe2290b8b5e07528c4ffda7",
 	list_id: "5fe22904a09947446a263ccc",
@@ -147,21 +148,6 @@ const MyTrello = {
 			}
 		});
 	},
-
-	// Clear the current list if it ever has anything in it
-	clearCurrentCardList: function(action="CurrentGame"){
-
-		MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
-			response = JSON.parse(data.responseText);
-			if(response.length > 0)
-			{
-				response.forEach(function(obj){
-					MyTrello.moveCard(obj["id"], action); 
-				});
-			}
-		});
-	},
-
 
 	/**** API Call Wrappers ***/
 

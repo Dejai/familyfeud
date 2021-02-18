@@ -67,11 +67,10 @@ const Helper = {
 	getDate: function(){
 		let dd = new Date();
 		let year = dd.getFullYear().toString();
-		let monthIdx = dd.getDay()+1;
+		let monthIdx = dd.getDay();
 		let month = (monthIdx<9) ? "0"+monthIdx : monthIdx;
 		let dayIdx = dd.getDate();
 		let day = (dayIdx < 9 ) ? "0"+dayIdx : dayIdx;
-		let date_code = [year,month,day].join("-");
 
 		var myDateObj = { "year":year, "month":month, "day":day };
 		return myDateObj;
@@ -119,6 +118,17 @@ const mydoc = {
 	removeClass: function(selector, className){
 		console.log(selector + " " + className);
 		this._toggleClass(selector, "remove", className);
+	},
+
+	setPassThroughParameters: function(className, key, value){
+		let param = `${key}=${value}`;
+
+		// Get all the elements to set the pass-through href;
+		let links = Array.from(document.querySelectorAll(className));
+		links.forEach(function(obj){
+			let sep = (!obj.href.includes("?")) ? "?" : "&";
+			obj.href += `${sep}${param}`;
+		});
 	},
 
 	isValidValue : function(value)

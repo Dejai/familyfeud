@@ -22,17 +22,12 @@ mydoc.ready(function(){
 
 	let query_map = mydoc.get_query_map();
 	
-	let is_admin = (query_map.hasOwnProperty("admin") && query_map["admin"] == 1);
+	
+	// Check if admin
+	checkAdmin(query_map)
 
-	if(is_admin){ 
-		mydoc.showContent("#back_to_admin"); 
-		mydoc.showContent("#game_action_buttons .fastmoney_admin"); 
-	}
-	else 
-	{ 
-		mydoc.showContent("#back_to_host"); 
-		mydoc.showContent("#game_action_buttons .fastmoney_host"); 
-	}
+	// Check for the game code
+	checkGameCode();
 
 
 	// Set fast money path variable
@@ -59,7 +54,40 @@ mydoc.ready(function(){
 	}
 });
 
+// Check if admin or host
+function checkAdmin(query_map)
+{
+	let is_admin = (query_map.hasOwnProperty("admin") && query_map["admin"] == 1);
 
+	if(is_admin)
+	{ 
+		mydoc.showContent("#back_to_admin"); 
+		mydoc.showContent("#game_action_buttons .fastmoney_admin"); 
+		mydoc.showContent(".fastmoney_answers");
+	}
+	else 
+	{ 
+		mydoc.showContent("#back_to_host"); 
+		mydoc.showContent("#game_action_buttons .fastmoney_host"); 
+		mydoc.showContent(".fastmoney_reveal_answers");
+	}
+}
+
+// Check the query param for game code
+function checkGameCode()
+{
+	let query_map = mydoc.get_query_map();
+	if(query_map.hasOwnProperty("gamecode"))
+	{
+		setGameCode(query_map["gamecode"]);
+	}
+	else
+	{
+		alert("Game Code not provided. :( ");
+	}
+}
+
+// Checks if the game list ID is set
 function checkGameListID()
 {
 	let query_map = mydoc.get_query_map();
@@ -70,6 +98,24 @@ function checkGameListID()
 	else
 	{
 		alert("Game ID not provided. :( ");
+	}
+}
+
+// Sets a flag if this is a TEST RUN
+function checkTestRun()
+{
+	let queryMap = mydoc.get_query_map();
+	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
+
+	if(IS_TEST_RUN)
+	{
+		mydoc.addTestBanner();
+
+		// Setup the element to be passed through to the next page;
+		let links = Array.from(document.querySelectorAll(".pass_through_params"));
+		links.forEach(function(obj){
+			obj.href += location.search;
+		});
 	}
 }
 
@@ -106,25 +152,6 @@ function fastMoneyListenerOnKeyUp()
 				return;
 		}
 	});	
-}
-
-
-// Sets a flag if this is a TEST RUN
-function checkTestRun()
-{
-	let queryMap = mydoc.get_query_map();
-	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
-
-	if(IS_TEST_RUN)
-	{
-		mydoc.addTestBanner();
-
-		// Setup the element to be passed through to the next page;
-		let links = Array.from(document.querySelectorAll(".pass_through_params"));
-		links.forEach(function(obj){
-			obj.href += location.search;
-		});
-	}
 }
 
 /*****************************FAST MONEY LISTENERS**********************************/
@@ -268,55 +295,21 @@ function onDuplicateAnswer()
 /***************************** LOADING QUESTIONS / ANSWERS **********************************/
 
 // Select fast money questions
-function selectFastMoneyQuestions()
-{
-	// Clear the current list
-	// MyTrello.clearCurrentCardList();
-
-	// Show loading gif
-	mydoc.showContent("#loading_gif");
-
-	selectQuestions2();
-	
-	// MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
-	// 	response = JSON.parse(data.responseText);
-	// 	if(response.length >= 5)
-	// 	{
-	// 		// Load 5 questions
-	// 		counter = 5;
-	// 		for(var idx = 0; idx < 5; idx++)
-	// 		{
-	// 			rand_id = Math.floor(Math.random()*response.length);
-	// 			card = response[rand_id];
-	// 			card_id  = card["id"];
-
-	// 			// Move card to current list
-	// 			loadCard(card_id, counter);
-	// 			MyTrello.moveCard(card_id, "Current");
-
-	// 			counter--;
-	// 		}
-
-	// 		// Hide the loading gif once done;
-	// 		mydoc.hideContent("#loading_gif");
-	// 		// setTimeout(function(){ loadFastMoneyQuestions(); }, 1500);
-	// 	}
-	// 	else
-	// 	{
-	// 		alert("SORRY! Not Enough Cards to Select From. The Admin needs to add more!");
-	// 	}
-	// });
-}
-
-function selectQuestions2(idx=0)
+function selectFastMoneyQuestions(idx=0)
 {
 	console.log(idx);
 	if(idx == 5)
 	{
-		return loadQuestionsForHost();
+		setTimeout(function(){
+			loadFastMoneyQuestions()
+			mydoc.hideContent("#loading_gif");
+			return;
+		}, 2000);
 	}
 	else
 	{
+		mydoc.showContent("#loading_gif");
+
 		MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
 
 			console.log(data)
@@ -329,16 +322,16 @@ function selectQuestions2(idx=0)
 			card_id  = card["id"];
 			MyTrello.moveCard(card_id, "Current");
 
-			selectQuestions2(idx+1);
+			selectFastMoneyQuestions(idx+1);
 		});
 	}
 }
 
-function loadQuestionsForHost()
+function loadFastMoneyQuestions()
 {
-	mydoc.hideContent("#loading_gif");
+	// Clear the current list first (if any)
+	clearFastMoneyQuestions();
 
-	// setTimeout(function(){
 	MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
 
 		console.log("Loading Questions");
@@ -352,10 +345,10 @@ function loadQuestionsForHost()
 				card_id = card["id"];
 				loadCard(card_id, idx+1);
 			}
+			// Hide the loading gif
+			mydoc.hideContent("#loading_gif");
 		}
 	});
-	// }, 2000)
-	
 }
 
 function loadCard(card_id, idx)
@@ -373,7 +366,7 @@ function loadCard(card_id, idx)
 		let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
 		quest_ele.innerText = question;
 
-		let answers_ele = document.querySelector(`#fast_money_question_${idx} ul`);
+		let answers_ele = document.querySelector(`#fast_money_question_${idx} ul.fastmoney_answers`);
 		answers.forEach(function(obj){
 			answers_ele.innerHTML += `<li>${obj["name"]}</li>`
 		});
@@ -382,65 +375,13 @@ function loadCard(card_id, idx)
 	});
 }
 
-// Load the questions (make sure they are sorted)
-function loadFastMoneyQuestions()
+function onShowAnswersForHost(event)
 {
-	// Clear the question on the board;
-	clearFastMoneyQuestions();
+	var ele = event.target;
+	console.log(ele);
+	sibling = ele.nextElementSibling;
+	sibling.classList.remove("hidden");
 
-	MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
-		response = JSON.parse(data.responseText);
-
-		let idx = 1;
-
-		console.log(response);
-
-		response = response.sort(function(a,b){
-			return a.pos - b.pos;
-		});
-		console.log(response);
-
-		response.forEach(function(card){
-
-			console.log(card["pos"]);
-
-			let isFastMoneyCard = card["idLabels"].includes(MyTrello.label_fast_money);
-
-			if(isFastMoneyCard)
-			{
-				let question = card["name"];
-				let checklist_id = card["idChecklists"][0];
-
-				let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
-				quest_ele.innerText = question;
-
-				loadFastMoneyAnswers(checklist_id, idx);
-
-				idx++; //increment counter;
-			}
-		});
-		
-		
-	});
-}
-
-// Load the fast money checklist answers based on given checklist ID
-function loadFastMoneyAnswers(checklist_id, idx)
-{
-	MyTrello.get_checklist(checklist_id,function(data){
-		response = JSON.parse(data.responseText);
-		checklist_items = response["checkItems"];
-
-		checklist_items = checklist_items.sort(function(a,b){
-			return a.pos - b.pos;
-		});
-		
-		let answers_ele = document.querySelector(`#fast_money_question_${idx} ul`);
-
-		checklist_items.forEach(function(obj){
-			answers_ele.innerHTML += `<li>${obj["name"]}</li>`
-		})
-	});
 }
 
 /***************************** HELPER FUNCTIONS **********************************/
@@ -554,6 +495,12 @@ function setTimeForFastMoneyPlayer(player)
 	mydoc.showContent("#time_view");
 }
 
+function setGameCode(value)
+{
+	CURR_GAME_CODE = value.toUpperCase();
+	document.getElementById("game_code").innerText = CURR_GAME_CODE;
+}
+
 function toggleFastMoneyTimer(forceStop=false)
 {
 	if(Timer.countdown_timer == undefined)
@@ -568,12 +515,6 @@ function toggleFastMoneyTimer(forceStop=false)
 	}
 }
 
-// Update the fast money total score
-function updateFastMoneyScore(value)
-{
-	FAST_MONEY_SCORE += Number(value);
-	document.getElementById("fast_money_total_score").innerText = FAST_MONEY_SCORE;
-}
 
 // Toggle answers in batch
 function toggleFastMoneyAnswers(action)
@@ -620,4 +561,11 @@ function toggleThemeSong()
 		theme_song.pause();
 		theme_song.currentTime = 0;
 	}
+}
+
+// Update the fast money total score
+function updateFastMoneyScore(value)
+{
+	FAST_MONEY_SCORE += Number(value);
+	document.getElementById("fast_money_total_score").innerText = FAST_MONEY_SCORE;
 }

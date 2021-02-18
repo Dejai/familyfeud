@@ -3,27 +3,18 @@
 
 // Game started?
 var GAME_STARTED = false; 
-var CURR_GAME_NUMBER = 0;
 var CURR_GAME_CODE = undefined;
-var CURR_GAME_LIST = "";
-
-// Check determine which views the game is in
-var ADMIN_VIEW = false;
-var BOARD_VIEW = false;
-var FAST_MONEY_VIEW = false;
 
 // Is this a a TEST run of the game
 var IS_TEST_RUN = false;
-
-// Storing the values of the current card
-var CURR_CARD  = "";
-var CURR_QUEST = "";
 
 // Game Board variables
 var CURR_ROUND = 0;
 var CURR_MULTIPLIER = 1;
 var CURR_SCORE = 0;
 var CURR_WRONG = 0;
+
+// Flags to indicate game state
 var IS_STEAL = false;
 var IN_PLAY = false;
 var IS_FACEOFF = false;
@@ -36,17 +27,9 @@ mydoc.ready(function(){
 
 	let path = location.pathname;
 
-	// Set admin path variable if on admin path
-	if(path.includes("/admin")){ 
-		ADMIN_VIEW = true; 
-	}
-
 	// Adds listener for game board
 	if(path.includes("/board"))
 	{ 
-
-		BOARD_VIEW = true;
-
 		checkTestRun();
 
 		window.addEventListener("beforeunload", onClosePage);
@@ -59,7 +42,72 @@ mydoc.ready(function(){
 	}
 });
 
+// Sets a flag if this is a TEST RUN
+function checkTestRun()
+{
+	let queryMap = mydoc.get_query_map();
+	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
 
+	if(IS_TEST_RUN)
+	{
+		mydoc.addTestBanner();
+		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
+	}
+}
+
+// Start the game
+function onStartGame()
+{
+	IS_FACEOFF = true;
+	
+	// Hide elements
+	mydoc.hideContent("#startGameButton");
+	mydoc.hideContent(".pregame_action_buttons");
+
+	// Show elements
+	mydoc.showContent("#game_code_section");	
+}
+
+function onEnterGame()
+{
+	GAME_STARTED = true;
+	
+	var ele = document.querySelector("#game_code_section input");
+	let entered_code = ele.value.toUpperCase();
+
+	if(entered_code == "TEST")
+	{
+		IS_TEST_RUN = true;
+		mydoc.addTestBanner();
+		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");	
+	}
+
+	MyTrello.get_lists(function(data){
+	response = JSON.parse(data.responseText);
+
+		var game_found = false;
+		for(var idx = 0; idx < response.length; idx++)
+		{
+			var obj = response[idx];
+			let list_name = obj["name"].toUpperCase();
+			let list_id = obj["id"];
+
+			if(list_name == entered_code)
+			{
+				game_found = true;
+				setGameCode(list_name);
+				MyTrello.setCurrentGameListID(list_id);
+				mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);
+				showGameBoard();
+				break;
+			}	
+		}
+		if(!game_found)
+		{
+			alert("Could Not Find Game With Given Code!");
+		}
+	});
+}
 
 /*****************************GENERAL LISTENERS**********************************/
 // Prevent the page accidentally closing
@@ -70,8 +118,8 @@ function onClosePage(event)
 }
 
 // Adds a listener for keystrokes (on keyup);
-function gameBoardListenerOnKeyUp(){
-
+function gameBoardListenerOnKeyUp()
+{
 	document.addEventListener("keyup", function(event){
 		// console.log(event);
 		switch(event.code)
@@ -128,91 +176,9 @@ function gameBoardListenerOnKeyUp(){
 	});	
 }
 
+/**************************** BOARD ACTIONS: QUESTIONS****************************************/
 
-
-/****************************BOARD ACTIONS: QUESTIONS****************************************/
-
-
-// Sets a flag if this is a TEST RUN
-function checkTestRun()
-{
-	let queryMap = mydoc.get_query_map();
-	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
-
-	if(IS_TEST_RUN)
-	{
-		mydoc.addTestBanner();
-
-		// Setup the element to be passed through to the next page;
-		let links = Array.from(document.querySelectorAll(".pass_through_params"));
-		links.forEach(function(obj){
-			obj.href += location.search;
-		});
-
-		// Enter the game as a test;
-		onEnterGame(true);
-	}
-}
-
-// Start the game
-function onStartGame()
-{
-	IS_FACEOFF = true;
-
-	// Add 1 to whatever the current game number is;
-	CURR_GAME_NUMBER += 1;
-	
-	// Hide elements
-	mydoc.hideContent("#startGameButton");
-	mydoc.hideContent(".pregame_action_buttons");
-
-	// Show elements
-	mydoc.showContent("#game_code_section");	
-}
-
-function onEnterGame(isTest=false)
-{
-	GAME_STARTED = true;
-	
-	if(isTest)
-	{
-		CURR_GAME_CODE = "TEST";
-		MyTrello.setCurrentGameListID(MyTrello.test_list_id);
-		showGameBoard();
-	}
-	else
-	{
-		var ele = document.querySelector("#game_code_section input");
-		let entered_code = ele.value.toUpperCase();
-
-		if(entered_code == "TEST")
-		{
-			let query = (location.search == "") ? "?test=1" : "&test=1";
-			let redirect = location.href + query;
-			location.replace(redirect);
-		}
-
-		MyTrello.get_lists(function(data){
-			response = JSON.parse(data.responseText);
-
-			for(var idx = 0; idx < response.length; idx++)
-			{
-				var obj = response[idx];
-				let list_name = obj["name"].toUpperCase();
-				let card_id = obj["id"];
-
-				if(list_name == entered_code)
-				{
-					CURR_GAME_CODE = list_name;
-					MyTrello.setCurrentGameListID(card_id);
-					showGameBoard();
-					break;
-				}
-			}
-		});
-	}	
-}
-
+// Show the game board
 function showGameBoard()
 {
 	// Hide things
@@ -231,6 +197,15 @@ function showGameBoard()
 	onNextRound();
 }
 
+// Reveal the game table
+function showGameTable()
+{
+	// Hide the GIF and show the table
+	mydoc.hideContent("#loading_gif");
+	mydoc.showContent("#game_table");
+}
+
+// End the game - thus archiving the list
 function onEndGame()
 {
 	let isEndGame = confirm("Are you sure you want to end the game?");
@@ -264,13 +239,21 @@ function onEndGame()
 			}
 			else
 			{
-				MyTrello.update_list_name_and_close(MyTrello.curr_game_list_id, function(data){
+				let dateObj = Helper.getDate();
+				let dateCode = `${dateObj["year"]}-${dateObj["month"]}-${dateObj["day"]}`;
+				let new_name = `${dateCode}__${CURR_GAME_CODE}`;
+				MyTrello.update_list_name_and_close(MyTrello.curr_game_list_id, new_name, function(data){
 					console.log("Game Archived");
 				});
 			}
 			
 			// Reset Round;
 			CURR_ROUND = 0;
+
+			// Reset Game Code
+			document.getElementById("game_code").innerText = "";
+			mydoc.hideContent("#game_code_label_section");
+			document.querySelector("#game_code_section input").value = "";
 
 			// Reset Team SCore
 			document.getElementById("team_one_score").innerText = "0";
@@ -306,6 +289,8 @@ function onFaceOff()
 	window.open(path, "_blank", `toolbar=yes,scrollbars=yes,resizable=yes,top=10,left=100,width=${width},height=${height}`);
 }
 
+/**************************** BOARD ACTIONS: LOADING QUESTIONS****************************************/
+
 // Select random question from pool
 function onSelectQuestion()
 {
@@ -321,7 +306,7 @@ function onSelectQuestion()
 
 			MyTrello.moveCard(card_id, "Current");
 
-			getSelectedQuestion(card_id);
+			loadCard(card_id);
 		}
 		else
 		{
@@ -330,19 +315,18 @@ function onSelectQuestion()
 	});
 }
 
-function getSelectedQuestion(card_id)
+// Load the specific card id;
+function loadCard(card_id)
 {
 	MyTrello.get_single_card(card_id, function(data){		
 		response = JSON.parse(data.responseText);
-
-		CURR_CARD = response["id"];
-		CURR_QUEST = response["name"];
 		checklist = response["checklists"][0].checkItems;
-		loadBoardAnswers(checklist);
+		loadAnswers(checklist);
 	});	
 }
 
-function loadBoardAnswers(checklist)
+// Load the checklist answers from the card
+function loadAnswers(checklist)
 {
 	try
 	{
@@ -370,47 +354,12 @@ function loadBoardAnswers(checklist)
 		});
 
 		// Show the board once succesfully loaded
-		showBoard();
+		showGameTable();
 	} 
 	catch(error) 
 	{
 		Logger.log(error, true);
-		if(BOARD_VIEW)
-		{
-			tryAnotherQuestion();
-		}
-	}
-}
-
-
-function showBoard()
-{
-	// Hide the GIF and show the table
-	mydoc.hideContent("#loading_gif");
-	mydoc.showContent("#game_table");
-}
-
-
-// When nobody got the correct answer
-function onNoCorrectAnswers()
-{
-
-	let noCorrectAnswers = confirm("CONFIRM: No Correct Answers Were Given?");
-
-	if(noCorrectAnswers)
-	{
-		// Set pseudo IN PLAY
-		TEAM_IN_PLAY = "NOBODY!";
-		
-		// Make sure the points do not get added
-		IN_PLAY = false;
-		IS_FACEOFF = false;
-
-		// Hide the play buttons
-		mydoc.hideContent(".team_in_play");
-
-		// Hide the Face Off things
-		mydoc.hideContent(".face_off_element");
+		tryAnotherQuestion();
 	}
 }
 
@@ -421,109 +370,6 @@ function tryAnotherQuestion()
 	cleared = onClearBoard(true);
 	if(cleared){
 		onSelectQuestion();
-	}
-}
-
-// Load the answers
-function onLoadAnswers(checklist_id)
-{
-	counter = 0;
-
-	MyTrello.get_checklist(checklist_id,function(data){
-		response = JSON.parse(data.responseText);
-
-		checklist_items = response["checkItems"];
-		card_id = response["idCard"];
-
-		checklist_items = checklist_items.sort(function(a,b){
-			return a.pos - b.pos;
-		});
-
-		try 
-		{
-			checklist_items.forEach(function(obj){
-				counter++;
-				splits = obj["name"].split("~");
-				answer_text = splits[0].trim();
-				answer_count = splits[1].trim();
-				document.querySelector(`#game_cell_${counter} p.answer`).innerText = answer_text;
-				document.querySelector(`#game_cell_count_${counter} p`).innerText = answer_count;
-
-				document.querySelector(`#game_cell_${counter} p.game_cell_number`).classList.remove("hidden");
-				document.querySelector(`#game_cell_${counter} p.game_cell_number`).classList.add("circled_number");
-
-				// If admin view -- load the answers immediately on load;
-				if(ADMIN_VIEW){
-					onRevealAnswer(String(counter));
-				}
-			});
-
-			if(BOARD_VIEW)
-			{
-				// Hide the GIF and show the answers
-				mydoc.hideContent("#loading_gif");
-				mydoc.showContent("#game_table");
-			}
-			
-			// Move the card to the current card; Only if NOT a test run
-			if(!IS_TEST_RUN){
-				MyTrello.moveCard(card_id, "Current");
-			}
-		} 
-		catch(error) 
-		{
-			Logger.log(error, true);
-			if(BOARD_VIEW)
-			{
-				tryAnotherQuestion();
-			}
-		}
-	});
-}
-
-
-// Set which team is in play
-function setTeamInPlay(team)
-{
-	// If team already in play, don't do anything
-	let in_play_already = document.querySelectorAll(".in_play");
-	if(in_play_already.length > 0){ return; }
-
-	// Set IN_PLAY to true and IS_FACEOFF to false
-	IN_PLAY = true; 
-	IS_FACEOFF = false;
-
-	// Set global team in play;
-	TEAM_IN_PLAY = team;
-
-	identifier = `#team_${team} .team_name_box`;
-	team_name = document.querySelector(identifier);
-	team_name.classList.add("in_play");
-
-	// Clear wrong answer count if any
-	clearWrongAnswerCount();
-
-	// Hide the PLAY buttons & Face Off things
-	mydoc.hideContent(".team_in_play"); 
-	mydoc.hideContent(".face_off_element");
-}
-
-// Set the countdown timer
-function toggleCountdownTimer(forceHide=false)
-{
-	let timeView = document.querySelector("#time_view");
-
-	let isHidden = (timeView.classList.contains("hidden")) ? true : false;
-
-	if(isHidden)
-	{
-		timeView.classList.remove("hidden");
-		Timer.startTimer();
-	}
-	if (!isHidden || forceHide)
-	{
-		timeView.classList.add("hidden");
-		Timer.resetTimer();
 	}
 }
 
@@ -572,6 +418,142 @@ function onWrongAnswer()
 	// },1000);
 }
 
+// Reveals an answer
+function onRevealAnswer(value)
+{	
+	let digit = value.replace("Digit","").replace("Numpad","");
+
+	// Make sure admin can no longer use the No Answers optio
+	mydoc.hideContent("#no_correct_answers");
+
+	// The right sound element;
+	let rightSound = document.getElementById("right_answer_sound");
+
+	let number = document.querySelector(`#game_cell_${digit} p.game_cell_number`);
+	let cell = document.querySelector(`#game_cell_${digit} p.answer`);
+	let count = document.querySelector(`#game_cell_count_${digit}`);
+	let count_val = document.querySelector(`#game_cell_count_${digit} p`);
+
+	let revealed = document.querySelectorAll(".answer.revealed");
+	if(revealed.length >=2 && TEAM_IN_PLAY === "")
+	{
+		alert("Cannot reveal another answer until a team is selected to \"Play\"");
+		return;
+	}
+
+	// Criteria for showing a value
+	let is_hidden = Array.from(count_val.classList).includes("hidden");
+	let has_value = (cell.innerText != "" && cell.innerText != undefined);
+
+	if(is_hidden && has_value)
+	{
+		
+		// Play the sound
+		rightSound.play();
+
+		// Stop the timer 
+		toggleCountdownTimer(true);
+
+		// Remove the number from board;
+		number.classList.add("hidden");
+		number.classList.remove("circled_number");
+
+		// Reveal the content
+		cell.classList.remove("hidden");
+		cell.classList.add("revealed");
+		count_val.classList.remove("hidden");
+		count.classList.remove("unseen");
+
+		// Update score and check to assign 
+		onUpdateScore(count_val.innerText);
+		checkToAssignScore(true);
+	}
+}
+
+// When nobody got the correct answer
+function onNoCorrectAnswers()
+{
+
+	let noCorrectAnswers = confirm("CONFIRM: No Correct Answers Were Given?");
+
+	if(noCorrectAnswers)
+	{
+		// Set pseudo IN PLAY
+		TEAM_IN_PLAY = "NOBODY!";
+		
+		// Make sure the points do not get added
+		IN_PLAY = false;
+		IS_FACEOFF = false;
+
+		// Hide the play buttons
+		mydoc.hideContent(".team_in_play");
+
+		// Hide the Face Off things
+		mydoc.hideContent(".face_off_element");
+	}
+}
+
+// Set the steal opportunity
+function setStealOpportunity()
+{
+	let team_in_play = document.querySelector(".in_play");
+
+	if(team_in_play != undefined)
+	{
+		let team_name = team_in_play.getAttribute("data-team");
+		opposite_team = (team_name == "team_one") ? "team_two" : "team_one";
+
+		let steal_phrase = document.querySelector(`#${opposite_team} span.can_steal`);
+		steal_phrase.classList.remove("hidden");
+
+	}
+}
+
+// Set which team is in play
+function setTeamInPlay(team)
+{
+	// If team already in play, don't do anything
+	let in_play_already = document.querySelectorAll(".in_play");
+	if(in_play_already.length > 0){ return; }
+
+	// Set IN_PLAY to true and IS_FACEOFF to false
+	IN_PLAY = true; 
+	IS_FACEOFF = false;
+
+	// Set global team in play;
+	TEAM_IN_PLAY = team;
+
+	identifier = `#team_${team} .team_name_box`;
+	team_name = document.querySelector(identifier);
+	team_name.classList.add("in_play");
+
+	// Clear wrong answer count if any
+	clearWrongAnswerCount();
+
+	// Hide the PLAY buttons & Face Off things
+	mydoc.hideContent(".team_in_play"); 
+	mydoc.hideContent(".face_off_element");
+}
+
+// Set the countdown timer
+function toggleCountdownTimer(forceHide=false)
+{
+	let timeView = document.querySelector("#time_view");
+
+	let isHidden = (timeView.classList.contains("hidden")) ? true : false;
+
+	if(isHidden)
+	{
+		timeView.classList.remove("hidden");
+		Timer.startTimer();
+	}
+	if (!isHidden || forceHide)
+	{
+		timeView.classList.add("hidden");
+		Timer.resetTimer();
+	}
+}
+
 // Undo a wrong answer set
 function undoWrongAnswer()
 {
@@ -596,79 +578,13 @@ function undoWrongAnswer()
 	}
 }
 
-// Set the steal opportunity
-function setStealOpportunity()
-{
-	let team_in_play = document.querySelector(".in_play");
-
-	if(team_in_play != undefined)
-	{
-		let team_name = team_in_play.getAttribute("data-team");
-		opposite_team = (team_name == "team_one") ? "team_two" : "team_one";
-
-		let steal_phrase = document.querySelector(`#${opposite_team} span.can_steal`);
-		steal_phrase.classList.remove("hidden");
-
-	}
-}
-
-// Reveals an answer
-function onRevealAnswer(value)
-{	
-	let digit = value.replace("Digit","").replace("Numpad","");
-
-	// Make sure admin can no longer use the No Answers optio
-	mydoc.hideContent("#no_correct_answers");
-
-	// The right sound element;
-	let rightSound = document.getElementById("right_answer_sound");
-
-	let number = document.querySelector(`#game_cell_${digit} p.game_cell_number`);
-	let cell = document.querySelector(`#game_cell_${digit} p.answer`);
-	let count = document.querySelector(`#game_cell_count_${digit}`);
-	let count_val = document.querySelector(`#game_cell_count_${digit} p`);
-
-	let revealed = document.querySelectorAll(".answer.revealed");
-	if(BOARD_VIEW && revealed.length >=2 && TEAM_IN_PLAY === "")
-	{
-		alert("Cannot reveal another answer until a team is selected to \"Play\"");
-		return;
-	}
-
-	// Criteria for showing a value
-	let is_hidden = Array.from(count_val.classList).includes("hidden");
-	let has_value = (cell.innerText != "" && cell.innerText != undefined);
-
-	if(is_hidden && has_value)
-	{
-		if(BOARD_VIEW)
-		{
-			rightSound.play(); 
-			toggleCountdownTimer(true);
-
-			number.classList.add("hidden");
-			number.classList.remove("circled_number");
-		}
-		// Reveal the content
-		cell.classList.remove("hidden");
-		cell.classList.add("revealed");
-		count_val.classList.remove("hidden");
-		count.classList.remove("unseen");
-
-		if(BOARD_VIEW){
-			onUpdateScore(count_val.innerText);
-
-			checkToAssignScore(true);
-		}
-	}
-}
-
 
 
 /**********************BOARD ACTIONS: SCORING*******************************/
 
 // Update the score
-function onUpdateScore(value){
+function onUpdateScore(value)
+{
 	if(IN_PLAY || IS_FACEOFF)
 	{
 		CURR_SCORE += (Number(value) * CURR_MULTIPLIER);
@@ -735,56 +651,12 @@ function checkToAssignScore(isCorrect)
 	}
 }
 
-
-
-
 /**********************ADMIN/BACK END ACTIONS*******************************/
-// Get the card that is currently selected
-function onGetCurrentQuestion()
-{
-
-	// Clear the cells on the board;
-	clearCellsOnBoard();
-	
-	// Get the current card
-	MyTrello.get_cards(MyTrello.current_card_list_id, function(data){
-
-		response = JSON.parse(data.responseText);
-
-		if(response.length == 1)
-		{
-			rand_id = Math.floor(Math.random()*response.length);
-			card = response[rand_id];
-			CURR_CARD = card["id"];
-			CURR_QUEST = card["name"];
-			question = card["name"];
-			checklist_id = card["idChecklists"][0];
-
-			// Set the current question:
-			document.getElementById("current_question").innerText = CURR_QUEST;
-
-			// Load the answers into the table; Pass true for admin view
-			onLoadAnswers(checklist_id);
-		}
-		else
-		{
-			msg = "ERROR: Something went wrong;";
-			if(response.length == 0){
-				msg = "A card has not been selected yet; Use the game board to select the next one";
-			}
-			if (response.length > 1)
-			{
-				msg = "Too many cards in the list; Should only be one;"
-			}
-			alert(msg);
-		}
-	});
-}
 
 // Switch to the next round
 function onNextRound()
 {
-	console.log("Going to Next Round");
+	Logger.log("Going to Next Round");
 	let nextRoundButton = document.getElementById("next_round_button");
 
 	if(nextRoundButton.disabled){
@@ -829,30 +701,20 @@ function onClearBoard(toBeFixed=false)
 
 	if(can_be_cleared)
 	{
+		// Show the loading GIF and hide the table
+		mydoc.hideContent("#game_table");
+		mydoc.showContent("#loading_gif");
 
-		if(BOARD_VIEW || FAST_MONEY_VIEW){
-			// Clear the current card list
-			var action = (toBeFixed) ? "Fix" : "CurrentGame"; 
-			MyTrello.clearCurrentCardList(action);
-		}
+		// Clear/reset the key FLAGS
+		clearInPlay();
+		clearSteal();
+		resetFaceOff();
 
-		if(BOARD_VIEW)
-		{
-			// Show the loading GIF and hide the table
-			mydoc.hideContent("#game_table");
-			mydoc.showContent("#loading_gif");
+		// Clear the cells on the board
+		clearCellsOnBoard();
 
-			// Clear/reset the key FLAGS
-			clearInPlay();
-			clearSteal();
-			resetFaceOff();
-
-			// Clear the cells on the board
-			clearCellsOnBoard();
-
-			// Clear the wrong answer
-			clearWrongAnswerCount();			
-		}
+		// Clear the wrong answer
+		clearWrongAnswerCount();			
 	}
 	else
 	{
@@ -864,46 +726,40 @@ function onClearBoard(toBeFixed=false)
 // Clear the cells on the board
 function clearCellsOnBoard()
 {
-	// Only the board view and admin view have the cells
-	if(BOARD_VIEW || ADMIN_VIEW)
-	{
-		// Reset aswer cells;
-		cells = document.querySelectorAll(".game_cell p.answer");
-		cells.forEach(function(obj){
-			obj.classList.add("hidden");
-			obj.classList.remove("revealed");
-			obj.innerText = "";
-		});
 
-		// Reset count cells
-		counts = document.querySelectorAll(".game_cell_count p");
-		counts.forEach(function(obj){
-			obj.classList.add("hidden");
-			obj.innerText = "";
-		});
+	// Reset aswer cells;
+	cells = document.querySelectorAll(".game_cell p.answer");
+	cells.forEach(function(obj){
+		obj.classList.add("hidden");
+		obj.classList.remove("revealed");
+		obj.innerText = "";
+	});
 
-		// Reset game_cell_number cells;
-		numbers = document.querySelectorAll(".game_cell p.game_cell_number");
-		numbers.forEach(function(obj){
-			obj.classList.add("hidden");
-			obj.classList.remove("circled_number");
-		});
+	// Reset count cells
+	counts = document.querySelectorAll(".game_cell_count p");
+	counts.forEach(function(obj){
+		obj.classList.add("hidden");
+		obj.innerText = "";
+	});
 
-		countsCells = document.querySelectorAll(".game_cell_count");
-		countsCells.forEach(function(obj){
-			obj.classList.add("unseen");
-		});
-	}
+	// Reset game_cell_number cells;
+	numbers = document.querySelectorAll(".game_cell p.game_cell_number");
+	numbers.forEach(function(obj){
+		obj.classList.add("hidden");
+		obj.classList.remove("circled_number");
+	});
 
+	countsCells = document.querySelectorAll(".game_cell_count");
+	countsCells.forEach(function(obj){
+		obj.classList.add("unseen");
+	});
 }
 
 // Clear the wrong answer count
 function clearWrongAnswerCount()
 {
-	if(BOARD_VIEW){
-		CURR_WRONG = 0;
-		document.getElementById("wrong_answer_section").innerText = "";
-	}
+	CURR_WRONG = 0;
+	document.getElementById("wrong_answer_section").innerText = "";
 }
 
 function clearInPlay()
@@ -944,9 +800,27 @@ function resetFaceOff()
 	mydoc.showContent(".face_off_element");
 }
 
-
-
 /*****************************HELPER FUNCTIONS*******************************************/
+
+function setGameCode(value)
+{
+	CURR_GAME_CODE = value;
+	document.getElementById("game_code").innerText = CURR_GAME_CODE;
+	mydoc.showContent("#game_code_label_section");
+	mydoc.setPassThroughParameters(".pass_through_params", "gamecode", value);
+}
+
+// function setPassThroughParameters(key, value)
+// {
+
+// 	let param = `${key}=${value}`;
+// 	// Setup the element to be passed through to the next page;
+// 	let links = Array.from(document.querySelectorAll(".pass_through_params"));
+// 	links.forEach(function(obj){
+// 		let sep = (!obj.href.includes("?")) ? "?" : "&";
+// 		obj.href += `${sep}${param}`;
+// 	});
+// }
 
 function toggleThemeSong()
 {

@@ -57,6 +57,9 @@
 
 	.fast_money_points { width:21px; background-color:#0046b7; color:#0046b7;}
 
+	.fastmoney_answers { font-size:200%; } 
+	.fastmoney_answers { font-size:200%; } 
+
 /* ADMIN VIEW */
 	#current_question_section{ border:1px solid white; }
 	#current_question { color:red; }

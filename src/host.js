@@ -14,36 +14,9 @@ var CURR_QUEST = "";
 /*****************************GETTING STARTED************************************/
 
 // Once doc is ready
-mydoc.ready(function(){
-	checkTestRun();
-});
-
-// Sets a flag if this is a TEST RUN
-function checkTestRun()
-{
-	let queryMap = mydoc.get_query_map();
-	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
-
-	if(IS_TEST_RUN)
-	{
-		indicateTestRun();
-	}
-}
-
-function indicateTestRun()
-{
-	mydoc.addTestBanner();
-
-	// Setup the element to be passed through to the next page;
-	let links = Array.from(document.querySelectorAll(".pass_through_params"));
-	links.forEach(function(obj){
-		obj.href += location.search;
-	});
-
-	MyTrello.setCurrentGameListID(MyTrello.test_list_id);
-	setGameCode("TEST");
-	setGameListId(MyTrello.test_list_id);
-}
+// mydoc.ready(function(){
+// 	checkTestRun();
+// });
 
 /***************************** LISTENERS**********************************/
 
@@ -55,7 +28,9 @@ function onEnterGame()
 
 	if(entered_code == "TEST")
 	{
-		indicateTestRun();
+		mydoc.addTestBanner();
+		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");	
+
 	}
 
 	MyTrello.get_lists(function(data){
@@ -73,7 +48,7 @@ function onEnterGame()
 				game_found = true;
 				CURR_GAME_CODE = list_name;
 				MyTrello.setCurrentGameListID(list_id);
-				setGameListId(list_id);
+				mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);	
 				setGameCode(list_name);
 				showHostSection();
 				break;
@@ -148,21 +123,11 @@ function showHostSection()
 /*****************************CLEAR/RESET*******************************************/
 function setGameCode(value)
 {
-	CURR_GAME_CODE = value;
+	CURR_GAME_CODE = value.toUpperCase();
 	document.getElementById("game_code").innerText = CURR_GAME_CODE;
+	mydoc.showContent("#game_code_label_section");
+	mydoc.setPassThroughParameters(".pass_through_params", "gamecode", CURR_GAME_CODE);
 }
-
-function setGameListId(listID)
-{
-	CURR_GAME_LIST_ID = listID
-	let links = Array.from(document.querySelectorAll(".pass_through_params"));
-	console.log(links);
-	links.forEach(function(obj){
-		let query = (obj.href.includes("?")) ? `&listid=${listID}` : `?listid=${listID}`;
-		obj.href += query;
-	});	
-}
-
 
 function setQuestion(value)
 {
