@@ -70,6 +70,8 @@ function checkAdmin(query_map)
 		mydoc.showContent("#back_to_host"); 
 		mydoc.showContent("#game_action_buttons .fastmoney_host"); 
 		mydoc.showContent(".fastmoney_reveal_answers");
+		mydoc.hideContent(".fastmoney_answers");
+
 	}
 }
 
@@ -375,13 +377,21 @@ function loadCard(card_id, idx)
 	});
 }
 
-function onShowAnswersForHost(event)
+function onToggleAnswersForHost(event)
 {
 	var ele = event.target;
-	console.log(ele);
 	sibling = ele.nextElementSibling;
-	sibling.classList.remove("hidden");
-
+	
+	if(sibling.classList.contains("hidden"))
+	{
+		sibling.classList.remove("hidden");
+		ele.innerText = "Hide Answers";
+	}
+	else
+	{
+		sibling.classList.add("hidden");
+		ele.innerText = "Reveal Answers";
+	}
 }
 
 /***************************** HELPER FUNCTIONS **********************************/
