@@ -8,18 +8,13 @@
 <body>
 	<div id="menu">
 		<h1 id="game_name">Family Feud &mdash; Admin View
-		<p style="font-size:75%;">
+		<p id="game_code_label_section" style="font-size:75%;" class="hidden">
 			<span>Game Code: </span>
 			<span id="game_code" class="emphasis_orange"></span></h1>	
 		</p>
 	</div>
 	<hr>
-	<div id="create_game_section" class="centered centere_section_50">
-		<button class="button_mash" onclick="onCreateGame()">New Game</button>
-		<br/><br/>
-		<button class="button_mash" onclick="onExistingGame()">Existing Game</button>
-	</div>
-	<div id="game_code_section" class="center_section_50 centered hidden">
+	<div id="game_code_section" class="center_section_50 centered">
 		<input type="text" name="game_code" class="input_mash input_large centered" placeholder="Enter Game Code">
 		<br/>
 		<button class="button_mash" onclick="onEnterGame()">Enter</button>
@@ -30,16 +25,13 @@
 			<a href="../fastmoney/questions.html?admin=1" class="pass_through_params">
 				<button id="fast_money_button" class="button_mash">FAST MONEY</button>	
 			</a>
-			<button class="button_mash" onclick="onCreateGame()">New Game</button>
-
 		</div>
 
 		<div id="current_question_section">
 			<h3>Question:</h3>
 			<h2 id="current_question"></h2>
 		</div>
-
-
+		
 		<h3>Answers:</h3>
 
 		<table id="game_table_admin" cellpadding="0">

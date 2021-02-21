@@ -60,14 +60,14 @@ const Helper = {
 			chars += Helper._getRandomCharacter();
 		}
 
-		var code = ( Helper._isReservedCode(chars) ) ? getGameCode() : chars;
+		var code = ( Helper._isReservedCode(chars) ) ? Helper.getCode() : chars;
 		return code;
 	},
 
 	getDate: function(){
 		let dd = new Date();
 		let year = dd.getFullYear().toString();
-		let monthIdx = dd.getDay();
+		let monthIdx = dd.getMonth()+1;
 		let month = (monthIdx<9) ? "0"+monthIdx : monthIdx;
 		let dayIdx = dd.getDate();
 		let day = (dayIdx < 9 ) ? "0"+dayIdx : dayIdx;

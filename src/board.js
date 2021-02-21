@@ -50,6 +50,7 @@ function checkTestRun()
 
 	if(IS_TEST_RUN)
 	{
+		IS_TEST_RUN = true;
 		mydoc.addTestBanner();
 		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
 	}
@@ -59,14 +60,74 @@ function checkTestRun()
 function onStartGame()
 {
 	IS_FACEOFF = true;
-	
-	// Hide elements
-	mydoc.hideContent("#startGameButton");
-	mydoc.hideContent(".pregame_action_buttons");
 
-	// Show elements
-	mydoc.showContent("#game_code_section");	
+	// Show the loading gif
+	mydoc.showContent("#loading_gif");
+
+	if(IS_TEST_RUN)
+	{
+		onEnterTestGame();
+	}
+	else
+	{
+		// Create the game
+		onCreateGame();	
+	}
+	
 }
+
+function onCreateGame()
+{
+	// let dateCode = getDateCode();
+	let gameCode = Helper.getCode();
+
+	list_name = `${gameCode}`;
+
+	MyTrello.create_list(list_name, function(data){
+
+		response = JSON.parse(data.responseText);
+		list_id = response["id"];
+
+		// Things to do after creating game
+		GAME_STARTED = true;
+		setGameCode(list_name);
+		MyTrello.setCurrentGameListID(list_id);
+		mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);
+		showGameBoard();
+	});
+}
+
+function onEnterTestGame()
+{
+
+	MyTrello.get_lists(function(data){
+	response = JSON.parse(data.responseText);
+
+		var game_found = false;
+		for(var idx = 0; idx < response.length; idx++)
+		{
+			var obj = response[idx];
+			let list_name = obj["name"].toUpperCase();
+			let list_id = obj["id"];
+
+			if(list_name == "TEST")
+			{
+				game_found = true;
+				GAME_STARTED = true;
+				setGameCode(list_name);
+				MyTrello.setCurrentGameListID(list_id);
+				mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);
+				showGameBoard();
+				break;
+			}	
+		}
+		if(!game_found)
+		{
+			alert("Could Not Find TEST Game!");
+		}
+	});
+}
+
 
 function onEnterGame()
 {
@@ -182,7 +243,7 @@ function gameBoardListenerOnKeyUp()
 function showGameBoard()
 {
 	// Hide things
-	mydoc.hideContent("#game_code_section");
+	// mydoc.hideContent("#game_code_section");
 	mydoc.hideContent("#startGameButton");
 	mydoc.hideContent(".pregame_action_buttons");
 
@@ -253,9 +314,8 @@ function onEndGame()
 			// Reset Game Code
 			document.getElementById("game_code").innerText = "";
 			mydoc.hideContent("#game_code_label_section");
-			document.querySelector("#game_code_section input").value = "";
 
-			// Reset Team SCore
+			// Reset Team Scores
 			document.getElementById("team_one_score").innerText = "0";
 			document.getElementById("team_two_score").innerText = "0";
 

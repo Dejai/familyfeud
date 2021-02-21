@@ -231,6 +231,7 @@ function setGameCode(value)
 {
 	CURR_GAME_CODE = value.toUpperCase();
 	document.getElementById("game_code").innerText = CURR_GAME_CODE;
+	mydoc.showContent("#game_code_label_section");
 	mydoc.setPassThroughParameters(".pass_through_params", "gamecode", CURR_GAME_CODE);
 }
 

@@ -345,7 +345,11 @@ function loadFastMoneyQuestions()
 			{
 				card = response[idx];
 				card_id = card["id"];
-				loadCard(card_id, idx+1);
+				labels = card["idLabels"];
+				if(labels.includes(MyTrello.label_fast_money))
+				{
+					loadCard(card_id, idx+1);				
+				}
 			}
 			// Hide the loading gif
 			mydoc.hideContent("#loading_gif");
