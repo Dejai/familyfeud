@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+<head>
+	<title>Hall of Fame</title>
+	<link rel="stylesheet" type="text/css" href="../src/game.css">
+<body>
+	<div id="menu">
+		<h1 id="game_name">Family Feud &mdash; Hall of Fame</h1>
+	</div>
+	<hr>
+	<div id="hof_enter_answer_section" class="centered hidden">
+
+		<h2>Add New "Hall of Fame" Answer</h2>
+
+		<div class="hall_of_fame_section center_section_50">
+			<p>The Question:<br/><br/><span id="new_hall_of_fame_question" class="hall_of_fame_content">"${question}"</span></p>
+			<br/>
+
+			<p>The Answer:<br/><br/><input type="text" name="answer" class="input_large input_width_medium" placeholder="Enter person's answer ..."></p>
+			<br/>
+
+			<p>The Person:<br/><br/><input type="text" name="person" class="input_large input_width_medium" placeholder="Enter person's name ..."> </p>
+			<br/>
+
+			<button onclick="submitHallOfFameAnswer()" class="button_mash">SUBMIT</button>		
+		</div>
+	</div>
+	<div id="hof_answers_list_section" class="centered hidden">
+		<!-- <h2>Hall of Fame Answers</h2> -->
+
+		<p>The following list are some of the best answers given so far.</p>
+
+		<hr/>
+	
+		<div id="hof_answers_list">
+			
+		</div>
+		<!-- <table style="width:100%;" border="1">
+			<colgroup>
+				<col style="width:33%">
+				<col style="width:33%">
+				<col style="width:33%">
+			</colgroup>
+			<thead>
+				<tr>
+					<th>Question</th>
+					<th>Answer</th>
+					<th>Person</th>
+				</tr>
+			</thead>
+			<tbody id="hof_answers_list"></tbody>
+		</table> -->
+	</div>
+</body>
+	<!-- Common Code -->
+	<script src="../src/common.js"></script>
+	<!-- My Trello code -->
+	<script src="../src/trello.js"></script>
+	<!-- My Source JS -->
+	<script src="../src/halloffame.js"></script>
+</html>

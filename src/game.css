@@ -19,6 +19,8 @@
 	.button_mash { font-size:140%; cursor:pointer;  }
 	.button_mash_medium { font-size:100%; cursor:pointer;  }
 
+	.input_width_large{ width:90%; }
+	.input_width_medium{ width:60%; }
 	.input_large { font-size:150%; }
 	.input_extra_large { font-size:200%; }
 
@@ -94,8 +96,6 @@
 	.shortcuts_table { width:100%; text-align:center; border-spacing:0; }
 	.shortcuts_table td { border:2px solid blue; font-size:80%;}
 
-
-
 /* GAME VIEW */
 	/*Game Scores*/
 	.in_play { border:2px solid limegreen; }
@@ -147,3 +147,9 @@
 	.face_off_teams label { font-size:200%; }
 	.face_off_teams input { font-size:200%; }
 	.face_off_teams button { font-size:200%; }
+
+
+/* Hall of Fame */
+	.hall_of_fame_section { border-bottom:3px solid white; padding:2%; }
+	.hall_of_fame_content { background-color: lightgray; color: black; padding: 1%; font-style: italic;}
+

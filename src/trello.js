@@ -295,10 +295,10 @@ const MyTrello = {
 	},
 
 	// Create a comment for a card
-	create_card_comment: function(card_id, comment){
+	create_card_comment: function(card_id, comment, successCallback){
 		let param = `text=${comment}`;
 		let trello_path = `${this.endpoint}/cards/${card_id}/actions/comments?key=${this.key}&token=${this.token}&${param}`;
-		myajax.AJAX({ method: "POST", path : trello_path, data:"", failure : Logger.errorHandler});
+		myajax.AJAX({ method: "POST", path : trello_path, data:"", success: successCallback, failure : Logger.errorHandler});
 	},
 
 

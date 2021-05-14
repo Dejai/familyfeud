@@ -123,6 +123,7 @@ function loadCurrentQuestion(cardId)
 		question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode
 
 		CURR_CARD = cardId;
+		setHallOfFameLink(CURR_CARD)
 		CURR_ANSWERS = response["checklists"][0].checkItems;
 
 		// Set the question:
@@ -194,6 +195,16 @@ function setGameListId(listID)
 		let query = (obj.href.includes("?")) ? `&listid=${listID}` : `?listid=${listID}`;
 		obj.href += query;
 	});	
+}
+
+function setHallOfFameLink(cardID)
+{
+	let link = document.querySelector("#enter_hall_of_fame");
+	if(link)
+	{
+		mydoc.showContent("#enter_hall_of_fame");
+		link.href = link.href += `?card=${cardID}`;
+	}
 }
 
 function setQuestion(value)
