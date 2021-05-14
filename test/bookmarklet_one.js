@@ -100,5 +100,6 @@ javascript:(function(){
 	}
 
 	console.log(CSV);
+	document.write(`<pre>${CSV}</pre>`);
 })();
 

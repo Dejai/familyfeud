@@ -36,6 +36,7 @@
 			<option value="card-create">Create New Card</option>
 			<option value="card-update">Update Existing Card</option>
 			<option value="list-create">Create a List</option>
+			<option value="closed-cards">Closed Cards</option>
 			<!-- <option value="boards">Get Boards</option> -->
 		</select>
 		<br/>
@@ -48,6 +49,156 @@
 	</div>
 
 	<div class="test_section">
+		<h3>Check Existing Cards</h3>
+		<p>
+			<button id="loadAllCardsButton" onclick="getAllCards()">Load All Cards</button>
+		</p>
+		<table style="width:50%; text-align:center;" border="1" cellspacing="0">
+			<tr>
+				<th>Total Cards</th>
+				<th>Open Regular Cards</th>
+				<th>Open Fast Money Cards</th>
+				<th>Closed Cards</th>
+				<th>Games Played</th>
+			</tr>
+			<tr>
+				<td>
+					<label id="total_cards_count"></label>	
+				</td>
+				<td>
+					<label id="open_cards_count"></label>
+				</td>
+				<td>
+					<label id="open_fastmoney_count"></label>
+				</td>
+				<td>
+					<label id="closed_cards_count"></label><br/>
+				</td>
+				<td>
+					<label id="total_games_count"></label>
+				</td>
+				
+			</tr>
+		</table>
+
+		<hr/>
+
+		<table style="width:100%;">
+			<colgroup>
+				<col style="width:50%;">
+				<col/>
+			</colgroup>
+			<tr>
+				<td  style="vertical-align: top;">
+					<div id="select_season_subsection" class="hidden">
+						<label>Check Season</label>
+						<select name="season" onchange="getAttachmentsFromCard()">
+							<option value="">Select one ... </option>
+						</select>
+
+						<!-- <p>
+							<button onclick="updateSeason2()">FIX SEASON</button>
+						</p> -->
+
+						<div id="season_results_subsection" class="hidden">
+							<!-- <h3>Question Bank Numbers</h3> -->
+							<table class="" style="width:100%;" border="1" cellspacing="0">
+								<thead>
+									<tr>
+										<th>Label</th>
+										<th>Number of Questions</th>
+										<th>Number Created</th>
+										<th>Number Missing</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th>Top 4 Answers</th>
+										<td id="top_4_count" class="question_bank_table_cell"> 0 </td>
+										<td id="top_4_card_count" class="question_bank_table_cell"></td>
+										<td id="top_4_card_missing" class="question_bank_table_cell"></td>
+									</tr>
+									<tr>
+										<th>Top 5 Answers</th>
+										<td id="top_5_count" class="question_bank_table_cell"> 0 </td>
+										<td id="top_5_card_count" class="question_bank_table_cell"></td>
+										<td id="top_5_card_missing" class="question_bank_table_cell"></td>
+
+									</tr>
+									<tr>
+										<th>Top 6 Answers</th>
+										<td id="top_6_count" class="question_bank_table_cell"> 0 </td>
+										<td id="top_6_card_count" class="question_bank_table_cell"></td>
+										<td id="top_6_card_missing" class="question_bank_table_cell"></td>
+									</tr>
+									<tr>
+										<th>Top 7 Answers</th>
+										<td id="top_7_count" class="question_bank_table_cell"> 0 </td>
+										<td id="top_7_card_count" class="question_bank_table_cell"></td>
+										<td id="top_7_card_missing" class="question_bank_table_cell"></td>
+									</tr>
+									<tr>
+										<th>Top 8 Answers</th>
+										<td id="top_8_count" class="question_bank_table_cell"> 0 </td>
+										<td id="top_8_card_count" class="question_bank_table_cell"></td>
+										<td id="top_8_card_missing" class="question_bank_table_cell"></td>
+									</tr>
+									<tr>
+										<th>Fast Money Answers</th>
+										<td id="top_fastmoney_count" class="question_bank_table_cell"> 0 </td>
+										<td id="top_fastmoney_card_count" class="question_bank_table_cell"></td>
+										<td id="top_fastmoney_card_missing" class="question_bank_table_cell"></td>
+									</tr>
+								</tbody>
+							</table>
+							<hr/>
+							<h3>Missing Cards - <button onclick="addAllToCreateQueue()">Add All</button></h3>
+							<div id="cards_not_found"></div>
+						</div>
+					</div>
+				</td>
+				<td style="vertical-align:top;">
+					<div id="search_cards_subsection" class="hidden">
+						<label>Search Set:</label>
+						<select id="search_type" name="search_type" onchange="setSearchType()">
+							<option value="Cards">Cards</option>
+							<option value="Source">Source</option>
+						</select>
+						<br/><br/>
+
+						<input id="search_cards" placeholder="Search for card(s) / question(s) ..." type="text" name="search_cards" style="width:90%"/>
+						<br/>
+						<button onclick="searchList()">Search</button>
+						<button id="checkForDuplicates" onclick="checkForDuplicates()" class="hidden">Check For Duplicates</button>
+
+						<div id="searchResults" style="overflow-y:scroll;height:300px;"></div>
+
+						<div id="resultDetails"></div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		
+		<img id="loading_gif" class="hidden" src="../assets/img/loading1.gif">
+	</div>
+
+	<div id="create_card_section" class="test_section" style="vertical-align:top;">
+		<div style="display:inline-block; width:45%; vertical-align:top;">
+			<h3>To Be Created: <span id="to_be_created_count"></span></h3>
+			<button id="createCardButton" onclick="createCard()">CREATE</button>
+			<div id="test_results2"></div>
+		</div>
+		<div style="display:inline-block; width:45%; vertical-align:top;">
+			<h3>Validate Newly Added Cards: <span id="to_be_validated_count"></span></h3>
+			<button id="validateCreatedButton" onclick="validateNewlyAddedCards()">
+				VALIDATE
+			</button>
+			<div id="test_results3"></div>
+		</div>
+	</div>
+	<div class="test_section hidden">
+
+
 		<h3>Create Family Feud Cards</h3>
 		<label>Number of Answers</label>
 		<input id="number_of_answers" type="number" name="number_of_answers"/>
@@ -69,7 +220,6 @@
 		<label>Step 4:</label><br/>
 		<button id="validateNewCards" onclick="checkCardsToBeFixed()">Check Cards to Fix</button>
 		&nbsp;
-		<div id="test_results2"></div>
 	</div>
 
 

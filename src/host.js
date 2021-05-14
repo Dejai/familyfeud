@@ -14,9 +14,9 @@ var CURR_QUEST = "";
 /*****************************GETTING STARTED************************************/
 
 // Once doc is ready
-// mydoc.ready(function(){
-// 	checkTestRun();
-// });
+mydoc.ready(function(){
+	IS_TEST_RUN = checkTestRun();
+});
 
 /***************************** LISTENERS**********************************/
 
@@ -28,9 +28,8 @@ function onEnterGame()
 
 	if(entered_code == "TEST")
 	{
-		mydoc.addTestBanner();
-		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");	
-
+		// mydoc.addTestBanner();
+		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
 	}
 
 	MyTrello.get_lists(function(data){
@@ -102,9 +101,9 @@ function loadCurrentQuestion(cardId)
 
 		response = JSON.parse(data.responseText);
 
-		console.log(response);
-
 		question = response["name"];
+		question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode
+
 		CURR_CARD = cardId;
 		CURR_ANSWERS = response["checklists"][0].checkItems;
 

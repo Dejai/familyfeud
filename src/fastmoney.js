@@ -26,6 +26,9 @@ mydoc.ready(function(){
 	// Check if admin
 	checkAdmin(query_map)
 
+	//Check Test run
+	IS_TEST_RUN = checkTestRun();
+
 	// Check for the game code
 	checkGameCode();
 
@@ -36,7 +39,6 @@ mydoc.ready(function(){
 		window.addEventListener("beforeunload", onFastMoneyClosePage);
 		fastMoneyListenerOnKeyUp();
 
-		checkTestRun();
 
 		// Set default time & buzzer sound
 		Timer.resetTimer();
@@ -100,24 +102,6 @@ function checkGameListID()
 	else
 	{
 		alert("Game ID not provided. :( ");
-	}
-}
-
-// Sets a flag if this is a TEST RUN
-function checkTestRun()
-{
-	let queryMap = mydoc.get_query_map();
-	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
-
-	if(IS_TEST_RUN)
-	{
-		mydoc.addTestBanner();
-
-		// Setup the element to be passed through to the next page;
-		let links = Array.from(document.querySelectorAll(".pass_through_params"));
-		links.forEach(function(obj){
-			obj.href += location.search;
-		});
 	}
 }
 
@@ -370,11 +354,13 @@ function loadCard(card_id, idx)
 		});
 		
 		let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
+		question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode		
 		quest_ele.innerText = question;
 
 		let answers_ele = document.querySelector(`#fast_money_question_${idx} ul.fastmoney_answers`);
 		answers.forEach(function(obj){
-			answers_ele.innerHTML += `<li>${obj["name"]}</li>`
+			let answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(obj["name"]) : obj["name"]; //Adjust answer if in TEST mode
+			answers_ele.innerHTML += `<li>${answer_text}</li>`
 		});
 
 

@@ -30,7 +30,7 @@ mydoc.ready(function(){
 	// Adds listener for game board
 	if(path.includes("/board"))
 	{ 
-		checkTestRun();
+		IS_TEST_RUN = checkTestRun();
 
 		window.addEventListener("beforeunload", onClosePage);
 		gameBoardListenerOnKeyUp(); 
@@ -42,19 +42,6 @@ mydoc.ready(function(){
 	}
 });
 
-// Sets a flag if this is a TEST RUN
-function checkTestRun()
-{
-	let queryMap = mydoc.get_query_map();
-	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
-
-	if(IS_TEST_RUN)
-	{
-		IS_TEST_RUN = true;
-		mydoc.addTestBanner();
-		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
-	}
-}
 
 // Start the game
 function onStartGame()
@@ -124,48 +111,6 @@ function onEnterTestGame()
 		if(!game_found)
 		{
 			alert("Could Not Find TEST Game!");
-		}
-	});
-}
-
-
-function onEnterGame()
-{
-	GAME_STARTED = true;
-	
-	var ele = document.querySelector("#game_code_section input");
-	let entered_code = ele.value.toUpperCase();
-
-	if(entered_code == "TEST")
-	{
-		IS_TEST_RUN = true;
-		mydoc.addTestBanner();
-		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");	
-	}
-
-	MyTrello.get_lists(function(data){
-	response = JSON.parse(data.responseText);
-
-		var game_found = false;
-		for(var idx = 0; idx < response.length; idx++)
-		{
-			var obj = response[idx];
-			let list_name = obj["name"].toUpperCase();
-			let list_id = obj["id"];
-
-			if(list_name == entered_code)
-			{
-				game_found = true;
-				setGameCode(list_name);
-				MyTrello.setCurrentGameListID(list_id);
-				mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);
-				showGameBoard();
-				break;
-			}	
-		}
-		if(!game_found)
-		{
-			alert("Could Not Find Game With Given Code!");
 		}
 	});
 }
@@ -400,6 +345,7 @@ function loadAnswers(checklist)
 			counter++;
 			splits = obj["name"].split("~");
 			answer_text = splits[0].trim();
+			answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
 			answer_count = splits[1].trim();
 
 			let answer = document.querySelector(`#game_cell_${counter} p.answer`);
@@ -869,18 +815,6 @@ function setGameCode(value)
 	mydoc.showContent("#game_code_label_section");
 	mydoc.setPassThroughParameters(".pass_through_params", "gamecode", value);
 }
-
-// function setPassThroughParameters(key, value)
-// {
-
-// 	let param = `${key}=${value}`;
-// 	// Setup the element to be passed through to the next page;
-// 	let links = Array.from(document.querySelectorAll(".pass_through_params"));
-// 	links.forEach(function(obj){
-// 		let sep = (!obj.href.includes("?")) ? "?" : "&";
-// 		obj.href += `${sep}${param}`;
-// 	});
-// }
 
 function toggleThemeSong()
 {

@@ -13,6 +13,8 @@ mydoc.ready(function(){
 	// Set listener ups
 	faceOffListenerOnKeyUp();
 
+
+
 });
 
 function setButtonHeight()

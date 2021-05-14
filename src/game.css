@@ -17,6 +17,7 @@
 	.pointer { cursor:pointer; }
 	.invisible { visibility:hidden; }
 	.button_mash { font-size:140%; cursor:pointer;  }
+	.button_mash_medium { font-size:100%; cursor:pointer;  }
 
 	.input_large { font-size:150%; }
 	.input_extra_large { font-size:200%; }
@@ -27,6 +28,10 @@
 						border-radius: 4px;  cursor:default;
 						box-shadow: inset 0 0 25px #E8E8E8, 0 1px 0 #C3C3C3, 0 2px 0 #C9C9C9, 0 2px 3px #333; }
 	
+
+	#home_button { display:block; margin-left:1%; margin-top:1%; cursor:pointer; }
+	#home_button button { border:none; font-size:25px; cursor:pointer;}
+
 	/*.back_button_link { float:left; clear:both; }*/
 	/*.back_button_link button { border:none; font-size:25px; cursor:pointer;}*/
 
@@ -87,7 +92,7 @@
 
 
 	.shortcuts_table { width:100%; text-align:center; border-spacing:0; }
-	.shortcuts_table td { border-bottom:2px solid white; }
+	.shortcuts_table td { border:2px solid blue; font-size:80%;}
 
 
 

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+<head>
+	<title>Family Feud</title>
+	<link rel="stylesheet" type="text/css" href="./src/game.css">
+</head>
+<body>
+
+	<div id="menu">
+		<h1 id="game_name">Family Feud &mdash; Practice</h1>
+	</div>
+	<hr>	
+	<div style="text-align:center;">
+		<h2>A Practice Game</h2>
+
+		<p>You can use the links below to do a practice run of a game. If you need a description for these pages, please review <a href="./rules/howtohost.html">this page</a>.</p>
+
+		<p style="color:red">WARNING:</span> All questions and answers will be encoded and appear as "gibberish". <br/>This is so you don't get a preview to the questions/answers, and so you can still use them in a real game.</p>
+		
+		<hr/>
+		<p>&nbsp;</p>
+
+		<a href="./board/" class="identify_yourself pass_through_params">
+			<h4>
+				GAME BOARD &mdash; Practice
+			</h4>
+		</a>
+		<a href="./admin/" class="identify_yourself pass_through_params">
+			<h4>
+				ADMIN VIEW &mdash; Practice
+			</h4>
+		</a>
+		<a href="./host/" class="identify_yourself pass_through_params">
+			<h4> 
+				HOST VIEW &mdash; Practice
+			</h4>
+		</a>
+		<a href="./faceoff/" class="identify_yourself pass_through_params">
+			<h4>
+				FACE OFF VIEW &mdash; Practice
+			</h4>
+		</a>
+	</div>
+</body>
+	<!-- Common Code -->
+	<script src="./src/common.js"></script>
+	<!-- My Source JS -->
+	<script src="./src/checkTestRun.js"></script>
+	<script>
+		// Once doc is ready, check for test run
+		mydoc.ready(function(){ checkTestRun(); });
+	</script>
+</html>

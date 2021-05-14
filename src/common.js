@@ -1,4 +1,4 @@
-/**********************************************************************************************************
+  /**********************************************************************************************************
 	Author: Derrick Fyfield
 	Purpose:
 		This "common" script will house things that I would want to reuse throughout this local server
@@ -52,6 +52,34 @@ const Helper = {
 		return reserved.includes(code.toUpperCase());
 	},
 
+	simpleEncode: function(value){
+		let characters = "abcdefghijklmnopqrstuvwxyz";
+		let is_upper_case = (value == value.toUpperCase());
+
+		let shift = 7; // "Lucky" number 
+
+		let chars = Array.from(value);
+		let results = [];
+
+		chars.forEach(function(char){
+			let lowerchar = char.toLowerCase();
+			if(characters.includes(lowerchar))
+			{
+				let currIndex = characters.indexOf(lowerchar)+1;
+				let shiftIndex = (currIndex + shift) % 26;
+				let newChar = characters[shiftIndex-1];
+				results.push(newChar);
+			}
+			else
+			{
+				results.push(char);
+			}
+		})
+
+		let encoded = results.join("");
+		return encoded;
+	},
+
 	getCode: function(numChars=4){
 		let chars = "";
 
@@ -62,6 +90,19 @@ const Helper = {
 
 		var code = ( Helper._isReservedCode(chars) ) ? Helper.getCode() : chars;
 		return code;
+	},
+
+	getGibberish: function(){
+		let numWords = Math.ceil(Math.random()*4);
+		let gibberishArray = [];
+		for(var idx = 0; idx < numWords; idx++)
+		{
+			let wordLength = Math.ceil(Math.random()*5);
+			let word = this.getCode(wordLength);
+			gibberishArray.push(word);
+		}
+		let gibberish = gibberishArray.join(" ");
+		return gibberish;
 	},
 
 	getDate: function(){
@@ -151,6 +192,16 @@ const mydoc = {
 		return isValid;
 	},
 
+	get_query_param: function(key){
+		let map = this.get_query_map();
+		let value = undefined;
+		if(map.hasOwnProperty(key))
+		{
+			value = map[key]
+		}
+		return value;
+	},
+
 	get_query_map: function(){
 		let query_string = location.search;
 		let query = query_string.replace("?", "")
@@ -192,12 +243,53 @@ const mydoc = {
 const myajax = { 
 	
 	GetContentType: function(type){
+		var content_type = "";
 		switch(type){
 			case "JSON":
 			case "json":
-				return "application/json";
+				content_type = "application/json";
+				break;
+			case "Multipart Form Data":
+			case "Multipart":
+				content_type = "multipart/form-data";
+				break;
+			case "Text":
+			case "Plain Text":
+				content_type = "text/plain";
 			default:
-				return "text/plain";
+				break;
+		}
+		return content_type;
+	},
+
+	GetProperties: function(){
+		let properties = [
+			["method", "string", "The method of the call (GET, POST, PUT, DELTE)"],
+			["path", "string", "The path of the API call"],
+			["success", "function", "Custom function to call on successful call"],
+			["failure", "function", "Custom function to call on FAILED call"],
+			["data", "varied", "Custom data to send in PUT or POST"],
+			["contentType", "string", "A string to indicate what Content-type header should be set"],
+			["cacheControl", "string", "A string to determine the Cache-Control header"]
+		];
+		properties.forEach(function(obj){
+			name = obj[0];
+			type = obj[1];
+			desc = obj[2];
+			let message = `Property:\t${name}\nType:\t${type}\nDescription\t${desc}\n\n`;
+		});
+	},
+
+	GetJSON: function(jsonString){
+		try
+		{
+			let jsonObject = JSON.parse(jsonString);
+			return jsonObject
+		}
+		catch(error)
+		{
+			Logger.log(error, true);
+			return undefined;
 		}
 	},
 
@@ -220,6 +312,10 @@ const myajax = {
 		return state;
 	},
 
+	isValidFunction(obj, key){
+		return (obj.hasOwnProperty(key) && typeof(obj[key]) == "function");
+	},
+
 	AJAX: function(object){
 		let checkObject = myajax.isValidAjaxObject(object);
 		if (!checkObject.isValid){
@@ -230,11 +326,8 @@ const myajax = {
 		let method 	= object["method"];
 		let path 	= object["path"];
 
-		let success = object.hasOwnProperty("success") ? object["success"] : function(request){console.log(request);};
-		success = (success != undefined) ? success : function(request){console.log(request);};
-		
-		let failure = object.hasOwnProperty("failure") ? object["failure"] : function(request){console.log(request);};
-		failure = (failure != undefined) ? failure : function(request){console.log(request);};
+		let success = this.isValidFunction(object, "success") ? object["success"] : function(request){console.log(request);};
+		let failure = this.isValidFunction(object, "failure") ? object["failure"] : function(request){console.log(request);};
 
 		// Setting up the request object
 		var xhttp = new XMLHttpRequest();
@@ -259,22 +352,19 @@ const myajax = {
 		}
 
 		// Send/proces the request
-		if ( object.hasOwnProperty("data_json") && object["datatype"] == "JSON" )
+		if ( object.hasOwnProperty("data") )
 		{
 			let data = object["data"];
-			xhttp.setRequestHeader('Content-type', 'application/json');
-			xhttp.send(data);
-		}
-		else if ( object.hasOwnProperty("data") )
-		{
-			let data = object["data"];
-			let content_type = "application/x-www-form-urlencoded";
-			if(object.hasOwnProperty("content_type"))
+
+			// Check if content type is set
+			if(object.hasOwnProperty("contentType"))
 			{
-				content_type = object["content_type"];
-				data = JSON.stringify(data);
+				let content_type = this.GetContentType( object["contentType"] );
+				if(content_type != "")
+				{
+					xhttp.setRequestHeader('Content-type', content_type);
+				}
 			}
-			xhttp.setRequestHeader('Content-type', content_type);
 			xhttp.send(data);
 		}
 		else

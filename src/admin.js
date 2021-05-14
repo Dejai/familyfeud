@@ -15,37 +15,9 @@ var CURR_QUEST = "";
 
 // Once doc is ready
 mydoc.ready(function(){
-	checkTestRun();
+
+	IS_TEST_RUN = checkTestRun();
 });
-
-// Sets a flag if this is a TEST RUN
-function checkTestRun()
-{
-	let queryMap = mydoc.get_query_map();
-	IS_TEST_RUN = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
-
-	if(IS_TEST_RUN)
-	{
-		indicateTestRun();
-
-		MyTrello.setCurrentGameListID(MyTrello.test_list_id);
-		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
-
-		setGameCode("TEST");
-		showAdminSection();
-	}
-}
-
-function indicateTestRun()
-{
-	mydoc.addTestBanner();
-
-	// Setup the element to be passed through to the next page;
-	let links = Array.from(document.querySelectorAll(".pass_through_params"));
-	links.forEach(function(obj){
-		obj.href += location.search;
-	});
-}
 
 /***************************** ENTERING GAME **********************************/
 
@@ -56,28 +28,6 @@ function onClosePage(event)
 	event.returnValue='';
 }
 
-function onCreateGame()
-{
-	// let dateCode = getDateCode();
-	let gameCode = Helper.getCode();
-
-	list_name = `${gameCode}`;
-
-	MyTrello.create_list(list_name, function(data){
-
-		response = JSON.parse(data.responseText);
-		list_id = response["id"];
-
-		MyTrello.setCurrentGameListID(list_id);
-		setGameListId(list_id);
-
-		setGameCode(list_name);
-		showAdminSection();
-
-	});
-}
-
-
 function onEnterGame()
 {
 
@@ -86,7 +36,8 @@ function onEnterGame()
 
 	if(entered_code == "TEST")
 	{
-		indicateTestRun();
+		// mydoc.addTestBanner();
+		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
 	}
 
 	MyTrello.get_lists(function(data){
@@ -144,8 +95,6 @@ function onGetCurrentCard()
 
 		response = JSON.parse(data.responseText);
 
-		console.log(response);
-
 		if(response.length >= 1)
 		{
 			card = response[0];
@@ -170,9 +119,9 @@ function loadCurrentQuestion(cardId)
 
 		response = JSON.parse(data.responseText);
 
-		console.log(response);
-
 		question = response["name"];
+		question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode
+
 		CURR_CARD = cardId;
 		CURR_ANSWERS = response["checklists"][0].checkItems;
 
@@ -197,6 +146,7 @@ function loadAdminAnswers(checklist)
 		counter++;
 		splits = obj["name"].split("~");
 		answer_text = splits[0].trim();
+		answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
 		answer_count = splits[1].trim();
 
 
