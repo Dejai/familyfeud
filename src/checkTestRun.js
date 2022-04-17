@@ -17,7 +17,7 @@ function checkTestRun()
 	if(is_test_run)
 	{
 		mydoc.addTestBanner();
-		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
+		// mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
 	}
 		
 	return is_test_run;

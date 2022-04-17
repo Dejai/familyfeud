@@ -2,11 +2,12 @@
 /* GENERAL */
 	body { background-color:black; color:white; }
 	
+	.invisible { visibility: hidden; }
+
 	#menu { text-align: center; }
 	#menu_table { text-align:center; }
 	body{ font-family:Arial, sans-serif; }
 	button { cursor:pointer; }
-	.centered{ text-align:center; }
 	.center_section_50 { width:50%; margin:auto; }
 	.center_section_60 { width:60%; margin:auto; }
 	.center_section_70 { width:70%; margin:auto; }
@@ -33,6 +34,9 @@
 
 	#home_button { display:block; margin-left:1%; margin-top:1%; cursor:pointer; }
 	#home_button button { border:none; font-size:25px; cursor:pointer;}
+
+	.team_indicators { color:gray; }
+	.team_indicators.in_play { color:limegreen !important; border:none !important; }
 
 	/*.back_button_link { float:left; clear:both; }*/
 	/*.back_button_link button { border:none; font-size:25px; cursor:pointer;}*/

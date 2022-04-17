@@ -30,7 +30,7 @@ mydoc.ready(function(){
 	IS_TEST_RUN = checkTestRun();
 
 	// Check for the game code
-	checkGameCode();
+	// checkGameCode();
 
 
 	// Set fast money path variable

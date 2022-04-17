@@ -3,6 +3,7 @@
 <head>
 	<title>Family Feud - Board</title>
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
+	<link rel="stylesheet" type="text/css" href="https://dejai.github.io/scripts/css/dlf_styles.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 </head>
@@ -15,53 +16,115 @@
 				<col style="width:33%"/>
 			</colgroup>
 			<tr>
-				<td >
-					<div id="team_one" class="team_score">
-						<h1 contenteditable="true" data-team="team_one" class="team_name_box">Family Name #1</h1>
-						<span class="can_steal hidden">THIS FAMILY CAN STEAL!</span>
+				<th>
+					<h1 id="teamOneName" data-team="team_one" class="team_name_box">Family Name #1</h1>
+				</th>
+				<th>
+					<h1 id="game_name">
+						<span class="teamIndicatorIcon">
+							<i id="teamOneIndicator" class="fa fa-arrow-left team_indicators pointer" onclick="setTeamInPlay('one')"></i>
+							&nbsp;
+						</span>
+						<span onclick="toggleThemeSong()" class="pointer">Family Feud</span>
+						<span class="teamIndicatorIcon">
+							&nbsp;
+							<i id="teamTwoIndicator" class="fa fa-arrow-right team_indicators pointer" onclick="setTeamInPlay('two')"></i>
+						</span>
+					</h1>
+					
+				</th>
+				<th>
+					<h1 id="teamTwoName" data-team="team_two" class="team_name_box">Family Name #2</h1>	
+				</th>
+			</tr>
+			<tr>
+				<td id="teamOneNameSection">
+					<div id="team_one" class="team_score hidden2">
 						<div id="team_one_score" class="score_value">0</div>
+						<span class="can_steal hidden">THIS FAMILY CAN STEAL!</span>
 						<p>
-							<button id="teamOnePlayButton" class="team_in_play hidden" onclick="setTeamInPlay('one')">PLAY</button>
+							<button id="teamOnePlayButton" class="team_in_play dlf_button_round_corners dlf_button_limegreen hidden" onclick="setTeamInPlay('one')">PLAY</button>
 						</p>
 					</div>
 				</td>
 				<td>
-					<h1 id="game_name">Family Feud
-
-					</h1>
+					<!-- <h1 id="game_name">Family Feud </h1> -->
+					
 					<h3 id="current_score_label" class="hidden current_score_section" style="margin:0px;">
 						Current Score:
 					</h3>
 					<div id="current_score" class="score_value hidden current_score_section">0</div>
-					<p id="game_code_label_section" class="hidden" style="font-size:125%;">
+					
+				</td>
+				<td id="teamTwoNameSection" style="text-align:right;padding-right:5%;">
+					<div id="team_two" class = "team_score hidden2">
+						<div id="team_two_score" class="score_value">0</div>
+						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
+						<p>
+							<button id="teamTwoPlayButton" class="team_in_play dlf_button_round_corners dlf_button_limegreen hidden" onclick="setTeamInPlay('two')">PLAY</button>
+						</p>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td>
+					<p id="game_code_label_section" class="hidden centered" style="font-size:100%; margin-top:0px; ">
 						<span>Game Code: </span>
 						<span id="game_code" class="emphasis_orange"></span></h1>	
 					</p>
 				</td>
-				<td style="text-align:right;padding-right:5%;">
-					<div id="team_two" class = "team_score">
-						<h1 contenteditable="true" data-team="team_two" class="team_name_box">Family Name #2</h1>	
-						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
-						<div id="team_two_score" class="score_value">0</div>
-						<p>
-							<button id="teamTwoPlayButton" class="team_in_play hidden" onclick="setTeamInPlay('two')">PLAY</button>
-						</p>
-					</div>
-				</td>
+				<td>&nbsp;</td>
 			</tr>
 		</table>
 	</div>
 	<hr>
 
+	<!-- A section for any error messages or notifications -->
+	<div id="notificationMessageSection" class="centered dlf_center_block_medium">
+		<p id="notificationMessage" style="color:red;"></p>
+	</div>
+
+	<!-- Enter the family names first -->
+	<div id="enterFamilyNamesSection" class="centered dlf_center_block_large hidden" >
+		<h2>Set Family Names</h2>
+		<div class="dlf_center_block_medium">
+			<table style='width:100%;' class="centered">
+				<tr>
+					<td>
+						<label for="">Family Name #1</label><br/>
+						<input type="text" id="enterFamilyName1" placeholder="Enter family name #1">
+					</td>
+					<td>
+						<label for="">Family Name #2</label><br/>
+						<input type="text" id="enterFamilyName2" placeholder="Enter familiy name #2">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<br/><br/>
+		<button class="dlf_button_round_corners dlf_button_blue" onclick="onSetFamilyNames()">SET FAMILY NAMES</button>
+
+	</div>
+	
+	<!-- To start the game, enter the given game code -->
+	<div id="startGameSection" class="centered dlf_center_block_large">	
+		<label for="gameCodeValue">Enter Game Code</label><br/>
+		<input id="gameCodeValue" type="text" placeholder="Enter the game code">
+		<br/><br/>
+		<button id="startGameButton" onclick="onStartGame()" class="dlf_button_round_corners dlf_button_large dlf_button_limegreen">START GAME</button>
+	</div>
+
+	<!-- The questions table -->
+	
 	<div id="game_table_section" class="hidden">
 
 		<h1 id="round_name" class="centered">Round #0</h1>
 
-		<h1 id="face_off" class="face_off_element emphasis hidden" onclick="onFaceOff()">Face Off!</h1>
+		<div id="wrong_answer_section" style="margin-bottom:2%"></div>
 
 		<div id="time_view" class="hidden">
 			<div id="time_view_regular" style="font-size:50%;">
-				<!-- <span id="timer_minute" class="timer_value">00:</span> -->
 				<span id="timer_second" class="timer_value">20</span>
 				<span>&nbsp;</span>
 				<span onclick="Timer.startTimer()" id="timer_start" class="timer_buttons fa fa-play" style="font-size:45px;"></span>
@@ -69,10 +132,8 @@
 				<span onclick="Timer.resetTimer()" id="timer_reset" class="timer_buttons fa fa-refresh" style="display:none; font-size:45px;"></span>
 			</div>
 		</div>
-
-		<img id="loading_gif" src="../assets/img/loading1.gif">
-
-		<table id="game_table" class="hidden" cellpadding="0">
+		<img id="loading_gif" class="hidden" src="https://dejai.github.io/scripts/img/loading1.gif">
+		<table id="game_table" class="hidden2" cellpadding="0">
 			<colgroup>
 				<col width="250">
 				<col width="21">
@@ -152,7 +213,18 @@
 		</p>
 	</div>
 	
-	<div id="wrong_answer_section"></div>
+	<!-- The next round / fast money buttons -->
+	<div id="game_action_button_section">
+		<!-- <hr style="margin-top:10%;" class="game_action_buttons hidden"/> -->
+		<button id="nextRoundButton" onclick="onNextRound()" class="button_mash dlf_button_round_corners dlf_button_green game_action_buttons hidden">
+			FIRST ROUND
+		</button>
+		<!-- <a href="../fastmoney/" target="_blank" class="pass_through_params">
+			<button id="fast_money_button" class="button_mash game_action_buttons hidden">FAST MONEY</button>	
+		</a> -->
+	</div>
+
+	<!-- The loaded sounds -->
 	<div id="sound_section">
 		<audio id="wrong_answer_sound">
 			<source src="../assets/audio/wrong_answer.mp3" type="audio/mpeg">
@@ -167,33 +239,17 @@
 			<source src="../assets/audio/theme_song.mp3" type="audio/mpeg">
 		</audio>
 	</div>
-
-	<div id="game_action_button_section">
-		<p class="pregame_action_buttons">
-			<button id="startGameButton" onclick="onStartGame()" class="button_mash">START GAME</button>
-		</p>
-		<a href="../rules/" target="_blank" class="pregame_action_buttons">
-			<button class="button_mash">REVIEW RULES</button>
-		</a>
-		<hr style="margin-top:10%;" class="game_action_buttons hidden"/>
-		<button id="next_round_button" onclick="onNextRound()" class="button_mash game_action_buttons hidden">
-			NEXT ROUND
-		</button>	
-		<a href="../fastmoney/" target="_blank" class="pass_through_params">
-			<button id="fast_money_button" class="button_mash game_action_buttons hidden">FAST MONEY</button>	
-		</a>
-		<br/><br/>
-		<button id="end_game_button" class="button_mash game_action_buttons hidden" onclick="onEndGame()">
-			END GAME
-		</button>			
-	</div>
-
 	
 </body>
 	<!-- Common Code -->
-	<script src="../src/common.js"></script>
+	<!-- <script src="../src/common.js"></script> -->
+	<script src="https://dejai.github.io/scripts/js/common.js"></script>
+
 	<!-- My Trello code -->
-	<script src="../src/trello.js"></script>
+	<!-- <script src="../src/trello.js"></script> -->
+	<script src="https://dejai.github.io/scripts/js/trellowrapper.js"></script>
+	<script src="../src/trellohelper.js"></script>
+
 	<!-- My Source JS -->
 	<script src="../src/timer.js"></script>
 	<script src="../src/checkTestRun.js"></script>
