@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+<head>
+	<title>Family Feud - Host</title>
+	<link rel="stylesheet" type="text/css" href="../src/game.css">
+	<link rel="stylesheet" type="text/css" href="https://dejai.github.io/scripts/css/dlf_styles.css"/>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+	<div id="menu">
+		<h1 id="game_name">Family Feud &mdash; Fast Money
+			<p style="font-size:75%;">
+				<span>Game Code: </span>
+				<span id="game_code" class="emphasis_orange"></span></h1>	
+			</p>
+		</h1>
+      	<a id="back_to_admin" href="../host/" class="back_button_link2">
+      		<button class=" dlf_button dlf_button_round_corners fa fa-caret-square-o-left">&nbsp;NEW GAME</button>
+      	</a>
+      	<br/><br/>
+	</div>
+	<hr style="clear:both;"/>
+
+	<div id="loadingSection" class="centered">
+		<!-- Used to show the loading gif -->
+	</div>
+
+	<div id="questionsSection" class="centered hidden">		
+		<div id="fast_money_question_1" class="question_section leftaligned">
+			<h2>Question #1</h2>
+			<h1 class="question"></h1>
+			<button class="fastmoney_reveal_answers button_mash hidden" onclick="onToggleAnswersForHost(event)">Reveal Answers</button>
+			<ul class="fastmoney_answers hidden"></ul>
+		</div>
+		<div id="fast_money_question_2" class="question_section leftaligned">
+			<h2>Question #2</h2>
+			<h1 class="question"></h1>
+			<button class="fastmoney_reveal_answers button_mash hidden" onclick="onToggleAnswersForHost(event)">Reveal Answers</button>
+			<ul class="fastmoney_answers hidden"></ul>
+		</div>
+		<div id="fast_money_question_3" class="question_section leftaligned">
+			<h2>Question #3</h2>
+			<h1 class="question"></h1>
+			<button class="fastmoney_reveal_answers button_mash hidden" onclick="onToggleAnswersForHost(event)">Reveal Answers</button>
+			<ul class="fastmoney_answers hidden"></ul>
+		</div>
+		<div id="fast_money_question_4" class="question_section leftaligned">
+			<h2>Question #4</h2>
+			<h1 class="question"></h1>
+			<button class="fastmoney_reveal_answers button_mash hidden" onclick="onToggleAnswersForHost(event)">Reveal Answers</button>
+			<ul class="fastmoney_answers hidden"></ul>
+		</div>
+		<div id="fast_money_question_5" class="question_section leftaligned">
+			<h2>Question #5</h2>
+			<h1 class="question"></h1>
+			<button class="fastmoney_reveal_answers button_mash hidden" onclick="onToggleAnswersForHost(event)">Reveal Answers</button>
+			<ul class="fastmoney_answers hidden"></ul>
+		</div>
+	</div>
+	
+</body>
+
+	<!-- Common Code -->
+	<script src="https://dejai.github.io/scripts/js/common.js"></script>
+
+	<!-- My Trello code -->
+	<script src="https://dejai.github.io/scripts/js/trellowrapper.js"></script>
+	<script src="../src/trellohelper.js"></script>
+
+	<!-- My Source JS -->
+	<script src="../src/checkTestRun.js"></script>
+	<script src="../src/fastmoney-host.js"></script>
+</html>

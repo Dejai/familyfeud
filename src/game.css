@@ -72,7 +72,7 @@
 	.fastmoney_answers { font-size:200%; } 
 
 /* ADMIN VIEW */
-	#current_question_section{ border:1px solid white; }
+	/* #current_question_section{ border:1px solid white; } */
 	#current_question { color:red; }
 
 	#game_table_admin { border:none; width:100%; border-collapse: collapse; font-size:100%; }

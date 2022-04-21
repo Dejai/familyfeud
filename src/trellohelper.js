@@ -2,6 +2,8 @@
 var TRELLO_LABELS = {}
 var QUESTIONS = {};
 var QUESTION_KEYS = [];
+// The pools of questions
+var QUESTION_POOL = { "regular": [], "fastMoney":[] }
 
 
 // Get and map the labels available on this board
@@ -15,6 +17,38 @@ function getTrelloLabels()
 			TRELLO_LABELS[labelName] = labelID;
 		});
 	});
+}
+
+// Get questions from the pool of questions; Total of -1 means get them all; 
+function getPoolQuestions(poolName, successCallback)
+{
+    // Get count of regular questions
+	MyTrello.get_cards_by_list_name(poolName, (cardData)=>{
+		
+        let response = myajax.GetJSON(cardData.responseText);
+
+        if(response.length >= 1 && successCallback != undefined)
+        {
+            successCallback(response);
+        }
+	});
+}
+
+// Select random pool questions
+function selectRandomPoolQuestions(poolName, count)
+{
+    poolSize = QUESTION_POOL[poolName]?.length ?? 0;
+
+    let questions = [];
+	// Select the random questions;
+	for(var idx = 0; idx < count; idx++)
+	{
+		let rand_id = Math.floor(Math.random()*poolSize);
+        rand_question = QUESTION_POOL[poolName][rand_id]
+        questions.push(rand_question);
+	}
+
+    return questions;
 }
 
 // Get the questions from a specific list;
@@ -77,7 +111,7 @@ function getGameQuestions(listName, questionType, successCallback, failureCallba
 function getNextQuestion(roundNumber)
 {
     let question = undefined;
-    if(roundNumber <= QUESTION_KEYS.length )
+    if(roundNumber <= QUESTION_KEYS.length)
     {
         question = QUESTIONS[ QUESTION_KEYS[roundNumber-1] ];
     }

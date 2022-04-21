@@ -12,98 +12,76 @@ var CURRENT_PLAYER = "one";
 var active_element = undefined;
 var blinking_interval = undefined;
 
+var LOADING_GIF = `<img src="https://dejai.github.io/scripts/img/loading1.gif">`
+
 
 /***************************** GETTING STARTED **********************************/
 
 // Once doc is ready
 mydoc.ready(function(){
 
-	let path = location.pathname;
+	// Set the board name
+	MyTrello.SetBoardName("familyfeud");
 
-	let query_map = mydoc.get_query_map();
-	
-	
-	// Check if admin
-	checkAdmin(query_map)
+	// Load the labels
+	getTrelloLabels();
 
 	//Check Test run
 	IS_TEST_RUN = checkTestRun();
 
-	// Check for the game code
-	// checkGameCode();
+	// Get the game code from the URL (if available)
+	let query_map = mydoc.get_query_map();
+	let gameCode = query_map["gamecode"] ?? undefined;
 
-
-	// Set fast money path variable
-	if(path.endsWith("fastmoney") || path.endsWith("fastmoney/")){ 
-		FAST_MONEY_VIEW = true;
-		window.addEventListener("beforeunload", onFastMoneyClosePage);
-		fastMoneyListenerOnKeyUp();
-
-
-		// Set default time & buzzer sound
-		Timer.resetTimer();
-		if(Timer)
-		{
-			Timer.resetTimer();			
-			Timer.setTimeUpCallback(function(){
-				document.getElementById("wrong_answer_sound").play();
-			});
-		}
-	}
-	else 
+	if(gameCode != undefined)
 	{
-		checkGameListID();
+		// Show loading gif while getting things together
+		MyNotification.notify("#loadingSection", LOADING_GIF);
+
+		// Get the set of questions from the
+		getGameQuestions(gameCode,"fast money",()=>{
+
+
+			// Check if admin
+			mydoc.showContent("#back_to_host"); 
+			mydoc.showContent("#game_action_buttons .fastmoney_host"); 
+			// mydoc.showContent(".fastmoney_reveal_answers");
+			// mydoc.hideContent(".fastmoney_answers");
+
+			// Add the fast money listeners;
+			fastMoneyListenerOnKeyUp();
+
+			// Set default time & buzzer sound
+			Timer.resetTimer();
+			if(Timer)
+			{
+				Timer.resetTimer();			
+				Timer.setTimeUpCallback(function(){
+					document.getElementById("wrong_answer_sound").play();
+				});
+			}
+
+			// Set the game code where it should be set;
+			setGameCode(gameCode);
+
+			// Hide loading;
+			MyNotification.clear("#loadingSection");
+
+			// Show game section
+			mydoc.showContent("#admin_game_section");
+		},
+		// If not successful
+		()=>{
+			errMsg = "Could not find a game code: " + gameCode;
+			MyNotification.notify("#loadingSection", errMsg);
+		});
+	}
+	else
+	{
+		// Show the admin how many questions are left
+		mydoc.showContent("#newGameSection");
 	}
 });
-
-// Check if admin or host
-function checkAdmin(query_map)
-{
-	let is_admin = (query_map.hasOwnProperty("admin") && query_map["admin"] == 1);
-
-	if(is_admin)
-	{ 
-		mydoc.showContent("#back_to_admin"); 
-		mydoc.showContent("#game_action_buttons .fastmoney_admin"); 
-		mydoc.showContent(".fastmoney_answers");
-	}
-	else 
-	{ 
-		mydoc.showContent("#back_to_host"); 
-		mydoc.showContent("#game_action_buttons .fastmoney_host"); 
-		mydoc.showContent(".fastmoney_reveal_answers");
-		mydoc.hideContent(".fastmoney_answers");
-
-	}
-}
-
-// Check the query param for game code
-function checkGameCode()
-{
-	let query_map = mydoc.get_query_map();
-	if(query_map.hasOwnProperty("gamecode"))
-	{
-		setGameCode(query_map["gamecode"]);
-	}
-	else
-	{
-		alert("Game Code not provided. :( ");
-	}
-}
-
-// Checks if the game list ID is set
-function checkGameListID()
-{
-	let query_map = mydoc.get_query_map();
-	if(query_map.hasOwnProperty("listid"))
-	{
-		MyTrello.curr_game_list_id = query_map["listid"];
-	}
-	else
-	{
-		alert("Game ID not provided. :( ");
-	}
-}
 
 // Adds a listener for keystrokes (on keyup);
 function fastMoneyListenerOnKeyUp()
