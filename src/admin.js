@@ -81,8 +81,8 @@ function getCountOfCardsAvailable()
 
 		if(QUESTION_POOL["fastMoney"].length > 0)
 		{
-			mydoc.showContent("#newGameButton");
-			mydoc.showContent("#testRunButton");
+			mydoc.showContent("#newGameRow");
+			mydoc.showContent("#testRunRow");
 		}
 	});
 
@@ -93,9 +93,8 @@ function getCountOfCardsAvailable()
 
 		if(QUESTION_POOL["regular"].length > 0)
 		{
-			mydoc.showContent("#newGameButton");
-			mydoc.showContent("#testRunButton");
-			
+			mydoc.showContent("#newGameRow");
+			mydoc.showContent("#testRunRow");
 		}
 	});
 }

@@ -181,7 +181,6 @@ function onClosePage(event)
 function gameBoardListenerOnKeyUp()
 {
 	document.addEventListener("keyup", function(event){
-		// console.log(event);
 		switch(event.code)
 		{
 			case "Escape":
@@ -303,6 +302,11 @@ function loadNextQuestion()
 	mydoc.hideContent("#loading_gif");
 	mydoc.showContent("#game_table");
 	mydoc.showContent("#game_table_section");
+
+	if(IS_TEST_RUN)
+	{
+		mydoc.showContent("#howToRevealInstructions");
+	}
 	
 
 	console.log("Would load the single card");
@@ -390,8 +394,7 @@ function onNextRound()
 	// Making moves based on type of round
 	if(CURR_ROUND == 4 || HAS_WINNER)
 	{
-		let fastMoneyPath = "../fastmoney/";
-		window.open(fastMoneyPath);
+		location.href = location.origin + "/fastmoney";
 	}
 	else
 	{

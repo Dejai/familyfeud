@@ -89,6 +89,11 @@ function loadFastMoneyQuestions()
 
 		let answers_ele = document.querySelector(`#fast_money_question_${ctr} ul.fastmoney_answers`);
 		answers = question["checklists"]?.[0]?.checkItems ?? [];
+		answers = answers.sort(function(a,b){
+			aDig = Number(a["name"]?.split(" ~ ")?.[1]) ?? 0;
+			bDig = Number(b["name"]?.split(" ~ ")?.[1]) ?? 0;
+			return  bDig - aDig;
+		});
 		answers.forEach(function(obj){
 			let answer_text = (IS_TEST_RUN) ? simpleEncode(obj["name"]) : obj["name"]; //Adjust answer if in TEST mode
 			answers_ele.innerHTML += `<li>${answer_text}</li>`

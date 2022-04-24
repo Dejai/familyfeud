@@ -141,7 +141,7 @@
 			</div>
 		</div>
 		<br/>
-		<img id="loading_gif" class="hidden" src="https://dejai.github.io/scripts/img/loading1.gif">
+		<img id="loading_gif" class="hidden" src="https://dejai.github.io/scripts/img/loading1.gif">		
 		<table id="game_table" class="hidden2" cellpadding="0">
 			<colgroup>
 				<col width="250">
@@ -217,9 +217,13 @@
 			</tbody>
 		</table>
 
-		<p id="no_correct_answers" class="face_off_element hidden pointer" onclick="onNoCorrectAnswers()">
+		<p id="no_correct_answers" style="color:red;" class="face_off_element hidden pointer" onclick="onNoCorrectAnswers()">
 			No Correct Answers Given
 		</p>
+		<div id="howToRevealInstructions" class="hidden">
+			<p>Use the <span class="keyboardButton"">1</span> through <span class="keyboardButton"">8</span> keyboard keys to reveal an answer. </p>
+			<p>Use the <span class="keyboardButton"">ESC</span> keyboard to give a wrong answer.</p>
+		</div>
 	</div>
 	
 	

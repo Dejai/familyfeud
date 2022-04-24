@@ -9,8 +9,7 @@
 </head>
 <body>
 	<div id="menu">
-		<h1 id="game_name">Family Feud &mdash; Admin View
-		</h1>	
+		<h1 id="game_name">Family Feud &mdash; Admin View</h1>	
 
 		<p>Use this page to manage a game.</p>
 
@@ -29,25 +28,41 @@
 					<th>
 						<p>Regular Questions:</p>
 					</th>
-					<td><p id="regularQuestionsAvailable">...</p></td>
+					<td>
+						<p id="regularQuestionsAvailable">
+							<img src="https://dejai.github.io/scripts/img/loading1.gif" style="width:25px;height:25px;">
+						</p>
+					</td>
 				</tr>
 				<tr>
 					<th>
 						<p>Fast Money Questions:</p>
 					</th>
-					<td><p id="fastMoneyQuestionsAvailable">...</p></td>
+					<td>
+						<p id="fastMoneyQuestionsAvailable">
+							<img src="https://dejai.github.io/scripts/img/loading1.gif" style="width:25px;height:25px;">
+						</p>
+					</td>
 				</tr>
 			</table>
 		</div>
 		<hr>
 		<div class="centered dlf_center_block_medium">
-			<button id="testRunButton" class="hidden dlf_button dlf_button_xxxlarge dlf_button_round_corners dlf_button_limegreen" onclick="onNewGame(false)">
-				Test Run
-			</button>
-			&nbsp;
-			<button id="newGameButton" class="hidden dlf_button dlf_button_xxxlarge dlf_button_round_corners dlf_button_blue" onclick="onNewGame(true)">
-				New Game
-			</button>
+			<p id="testRunRow" class="hidden">
+				Practice how to play.
+				<br/>
+				<button id="testRunButton" class="dlf_button dlf_button_xxlarge dlf_button_round_corners dlf_button_limegreen" onclick="onNewGame(false)">
+					PRACTICE GAME
+				</button>
+			</p>
+			<br/>
+			<p id="newGameRow" class="hidden">
+				Run a real game!
+				<br/>
+				<button id="newGameButton" class="dlf_button dlf_button_xxxlarge dlf_button_round_corners dlf_button_blue" onclick="onNewGame(true)">
+					NEW GAME
+				</button>
+			</p>
 		</div>
 	</div>
 

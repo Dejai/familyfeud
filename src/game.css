@@ -45,10 +45,10 @@
 	.themeSongPlaying { color:blue !important; }
 
 /* HOME PAGE */
-	.identify_yourself { display:block; text-align:center; padding:2%; width:40%; margin:auto; cursor:pointer;
+	/* .identify_yourself { display:block; text-align:center; padding:2%; width:40%; margin:auto; cursor:pointer;
 							 background-color:lightgray; margin-bottom:2%;
 			 }
-	.identify_yourself:hover{background-color:blue; color:yellow; }
+	.identify_yourself:hover{background-color:blue; color:yellow; } */
 
 /* FAST MONEY */
 	.blinking { color:red !important; background-color:red !important; border:1px solid red!important;}
