@@ -68,15 +68,11 @@ mydoc.ready(function(){
 
 function onEnterGame()
 {
-
-
 	var ele = document.querySelector("#game_code_section input");
 	let entered_code = ele.value.toUpperCase();
 
 	// Show loading GIF
 	MyNotification.notify("#loadingSection", LOADING_GIF);
-
-
 	let errMsg = "Could not find game code: " + entered_code;
 
 	MyTrello.get_list_by_name(entered_code, (listData)=>{
@@ -94,39 +90,6 @@ function onEnterGame()
 	},()=>{
 		MyNotification.notify("#loadingSection", errMsg);
 	});
-
-	// if(entered_code == "TEST")
-	// {
-	// 	// mydoc.addTestBanner();
-	// 	mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
-	// }
-
-	// MyTrello.get_lists(function(data){
-	// 	response = JSON.parse(data.responseText);
-
-	// 	var game_found;
-	// 	for(var idx = 0; idx < response.length; idx++)
-	// 	{
-	// 		var obj = response[idx];
-	// 		let list_name = obj["name"].toUpperCase();
-	// 		let list_id = obj["id"];
-
-	// 		if(list_name == entered_code)
-	// 		{
-	// 			game_found = true;
-	// 			CURR_GAME_CODE = list_name;
-	// 			MyTrello.setCurrentGameListID(list_id);
-	// 			mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);	
-	// 			setGameCode(list_name);
-	// 			showHostSection();
-	// 			break;
-	// 		}
-	// 	}
-	// 	if(!game_found)
-	// 	{
-	// 		alert("Game Not Found with Given Game Code!");
-	// 	}
-	// });
 }
 
 // Going to the next round;
@@ -168,10 +131,9 @@ function loadNextQuestion()
 
 	if(nextQuestion != undefined)
 	{
-
 		// Set the question text;
 		let questionText = nextQuestion["name"] ?? "N/A";
-		// question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode
+		questionText = (IS_TEST_RUN) ? simpleEncode(questionText) : questionText; //Adjust question if in TEST mode
 		mydoc.loadContent(questionText, "current_question");
 	}
 }

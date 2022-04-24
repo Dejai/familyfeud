@@ -28,11 +28,14 @@ mydoc.ready(function(){
 	// Load the labels
 	getTrelloLabels();
 
-	IS_TEST_RUN = checkTestRun();
+	// Get the map of search params
+	let query_map = mydoc.get_query_map();
 
 	// Get the game code from the URL (if available)
-	let query_map = mydoc.get_query_map();
-	let gameCode = query_map["gamecode"] ?? undefined;
+	let gameCode = mydoc.get_query_param("gamecode");
+
+	// Check if we are doing a TEST RUN
+	IS_TEST_RUN = checkTestRun();
 
 	if(gameCode != undefined)
 	{
@@ -79,6 +82,7 @@ function getCountOfCardsAvailable()
 		if(QUESTION_POOL["fastMoney"].length > 0)
 		{
 			mydoc.showContent("#newGameButton");
+			mydoc.showContent("#testRunButton");
 		}
 	});
 
@@ -90,16 +94,17 @@ function getCountOfCardsAvailable()
 		if(QUESTION_POOL["regular"].length > 0)
 		{
 			mydoc.showContent("#newGameButton");
+			mydoc.showContent("#testRunButton");
+			
 		}
 	});
 }
 
 // Create a new game - including setting up a new list
-function onNewGame()
+function onNewGame(isRealGame=false)
 {
-	// First setup a new list
-	let gameCode = Helper.getCode(4);
-	console.log("Game Code: " + gameCode);
+	// The game code default
+	let gameCode = "";
 
 	let regularQuestions = selectRandomPoolQuestions("regular",4);
 	let fastMoneyQuestions = selectRandomPoolQuestions("fastMoney",5);
@@ -109,28 +114,64 @@ function onNewGame()
 	// Show loading gif
 	MyNotification.notify("#loadingSection", LOADING_GIF);
 
-	MyTrello.create_list(gameCode, (newListData)=>{
-		
-		let newListResp = myajax.GetJSON(newListData.responseText);
-		newListID = newListResp?.id
+	if(isRealGame)
+	{
+		gameCode = Helper.getCode(4);
+		console.log("Game Code: " + gameCode);
 
-		if(newListID != undefined)
-		{
+		MyTrello.create_list(gameCode, (newListData)=>{
+			
+			let newListResp = myajax.GetJSON(newListData.responseText);
+			newListID = newListResp?.id;
 
-			let cardsMoved = 0;
+			if(newListID != undefined)
+			{
+				moveCardsToList(allQuestions, gameCode, newListID, isRealGame);
+			}
+			else
+			{
+				MyNotification.notify("#loadingSection", "Could not create the new list.");
+			}
+		});
+	}
+	else
+	{
+		gameCode = "TEST"; 
 
-			allQuestions.forEach((card)=>{
-				MyTrello.update_card_list(card.id, newListID, (data)=>{
+		MyTrello.get_list_by_name("TEST",(listData)=>{
 
-					cardsMoved += 1;
+			let listResp = myajax.GetJSON(listData.responseText);
+			let listID = listResp[0]?.id;
 
-					if(cardsMoved == allQuestions.length)
-					{
-						location.href = location + "?gamecode="+gameCode.toUpperCase();
-					}
-				});
-			});
-		}
+			if(listID != undefined)
+			{
+				moveCardsToList(allQuestions, gameCode, listID, isRealGame);
+			}
+			else
+			{
+				MyNotification.notify("#loadingSection", "Could not find the test list.");
+			}
+		});
+	}
+}
+
+// Move cards for the game to the respective list
+function moveCardsToList(questions, gameCode, listID, isRealGame=false)
+{
+	let cardsMoved = 0;
+
+	questions.forEach((card)=>{
+		MyTrello.update_card_list(card.id, listID, (data)=>{
+
+			cardsMoved += 1;
+
+			if(cardsMoved == questions.length)
+			{
+				setTimeout(()=>{
+					location.href = location.origin + location.pathname + "?gamecode="+gameCode.toUpperCase();;
+				},2000);
+			}
+		});
 	});
 }
 
@@ -169,7 +210,7 @@ function onNextRound(increment=1)
 	}
 }
 
-// Load the specific card id;
+// Load the specific card question;
 function loadNextQuestion()
 {
 	let nextQuestion  = getNextQuestion(CURR_ROUND);
@@ -178,7 +219,7 @@ function loadNextQuestion()
 	{
 		// Set the question text;
 		let questionText = nextQuestion["name"] ?? "N/A";
-		// question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode
+		questionText = (IS_TEST_RUN) ? simpleEncode(questionText) : questionText; //Adjust question if in TEST mode
 		mydoc.loadContent(questionText, "current_question");
 
 		// Setup the Hall of Fame answer option;
@@ -197,8 +238,6 @@ function loadNextQuestion()
 		// Show the section
 		mydoc.showContent("#gameQuestionAndAnswerSection");
 
-		// If not the first round, show previous round button
-
 	}
 }
 
@@ -215,7 +254,7 @@ function loadAdminAnswers(checklist)
 		counter++;
 		splits = obj["name"].split("~");
 		answer_text = splits[0].trim();
-		answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
+		answer_text = (IS_TEST_RUN) ? simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
 		answer_count = splits[1].trim();
 
 
@@ -250,16 +289,6 @@ function setGameCode(value)
 	fastMoneyLink.href += `&gamecode=${CURR_GAME_CODE}`;
 }
 
-function setGameListId(listID)
-{
-	CURR_GAME_LIST_ID = listID
-	let links = Array.from(document.querySelectorAll(".pass_through_params"));
-	console.log(links);
-	links.forEach(function(obj){
-		let query = (obj.href.includes("?")) ? `&listid=${listID}` : `?listid=${listID}`;
-		obj.href += query;
-	});	
-}
 
 function setHallOfFameLink(cardID)
 {

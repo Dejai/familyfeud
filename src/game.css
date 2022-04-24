@@ -41,6 +41,9 @@
 	/*.back_button_link { float:left; clear:both; }*/
 	/*.back_button_link button { border:none; font-size:25px; cursor:pointer;}*/
 
+	.themeSongPaused { color:gray !important; }
+	.themeSongPlaying { color:blue !important; }
+
 /* HOME PAGE */
 	.identify_yourself { display:block; text-align:center; padding:2%; width:40%; margin:auto; cursor:pointer;
 							 background-color:lightgray; margin-bottom:2%;
@@ -63,8 +66,8 @@
 	#time_view table {width: 100%;}
 	#timer_second { margin-right:2%; }
 
-	.timer_value { font-size:65px; }
-	.timer_buttons {  cursor:pointer; font-size:45px; }
+	.timer_value { font-size:45px; }
+	.timer_buttons {  cursor:pointer; font-size:25px; }
 
 	.fast_money_points { width:21px; background-color:#0046b7; color:#0046b7;}
 

@@ -17,29 +17,33 @@
 			</colgroup>
 			<tr>
 				<th>
-					<h1 id="teamOneName" data-team="team_one" class="team_name_box">Family Name #1</h1>
+					<h1 id="teamOneName" data-team="team_one" class="team_name_box hidden">Family Name #1</h1>
 				</th>
 				<th>
 					<h1 id="game_name">
 						<span class="teamIndicatorIcon">
-							<i id="teamOneIndicator" class="fa fa-arrow-left team_indicators pointer" onclick="setTeamInPlay('one')"></i>
+							<i id="teamOneIndicator" class="fa fa-arrow-left team_indicators pointer invisible" onclick="setTeamInPlay('one')"></i>
 							&nbsp;
 						</span>
-						<span onclick="toggleThemeSong()" class="pointer">Family Feud</span>
+						<span  class="pointer">
+							Family Feud
+						</span>
 						<span class="teamIndicatorIcon">
 							&nbsp;
-							<i id="teamTwoIndicator" class="fa fa-arrow-right team_indicators pointer" onclick="setTeamInPlay('two')"></i>
+							<i id="teamTwoIndicator" class="fa fa-arrow-right team_indicators pointer invisible" onclick="setTeamInPlay('two')"></i>
 						</span>
+						<br/>
+						<i id="themeSongIcon" class="fa fa-volume-up pointer themeSongPaused invisible" onclick="toggleThemeSong()" ></i>
 					</h1>
 					
 				</th>
 				<th>
-					<h1 id="teamTwoName" data-team="team_two" class="team_name_box">Family Name #2</h1>	
+					<h1 id="teamTwoName" data-team="team_two" class="team_name_box hidden">Family Name #2</h1>	
 				</th>
 			</tr>
 			<tr>
 				<td id="teamOneNameSection">
-					<div id="team_one" class="team_score hidden2">
+					<div id="team_one" class="team_score hidden">
 						<div id="team_one_score" class="score_value">0</div>
 						<span class="can_steal hidden">THIS FAMILY CAN STEAL!</span>
 						<p>
@@ -47,17 +51,15 @@
 						</p>
 					</div>
 				</td>
-				<td>
-					<!-- <h1 id="game_name">Family Feud </h1> -->
-					
+				<td>					
 					<h3 id="current_score_label" class="hidden current_score_section" style="margin:0px;">
-						Current Score:
+						Current Round Points
 					</h3>
 					<div id="current_score" class="score_value hidden current_score_section">0</div>
 					
 				</td>
 				<td id="teamTwoNameSection" style="text-align:right;padding-right:5%;">
-					<div id="team_two" class = "team_score hidden2">
+					<div id="team_two" class = "team_score hidden">
 						<div id="team_two_score" class="score_value">0</div>
 						<span class="can_steal hidden">THIS TEAM CAN STEAL!</span>
 						<p>
@@ -85,6 +87,14 @@
 		<p id="notificationMessage" style="color:red;"></p>
 	</div>
 
+	<!-- To start the game, enter the given game code -->
+	<div id="startGameSection" class="centered dlf_center_block_large hidden">	
+		<label for="gameCodeValue">Enter Game Code</label><br/>
+		<input id="gameCodeValue" type="text" placeholder="Enter the game code">
+		<br/><br/>
+		<button id="startGameButton" onclick="onStartGame()" class="dlf_button_round_corners dlf_button_large dlf_button_limegreen">START GAME</button>
+	</div>
+
 	<!-- Enter the family names first -->
 	<div id="enterFamilyNamesSection" class="centered dlf_center_block_large hidden" >
 		<h2>Set Family Names</h2>
@@ -107,13 +117,7 @@
 
 	</div>
 	
-	<!-- To start the game, enter the given game code -->
-	<div id="startGameSection" class="centered dlf_center_block_large">	
-		<label for="gameCodeValue">Enter Game Code</label><br/>
-		<input id="gameCodeValue" type="text" placeholder="Enter the game code">
-		<br/><br/>
-		<button id="startGameButton" onclick="onStartGame()" class="dlf_button_round_corners dlf_button_large dlf_button_limegreen">START GAME</button>
-	</div>
+	
 
 	<!-- The questions table -->
 	
@@ -123,15 +127,20 @@
 
 		<div id="wrong_answer_section" style="margin-bottom:2%"></div>
 
-		<div id="time_view" class="hidden">
+		<div >
 			<div id="time_view_regular" style="font-size:50%;">
-				<span id="timer_second" class="timer_value">20</span>
-				<span>&nbsp;</span>
-				<span onclick="Timer.startTimer()" id="timer_start" class="timer_buttons fa fa-play" style="font-size:45px;"></span>
-				<span onclick="Timer.stopTimer()" id="timer_stop" class="timer_buttons fa fa-pause" style="display:none; font-size:45px;"></span>
-				<span onclick="Timer.resetTimer()" id="timer_reset" class="timer_buttons fa fa-refresh" style="display:none; font-size:45px;"></span>
+				<i id="countdownTimerIcon" style="font-size:45px;" class="fa fa-clock-o timer_value" onclick="toggleCountdownTimer()"></i>
+				<span id="time_view" class="hidden">
+					<span id="timer_second" class="timer_value">20</span>
+					<span>&nbsp;</span>
+					<span onclick="Timer.startTimer()" id="timer_start" class="timer_buttons fa fa-play" style="font-size:45px;"></span>
+					<span onclick="Timer.stopTimer()" id="timer_stop" class="timer_buttons fa fa-pause" style="display:none; font-size:45px;"></span>
+					<span onclick="toggleCountdownTimer(true)" id="timer_reset" class="timer_buttons fa fa-refresh" style="display:none; font-size:45px;"></span>
+				</span>
+				
 			</div>
 		</div>
+		<br/>
 		<img id="loading_gif" class="hidden" src="https://dejai.github.io/scripts/img/loading1.gif">
 		<table id="game_table" class="hidden2" cellpadding="0">
 			<colgroup>
@@ -213,15 +222,12 @@
 		</p>
 	</div>
 	
+	
 	<!-- The next round / fast money buttons -->
 	<div id="game_action_button_section">
-		<!-- <hr style="margin-top:10%;" class="game_action_buttons hidden"/> -->
 		<button id="nextRoundButton" onclick="onNextRound()" class="button_mash dlf_button_round_corners dlf_button_green game_action_buttons hidden">
 			FIRST ROUND
 		</button>
-		<!-- <a href="../fastmoney/" target="_blank" class="pass_through_params">
-			<button id="fast_money_button" class="button_mash game_action_buttons hidden">FAST MONEY</button>	
-		</a> -->
 	</div>
 
 	<!-- The loaded sounds -->

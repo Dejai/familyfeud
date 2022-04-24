@@ -68,37 +68,41 @@ function getGameQuestions(listName, questionType, successCallback, failureCallba
 			return a.pos - b.pos;
 		});
 
-        // Loop through the cards and setup
-        theCards.forEach( (question)=>{
+        if(theCards.length > 0)
+        {
+            // Loop through the cards and setup
+            theCards.forEach( (question)=>{
+                    let cardLabels = question["idLabels"];
+                    let is5answer = cardLabels.includes(TRELLO_LABELS["5 answers"]);
+                    let is6answer = cardLabels.includes(TRELLO_LABELS["6 answers"]);
+                    let is7answer = cardLabels.includes(TRELLO_LABELS["7 answers"]);
+                    let is8answer = cardLabels.includes(TRELLO_LABELS["8 answers"]);
+                    let isFastMoney = cardLabels.includes(TRELLO_LABELS["Fast Money"]);
 
-            let cardLabels = question["idLabels"];
-            let is5answer = cardLabels.includes(TRELLO_LABELS["5 answers"]);
-            let is6answer = cardLabels.includes(TRELLO_LABELS["6 answers"]);
-            let is7answer = cardLabels.includes(TRELLO_LABELS["7 answers"]);
-            let is8answer = cardLabels.includes(TRELLO_LABELS["8 answers"]);
-            let isFastMoney = cardLabels.includes(TRELLO_LABELS["Fast Money"]);
-
-            let isEligibleCard = (getFastMoney) ? (isFastMoney) : (is5answer || is6answer || is7answer || is8answer)
-            if(isEligibleCard)
-            {
-                let cardID = question["id"];
-                MyTrello.get_single_card(cardID, (cardData)=>{
-                    let cardResp = myajax.GetJSON(cardData.responseText);
-
-                    let pos = cardResp["pos"];
-                    QUESTIONS[pos] = cardResp;
-                    QUESTION_KEYS = Object.keys(QUESTIONS);
-
-                    if(QUESTION_KEYS.length == expectedQuestions)
+                    let isEligibleCard = (getFastMoney) ? (isFastMoney) : (is5answer || is6answer || is7answer || is8answer)
+                    if(isEligibleCard)
                     {
-                        // Call the success callback
-                        successCallback();
-                    }
-                });
-            }
-        });
+                        let cardID = question["id"];
+                        MyTrello.get_single_card(cardID, (cardData)=>{
+                            let cardResp = myajax.GetJSON(cardData.responseText);
 
-        
+                            let pos = cardResp["pos"];
+                            QUESTIONS[pos] = cardResp;
+                            QUESTION_KEYS = Object.keys(QUESTIONS);
+
+                            if(QUESTION_KEYS.length == expectedQuestions)
+                            {
+                                // Call the success callback
+                                successCallback();
+                            }
+                        });
+                    }
+            });
+        }
+        else
+        {
+            failureCallback();
+        }
     }, 
     // If cannot find that list;
     (data)=>{
@@ -116,4 +120,34 @@ function getNextQuestion(roundNumber)
         question = QUESTIONS[ QUESTION_KEYS[roundNumber-1] ];
     }
     return question;
+}
+
+
+// A simple way to encode the questions during a Test run
+function simpleEncode(value){
+    let characters = "abcdefghijklmnopqrstuvwxyz";
+    let is_upper_case = (value == value.toUpperCase());
+
+    let shift = 7; // "Lucky" number 
+
+    let chars = Array.from(value);
+    let results = [];
+
+    chars.forEach(function(char){
+        let lowerchar = char.toLowerCase();
+        if(characters.includes(lowerchar))
+        {
+            let currIndex = characters.indexOf(lowerchar)+1;
+            let shiftIndex = (currIndex + shift) % 26;
+            let newChar = characters[shiftIndex-1];
+            results.push(newChar);
+        }
+        else
+        {
+            results.push(char);
+        }
+    })
+
+    let encoded = results.join("");
+    return encoded;
 }

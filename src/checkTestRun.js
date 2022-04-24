@@ -11,14 +11,17 @@
 // Sets a flag if this is a TEST RUN
 function checkTestRun()
 {
-	let queryMap = mydoc.get_query_map();
-	var is_test_run = (queryMap != undefined && queryMap.hasOwnProperty("test") && queryMap["test"] == "1")
 
-	if(is_test_run)
+	let testFlag = mydoc.get_query_param("test");
+	let gameCode = mydoc.get_query_param("gamecode");
+	let gameCodeVal = gameCode?.toUpperCase() ?? "N/A";
+	var isTestRun = (testFlag == "1" || gameCodeVal  == "TEST");
+
+	if(isTestRun)
 	{
 		mydoc.addTestBanner();
 		// mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
 	}
 		
-	return is_test_run;
+	return isTestRun;
 }

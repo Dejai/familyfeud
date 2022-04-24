@@ -45,22 +45,48 @@ mydoc.ready(function(){
 	// Load the labels
 	getTrelloLabels();
 
+	let gameCode = mydoc.get_query_param("gamecode");
+
+	IS_TEST_RUN = checkTestRun();
+
 	// Adds listener for game board
-	if(path.includes("/board"))
+	if(gameCode != undefined)
 	{ 
 
-		// TEMPORARY
-		onStartGame();
+		setGameCode(gameCode);
 
-		IS_TEST_RUN = checkTestRun();
+		loading = `<img src="https://dejai.github.io/scripts/img/loading1.gif" style="width:5%;height:5%;">`
+		boardNotification(loading);
 
-		// window.addEventListener("beforeunload", onClosePage);
-		gameBoardListenerOnKeyUp(); 
-		// set default timer time
-		Timer.setTimerDefault(10);
-		Timer.setTimeUpCallback(function(){
-			document.getElementById("duplicate_answer_sound").play();
+		// Get the set of questions from the
+		getGameQuestions(gameCode,"round",()=>{
+			// Clear notificiation
+			boardNotification("");
+
+			// window.addEventListener("beforeunload", onClosePage);
+
+			// set default timer time
+			Timer.setTimerDefault(10);
+			Timer.setTimeUpCallback(function(){
+				document.getElementById("duplicate_answer_sound").play();
+			});
+
+			// Hide start game section
+			mydoc.hideContent("#startGameSection");
+			
+			// Show the section to set family names
+			mydoc.showContent("#enterFamilyNamesSection");
+
+		},
+		// If not successful
+		()=>{
+			errMsg = "Could not find a game code: " + gameCode;
+			boardNotification(errMsg);
 		});
+	}
+	else
+	{
+		mydoc.showContent("#startGameSection");
 	}
 });
 
@@ -90,7 +116,8 @@ function onSetFamilyNames()
 		// Clear any messages
 		boardNotification("");
 
-		console.log("Showing things");
+		// Add the listeners
+		gameBoardListenerOnKeyUp();
 
 		// Hide the section set family names
 		mydoc.hideContent("#enterFamilyNamesSection");
@@ -98,12 +125,23 @@ function onSetFamilyNames()
 		// Set the team names
 		mydoc.loadContent(fname1,"teamOneName");
 		mydoc.loadContent(fname2, "teamTwoName");
+		mydoc.showContent(".team_name_box");
 
 		// Show the team name sections
 		mydoc.showContent(".team_score");
 
-		// Show the start game section
-		mydoc.showContent("#startGameSection");
+		// Show action buttons
+		mydoc.showContent(".game_action_buttons");
+
+		// Enable the next round button
+		toggleNextRoundButton('enable');
+
+		// Show the theme song icon
+		mydoc.removeClass("#themeSongIcon", "invisible");
+
+		// Show current score section
+		mydoc.showContent("#current_score_label");
+		mydoc.showContent("#current_score");
 
 	}
 	else
@@ -117,56 +155,17 @@ function onSetFamilyNames()
 // Start the game
 function onStartGame()
 {
-	// let gameCode = mydoc.getContent("#gameCodeValue")?.value.toUpperCase() ?? "";
-
-	// TEMPORARY
-	gameCode = "TEST";
+	let gameCode = mydoc.getContent("#gameCodeValue")?.value.toUpperCase() ?? "";
 
 	if(gameCode != "")
 	{
-
-		setGameCode(gameCode);
-
-		loading = `<img src="https://dejai.github.io/scripts/img/loading1.gif" style="width:5%;height:5%;">`
-		boardNotification(loading);
-
-		// Get the set of questions from the
-		getGameQuestions(gameCode,"round",()=>{
-			// Clear notificiation
-			boardNotification("");
-
-			// Hide start game section
-			mydoc.hideContent("#startGameSection");
-
-			// Show action buttons
-			mydoc.showContent(".game_action_buttons");
-
-			// Enable the next round button
-			toggleNextRoundButton('enable');
-
-		},
-		// If not successful
-		()=>{
-			errMsg = "Could not find a game code: " + gameCode;
-			boardNotification(errMsg);
-		});
+		location.href = location.origin + location.pathname + "?gamecode="+gameCode.toUpperCase();;
 	}
 	else 
 	{
 		errMsg = "Please enter the game code as shown on the Admin page.";
 		boardNotification(errMsg);
-	}	
-}
-
-//  TO BE DELETED? May not need if the board won't create the game code. 
-function onCreateGame()
-{
-	// let dateCode = getDateCode();
-	let gameCode = Helper.getCode();
-
-	list_name = `${gameCode}`;
-
-	console.log("Would create the list with game code: " + list_name);
+	}
 }
 
 /*****************************GENERAL LISTENERS**********************************/
@@ -185,29 +184,7 @@ function gameBoardListenerOnKeyUp()
 		// console.log(event);
 		switch(event.code)
 		{
-			case "Backquote":
-				undoWrongAnswer();
-				break;
-			case "Backslash":
-				toggleThemeSong();
-				break;
-			case "ControlLeft":
-			case "ControlRight":
-				toggleCountdownTimer();
-				break;
-			case "NumpadEnter":
-				if(GAME_STARTED)
-				{
-					document.getElementById("nextRoundButton").click();				
-				}
-				else
-				{
-					document.getElementById("startGameButton").click();
-				}
-				break;
-
 			case "Escape":
-			// case "NumpadSubtract":
 				onWrongAnswer();
 				break;
 
@@ -318,31 +295,6 @@ function onEndGame()
 
 /**************************** BOARD ACTIONS: LOADING QUESTIONS****************************************/
 
-// Select random question from pool
-function onSelectQuestion()
-{
-	console.log("Would get the next question");
-	// MyTrello.get_cards(MyTrello.pool_list_id, function(data){
-
-	// 	response = JSON.parse(data.responseText);
-
-	// 	if(response.length >= 1)
-	// 	{
-	// 		rand_id = Math.floor(Math.random()*response.length);
-	// 		card = response[rand_id];
-	// 		card_id = card["id"];
-
-	// 		MyTrello.moveCard(card_id, "Current");
-
-	// 		loadCard(card_id);
-	// 	}
-	// 	else
-	// 	{
-	// 		alert("NOT ENOUGH CARDS TO SELECT FROM THE POOL!");
-	// 	}
-	// });
-}
-
 // Load the specific card id;
 function loadNextQuestion()
 {
@@ -351,9 +303,7 @@ function loadNextQuestion()
 	mydoc.hideContent("#loading_gif");
 	mydoc.showContent("#game_table");
 	mydoc.showContent("#game_table_section");
-	// Show current score section
-	mydoc.showContent("#current_score_label");
-	mydoc.showContent("#current_score")
+	
 
 	console.log("Would load the single card");
 
@@ -398,7 +348,7 @@ function loadAnswers(checklist)
 			counter++;
 			splits = obj["name"].split("~");
 			answer_text = splits[0].trim();
-			// answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
+			answer_text = (IS_TEST_RUN) ? simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
 			answer_count = splits[1].trim();
 
 			let answer = document.querySelector(`#game_cell_${counter} p.answer`);
@@ -547,7 +497,8 @@ function onRevealAnswer(value)
 	if(!TEAM_IN_PLAY)
 	{
 		mydoc.showContent(".team_in_play");
-		// mydoc.showContent(".teamIndicatorIcon");
+		// Show the indicators
+		mydoc.removeClass(".team_indicators", "invisible");
 	}
 
 	if(revealed.length >=2 && TEAM_IN_PLAY === "")
@@ -659,7 +610,6 @@ function setTeamInPlay(team)
 
 		// Clear wrong answer count if any
 		clearWrongAnswerCount();
-
 		// Hide the PLAY buttons & Face Off things
 		mydoc.hideContent(".team_in_play"); 
 		mydoc.hideContent(".face_off_element");
@@ -676,10 +626,12 @@ function toggleCountdownTimer(forceHide=false)
 	if(isHidden)
 	{
 		timeView.classList.remove("hidden");
+		mydoc.addClass("#countdownTimerIcon", "invisible");
 		Timer.startTimer();
 	}
 	if (!isHidden || forceHide)
 	{
+		mydoc.removeClass("#countdownTimerIcon", "invisible");
 		timeView.classList.add("hidden");
 		Timer.resetTimer();
 	}
@@ -826,7 +778,8 @@ function onClearBoard(toBeFixed=false)
 		mydoc.hideContent("#game_table");
 		mydoc.showContent("#loading_gif");
 
-		// mydoc.hideContent(".teamIndicatorIcon");
+		// Hide the icons
+		mydoc.addClass(".team_indicators", "invisible");
 
 		// Clear/reset the key FLAGS
 		clearInPlay();
@@ -947,11 +900,16 @@ function toggleThemeSong()
 	if(is_paused)
 	{
 		theme_song.play();
+		mydoc.removeClass("#themeSongIcon", "themeSongPaused");
+		mydoc.addClass("#themeSongIcon", "themeSongPlaying");
 	}
 	else
 	{
 		theme_song.pause();
 		theme_song.currentTime = 0;
+		mydoc.removeClass("#themeSongIcon", "themeSongPlaying");
+		mydoc.addClass("#themeSongIcon", "themeSongPaused");
+
 	}
 }
 

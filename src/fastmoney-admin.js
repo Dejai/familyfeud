@@ -83,15 +83,14 @@ function loadFastMoneyQuestions()
 
 		ctr = idx+1
 
-		let questionText = question["name"];
+		let questionText = (IS_TEST_RUN) ? simpleEncode(question["name"]) : question["name"]; //Adjust question if in TEST mode		
 		let quest_ele = document.querySelector(`#fast_money_question_${ctr} .question`);
-		//question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode		
 		quest_ele.innerText = questionText;
 
 		let answers_ele = document.querySelector(`#fast_money_question_${ctr} ul.fastmoney_answers`);
 		answers = question["checklists"]?.[0]?.checkItems ?? [];
 		answers.forEach(function(obj){
-			let answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(obj["name"]) : obj["name"]; //Adjust answer if in TEST mode
+			let answer_text = (IS_TEST_RUN) ? simpleEncode(obj["name"]) : obj["name"]; //Adjust answer if in TEST mode
 			answers_ele.innerHTML += `<li>${answer_text}</li>`
 		});
 
