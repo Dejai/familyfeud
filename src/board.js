@@ -394,7 +394,7 @@ function onNextRound()
 	// Making moves based on type of round
 	if(CURR_ROUND == 4 || HAS_WINNER)
 	{
-		location.href = location.origin + "/fastmoney";
+		location.href = location.origin + "/fastmoney/?gamecode="+CURR_GAME_CODE;
 	}
 	else
 	{

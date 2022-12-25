@@ -9,7 +9,6 @@ var IS_TEST_RUN = false;
 var NUMBER_OF_ANSWERS = 0;
 var CURRENT_PLAYER = "one";
 
-var active_element = undefined;
 var blinking_interval = undefined;
 
 var LOADING_GIF = `<img src="https://dejai.github.io/scripts/img/loading1.gif">`
@@ -20,74 +19,22 @@ var LOADING_GIF = `<img src="https://dejai.github.io/scripts/img/loading1.gif">`
 // Once doc is ready
 mydoc.ready(function(){
 
-	// Set the board name
-	MyTrello.SetBoardName("familyfeud");
-
-	// Load the labels
-	getTrelloLabels();
-
 	//Check Test run
 	IS_TEST_RUN = checkTestRun();
 
 	// Get the game code from the URL (if available)
-	let query_map = mydoc.get_query_map();
-	let gameCode = query_map["gamecode"] ?? undefined;
+	let gamecode = mydoc.get_query_param('gamecode') ?? "";
+	setGameCode(gamecode);
 
-	if(gameCode != undefined)
-	{
-		// Show loading gif while getting things together
-		MyNotification.notify("#loadingSection", LOADING_GIF);
-
-		// Get the set of questions from the
-		getGameQuestions(gameCode,"fast money",()=>{
-
-
-			// Check if admin
-			mydoc.showContent("#back_to_host"); 
-			mydoc.showContent("#game_action_buttons .fastmoney_host"); 
-			// mydoc.showContent(".fastmoney_reveal_answers");
-			// mydoc.hideContent(".fastmoney_answers");
-
-			// Add the fast money listeners;
-			fastMoneyListenerOnKeyUp();
-
-			// Set default time & buzzer sound
-			Timer.resetTimer();
-			if(Timer)
-			{
-				Timer.resetTimer();			
-				Timer.setTimeUpCallback(function(){
-					document.getElementById("wrong_answer_sound").play();
-				});
-			}
-
-			// Set the game code where it should be set;
-			setGameCode(gameCode);
-
-			// Hide loading;
-			MyNotification.clear("#loadingSection");
-
-			// Show game section
-			mydoc.showContent("#admin_game_section");
-		},
-		// If not successful
-		()=>{
-			errMsg = "Could not find a game code: " + gameCode;
-			MyNotification.notify("#loadingSection", errMsg);
-		});
-	}
-	else
-	{
-		// Show the admin how many questions are left
-		mydoc.showContent("#newGameSection");
-	}
+	// Add the fast money listeners;
+	fastMoneyListenerOnKeyUp();
 });
 
 // Adds a listener for keystrokes (on keyup);
 function fastMoneyListenerOnKeyUp()
 {
 
-	document.addEventListener("keyup", function(event){
+	document.addEventListener("keydown", function(event){
 		// console.log(event);
 		switch(event.code)
 		{
@@ -106,11 +53,17 @@ function fastMoneyListenerOnKeyUp()
 				onDuplicateAnswer();
 				break;
 			case "Enter":
-				if(active_element)
+				var activeElement = document.activeElement;
+				if (activeElement.classList.contains("game_cell"))
 				{
 					event.preventDefault();
-					active_element.blur();
-					active_element = undefined;
+					event.stopPropagation();
+					activeElement.blur();
+					onFastMoneyAnswerNextFocus(event.target);
+				}
+				else if (activeElement.classList.contains("fast_money_points"))
+				{
+					activeElement.blur();
 				}
 			default:
 				return;
@@ -126,22 +79,37 @@ function onFastMoneyClosePage(event)
 	event.returnValue='';
 }
 
+// Go to the next possible answer question that is available
+function onFastMoneyAnswerNextFocus(currentElement)
+{
+	let nextSibling = currentElement?.parentElement?.nextElementSibling ?? undefined
+	let sourceDocument = (nextSibling != undefined) ? nextSibling : document;
+	let nextCell = sourceDocument.querySelector(".game_cell[contenteditable='true']");
+	if(nextCell != undefined)
+	{
+		nextCell.focus();		
+	}
+}
+
 // Hide the answer after entering
 function onFastMoneyAnswerBlur(event)
 {
 	let ele = event.srcElement;
-	value = ele.innerText;
-	if(value != undefined && value != "")
+	value = ele.innerText ?? "";
+	cleanValue = value.replace("\n","").replace("\t","").trim();
+
+	if(cleanValue.length > 1)
 	{
-		ele.setAttribute("data-answer", value); 
+		ele.setAttribute("data-answer", cleanValue);
 		ele.innerText = "ANSWERED";
+
 		// Increment # of answers & check if all entered
 		NUMBER_OF_ANSWERS++;
 		checkAnswersAndTimer();
 
-		// ("data-answer", value); 
+		// Make it no longer editable
 		ele.contentEditable = false;
-		// ele.classList.remove("fastmoney_editable");
+
 		ele.classList.add("fastmoney_hidden");
 		ele.addEventListener("click", onFastMoneyRevealAnswer);
 	}
@@ -177,7 +145,7 @@ function onFastMoneyRevealAnswer(event)
 
 		document.getElementById("fast_money_answer").play();
 		ele.classList.remove("fastmoney_hidden");
-		// Update the total score after entered
+		// Add the listener to the answer section
 		sibling.addEventListener("focus", blinkingFastMoneyScore);
 		sibling.addEventListener("blur", onFastMoneyRevealScore);
 		// Focus into the answer element
@@ -185,6 +153,7 @@ function onFastMoneyRevealAnswer(event)
 	}	
 }
 
+/***************** THE SCORES FOR ANSWERS **********************************/
 
 // Update the fast money total score
 function onFastMoneyRevealScore(event)
@@ -248,6 +217,7 @@ function onFastMoneyEditScore(event)
 	}
 }
 
+
 // Play duplicate sound
 function onDuplicateAnswer()
 {
@@ -256,119 +226,12 @@ function onDuplicateAnswer()
 	duplicateAnswerSound.play();
 }
 
-/***************************** LOADING QUESTIONS / ANSWERS **********************************/
-
-// Select fast money questions
-function selectFastMoneyQuestions(idx=0)
-{
-	console.log(idx);
-	if(idx == 5)
-	{
-		setTimeout(function(){
-			loadFastMoneyQuestions()
-			mydoc.hideContent("#loading_gif");
-			return;
-		}, 2000);
-	}
-	else
-	{
-		mydoc.showContent("#loading_gif");
-
-		MyTrello.get_cards(MyTrello.fast_money_pool_list_id, function(data){
-
-			console.log(data)
-
-			response = JSON.parse(data.responseText);
-
-			rand_id = Math.floor(Math.random()*response.length);
-			card = response[rand_id];
-			console.log(card);
-			card_id  = card["id"];
-			MyTrello.moveCard(card_id, "Current");
-
-			selectFastMoneyQuestions(idx+1);
-		});
-	}
-}
-
-function loadFastMoneyQuestions()
-{
-	// Clear the current list first (if any)
-	clearFastMoneyQuestions();
-
-	MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
-
-		console.log("Loading Questions");
-
-		response = JSON.parse(data.responseText);
-		if(response.length >= 5)
-		{
-			for(var idx = 0; idx < 5; idx++)
-			{
-				card = response[idx];
-				card_id = card["id"];
-				labels = card["idLabels"];
-				if(labels.includes(MyTrello.label_fast_money))
-				{
-					loadCard(card_id, idx+1);				
-				}
-			}
-			// Hide the loading gif
-			mydoc.hideContent("#loading_gif");
-		}
-	});
-}
-
-function loadCard(card_id, idx)
-{
-	MyTrello.get_single_card(card_id, function(data){
-
-		response = JSON.parse(data.responseText);
-
-		question = response["name"];
-		answers = response["checklists"][0].checkItems;
-		answers = answers.sort(function(a,b){
-			return a.pos - b.pos;
-		});
-		
-		let quest_ele = document.querySelector(`#fast_money_question_${idx} .question`);
-		question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode		
-		quest_ele.innerText = question;
-
-		let answers_ele = document.querySelector(`#fast_money_question_${idx} ul.fastmoney_answers`);
-		answers.forEach(function(obj){
-			let answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(obj["name"]) : obj["name"]; //Adjust answer if in TEST mode
-			answers_ele.innerHTML += `<li>${answer_text}</li>`
-		});
-
-
-	});
-}
-
-function onToggleAnswersForHost(event)
-{
-	var ele = event.target;
-	sibling = ele.nextElementSibling;
-	
-	if(sibling.classList.contains("hidden"))
-	{
-		sibling.classList.remove("hidden");
-		ele.innerText = "Hide Answers";
-	}
-	else
-	{
-		sibling.classList.add("hidden");
-		ele.innerText = "Reveal Answers";
-	}
-}
-
 /***************************** HELPER FUNCTIONS **********************************/
 
 // Blinking score before reveal
 function blinkingFastMoneyScore(event)
 {
 	let ele = event.srcElement;
-	active_element = ele; 
 	blinking_interval = setInterval(function(){
 		let has_class = ele.classList.contains("blinking");
 		if(!has_class)
@@ -382,15 +245,6 @@ function blinkingFastMoneyScore(event)
 	}, 400);
 }
 
-
-// Clear the current list of fast money questions
-function clearFastMoneyQuestions()
-{
-	Array.from(document.querySelectorAll(".question_section")).forEach(function(obj){
-		obj.querySelector(".question").innerText = "";
-		obj.querySelector("ul").innerHTML = "";
-	});
-}
 
 // If all answers entered, stop the timer
 function checkAnswersAndTimer()
@@ -455,13 +309,10 @@ function setCurrentPlayer(event, player)
 	{
 		cells.forEach(function(obj){
 			obj.contentEditable = true;
-			// obj.classList.add("fastmoney_editable");
 			obj.innerText = "... add answer ...";
 			obj.addEventListener("focus", onFastMoneyAnswerFocus);
 			obj.addEventListener("blur", onFastMoneyAnswerBlur);
 		});
-
-		
 	}
 }
 
@@ -475,8 +326,11 @@ function setTimeForFastMoneyPlayer(player)
 
 function setGameCode(value)
 {
-	CURR_GAME_CODE = value.toUpperCase();
-	document.getElementById("game_code").innerText = CURR_GAME_CODE;
+	if(value != "")
+	{
+		CURR_GAME_CODE = value.toUpperCase();
+		mydoc.setContent("#game_code", {"innerText": value});
+	}
 }
 
 function toggleFastMoneyTimer(forceStop=false)
@@ -526,6 +380,7 @@ function toggleFastMoneyAnswers(action)
 	}
 }
 
+// Toggle the theme song
 function toggleThemeSong()
 {
 	theme_song = document.getElementById("theme_song_sound");
@@ -533,11 +388,16 @@ function toggleThemeSong()
 	if(is_paused)
 	{
 		theme_song.play();
+		mydoc.removeClass("#themeSongIcon", "themeSongPaused");
+		mydoc.addClass("#themeSongIcon", "themeSongPlaying");
 	}
 	else
 	{
 		theme_song.pause();
 		theme_song.currentTime = 0;
+		mydoc.removeClass("#themeSongIcon", "themeSongPlaying");
+		mydoc.addClass("#themeSongIcon", "themeSongPaused");
+
 	}
 }
 

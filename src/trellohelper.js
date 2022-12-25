@@ -92,6 +92,7 @@ function getGameQuestions(listName, questionType, successCallback, failureCallba
 
                             if(QUESTION_KEYS.length == expectedQuestions)
                             {
+                                QUESTION_KEYS.sort();
                                 // Call the success callback
                                 successCallback();
                             }
@@ -117,6 +118,7 @@ function getNextQuestion(roundNumber)
     let question = undefined;
     if(roundNumber <= QUESTION_KEYS.length)
     {
+        console.log(roundNumber);
         question = QUESTIONS[ QUESTION_KEYS[roundNumber-1] ];
     }
     return question;
