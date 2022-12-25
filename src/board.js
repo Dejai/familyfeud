@@ -7,18 +7,30 @@ var CURR_GAME_CODE = undefined;
 
 // Is this a a TEST run of the game
 var IS_TEST_RUN = false;
+var NEXT_ROUND_BUTTON_STATE = "disabled";
 
 // Game Board variables
 var CURR_ROUND = 0;
 var CURR_MULTIPLIER = 1;
 var CURR_SCORE = 0;
 var CURR_WRONG = 0;
+var CURR_TARGET_SCORE = 300;
 
 // Flags to indicate game state
 var IS_STEAL = false;
 var IN_PLAY = false;
 var IS_FACEOFF = false;
 var TEAM_IN_PLAY = "";
+var HAS_WINNER = false;
+
+// Loading GIF
+var LOADING_GIF = `<img src="https://dejai.github.io/scripts/img/loading1.gif">`
+
+var WRONG_ANSWER_IMG = `<span style="display:inline-block; margin-right:2%;">
+							<img class="wrong_answer_img" src="../assets/img/wrong_answer.png" alt="WRONG"/>
+							<br/>
+							<span onclick="undoWrongAnswer()" style="color:gray;" class="pointer">undo</span>
+						</span>`;
 
 /*****************************GETTING STARTED************************************/
 
@@ -27,95 +39,137 @@ mydoc.ready(function(){
 
 	let path = location.pathname;
 
-	// Adds listener for game board
-	if(path.includes("/board"))
-	{ 
-		IS_TEST_RUN = checkTestRun();
+	// Set the board name
+	MyTrello.SetBoardName("familyfeud");
 
-		window.addEventListener("beforeunload", onClosePage);
-		gameBoardListenerOnKeyUp(); 
-		// set default timer time
-		Timer.setTimerDefault(10);
-		Timer.setTimeUpCallback(function(){
-			document.getElementById("duplicate_answer_sound").play();
+	// Load the labels
+	getTrelloLabels();
+
+	let gameCode = mydoc.get_query_param("gamecode");
+
+	IS_TEST_RUN = checkTestRun();
+
+	// Adds listener for game board
+	if(gameCode != undefined)
+	{ 
+
+		setGameCode(gameCode);
+
+		loading = `<img src="https://dejai.github.io/scripts/img/loading1.gif" style="width:5%;height:5%;">`
+		boardNotification(loading);
+
+		// Get the set of questions from the
+		getGameQuestions(gameCode,"round",()=>{
+			// Clear notificiation
+			boardNotification("");
+
+			// window.addEventListener("beforeunload", onClosePage);
+
+			// set default timer time
+			Timer.setTimerDefault(10);
+			Timer.setTimeUpCallback(function(){
+				document.getElementById("duplicate_answer_sound").play();
+			});
+
+			// Hide start game section
+			mydoc.hideContent("#startGameSection");
+			
+			// Show the section to set family names
+			mydoc.showContent("#enterFamilyNamesSection");
+
+		},
+		// If not successful
+		()=>{
+			errMsg = "Could not find a game code: " + gameCode;
+			boardNotification(errMsg);
 		});
+	}
+	else
+	{
+		mydoc.showContent("#startGameSection");
 	}
 });
 
+// Get and map the labels available on this board
+// function onGetTrelloLabels()
+// {
+// 	MyTrello.get_labels((data)=>{
+// 		let resp = myajax.GetJSON(data.responseText);
+// 		resp.forEach( (obj)=>{
+// 			let labelID = obj["id"];
+// 			let labelName = obj["name"];
+// 			TRELLO_LABELS[labelName] = labelID;
+// 		});
+// 		console.log(TRELLO_LABELS);
+// 	});
+// }
+
+// Set the family team names
+function onSetFamilyNames()
+{
+	
+	let fname1 = mydoc.getContent("#enterFamilyName1")?.value ?? "";
+	let fname2 = mydoc.getContent("#enterFamilyName2")?.value ?? "";
+
+	if(fname1 != "" && fname2 != "")
+	{
+		// Clear any messages
+		boardNotification("");
+
+		// Add the listeners
+		gameBoardListenerOnKeyUp();
+
+		// Hide the section set family names
+		mydoc.hideContent("#enterFamilyNamesSection");
+
+		// Set the team names
+		mydoc.loadContent(fname1,"teamOneName");
+		mydoc.loadContent(fname2, "teamTwoName");
+		mydoc.showContent(".team_name_box");
+
+		// Show the team name sections
+		mydoc.showContent(".team_score");
+
+		// Show action buttons
+		mydoc.showContent(".game_action_buttons");
+
+		// Enable the next round button
+		toggleNextRoundButton('enable');
+
+		// Show the theme song icon
+		mydoc.removeClass("#themeSongIcon", "invisible");
+
+		// Show current score section
+		mydoc.showContent("#current_score_label");
+		mydoc.showContent("#current_score");
+
+	}
+	else
+	{
+		errMsg = "Please enter a family name for both families."
+		boardNotification(errMsg);
+	}
+
+}
 
 // Start the game
 function onStartGame()
 {
-	IS_FACEOFF = true;
+	let gameCode = mydoc.getContent("#gameCodeValue")?.value.toUpperCase() ?? "";
 
-	// Show the loading gif
-	mydoc.showContent("#loading_gif");
-
-	if(IS_TEST_RUN)
+	if(gameCode != "")
 	{
-		onEnterTestGame();
+		location.href = location.origin + location.pathname + "?gamecode="+gameCode.toUpperCase();;
 	}
-	else
+	else 
 	{
-		// Create the game
-		onCreateGame();	
+		errMsg = "Please enter the game code as shown on the Admin page.";
+		boardNotification(errMsg);
 	}
-	
-}
-
-function onCreateGame()
-{
-	// let dateCode = getDateCode();
-	let gameCode = Helper.getCode();
-
-	list_name = `${gameCode}`;
-
-	MyTrello.create_list(list_name, function(data){
-
-		response = JSON.parse(data.responseText);
-		list_id = response["id"];
-
-		// Things to do after creating game
-		GAME_STARTED = true;
-		setGameCode(list_name);
-		MyTrello.setCurrentGameListID(list_id);
-		mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);
-		showGameBoard();
-	});
-}
-
-function onEnterTestGame()
-{
-
-	MyTrello.get_lists(function(data){
-	response = JSON.parse(data.responseText);
-
-		var game_found = false;
-		for(var idx = 0; idx < response.length; idx++)
-		{
-			var obj = response[idx];
-			let list_name = obj["name"].toUpperCase();
-			let list_id = obj["id"];
-
-			if(list_name == "TEST")
-			{
-				game_found = true;
-				GAME_STARTED = true;
-				setGameCode(list_name);
-				MyTrello.setCurrentGameListID(list_id);
-				mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);
-				showGameBoard();
-				break;
-			}	
-		}
-		if(!game_found)
-		{
-			alert("Could Not Find TEST Game!");
-		}
-	});
 }
 
 /*****************************GENERAL LISTENERS**********************************/
+
 // Prevent the page accidentally closing
 function onClosePage(event)
 {
@@ -127,33 +181,9 @@ function onClosePage(event)
 function gameBoardListenerOnKeyUp()
 {
 	document.addEventListener("keyup", function(event){
-		// console.log(event);
 		switch(event.code)
 		{
-			case "Backquote":
-				undoWrongAnswer();
-				break;
-			case "Backslash":
-				toggleThemeSong();
-				break;
-			case "ControlLeft":
-			case "ControlRight":
-				toggleCountdownTimer();
-				break;
-			case "Enter":
-			case "NumpadEnter":
-				if(GAME_STARTED)
-				{
-					document.getElementById("next_round_button").click();				
-				}
-				else
-				{
-					document.getElementById("startGameButton").click();
-				}
-				break;
-
 			case "Escape":
-			case "NumpadSubtract":
 				onWrongAnswer();
 				break;
 
@@ -184,24 +214,6 @@ function gameBoardListenerOnKeyUp()
 
 /**************************** BOARD ACTIONS: QUESTIONS****************************************/
 
-// Show the game board
-function showGameBoard()
-{
-	// Hide things
-	// mydoc.hideContent("#game_code_section");
-	mydoc.hideContent("#startGameButton");
-	mydoc.hideContent(".pregame_action_buttons");
-
-	// Show Content
-	mydoc.showContent(".face_off_element");
-	mydoc.showContent(".game_action_buttons");
-	mydoc.showContent("#game_table_section");
-	mydoc.showContent(".current_score_section");
-	mydoc.showContent(".team_in_play");
-
-	// Start next round
-	onNextRound();
-}
 
 // Reveal the game table
 function showGameTable()
@@ -224,33 +236,35 @@ function onEndGame()
 			{
 				alert("Resetting Cards to their Pools");
 
-				MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
+				console.log("Would move cards to the given lists")
+				// MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
 
-					response = JSON.parse(data.responseText);
+				// 	response = JSON.parse(data.responseText);
 
-					response.forEach(function(obj){
-						console.log(obj);
-						let card_id = obj["id"];
-						let labels = obj["idLabels"];
-						if(labels.includes(MyTrello.label_fast_money))
-						{
-							MyTrello.moveCard(card_id, "FastMoneyPool");
-						}
-						else
-						{
-							MyTrello.moveCard(card_id, "Pool");
-						}
-					});
-				});
+				// 	response.forEach(function(obj){
+				// 		console.log(obj);
+				// 		let card_id = obj["id"];
+				// 		let labels = obj["idLabels"];
+				// 		if(labels.includes(MyTrello.label_fast_money))
+				// 		{
+				// 			MyTrello.moveCard(card_id, "FastMoneyPool");
+				// 		}
+				// 		else
+				// 		{
+				// 			MyTrello.moveCard(card_id, "Pool");
+				// 		}
+				// 	});
+				// });
 			}
 			else
 			{
 				let dateObj = Helper.getDate();
 				let dateCode = `${dateObj["year"]}-${dateObj["month"]}-${dateObj["day"]}`;
 				let new_name = `${dateCode}__${CURR_GAME_CODE}`;
-				MyTrello.update_list_name_and_close(MyTrello.curr_game_list_id, new_name, function(data){
-					console.log("Game Archived");
-				});
+				console.log("Would archive the game");
+				// MyTrello.update_list_name_and_close(MyTrello.curr_game_list_id, new_name, function(data){
+				// 	console.log("Game Archived");
+				// });
 			}
 			
 			// Reset Round;
@@ -278,56 +292,49 @@ function onEndGame()
 	}
 }
 
-// Start the face off window
-function onFaceOff()
-{
-	let height = window.innerHeight;
-	let width = window.innerWidth;
-
-	let team1 = document.querySelector("h1.team_name_box[data-team='team_one']");
-	let team2 = document.querySelector("h1.team_name_box[data-team='team_two']");
-	
-	let team1Name = (mydoc.isValidValue(team1.innerText)) ? team1.innerText : "Team 1";
-	let team2Name = (mydoc.isValidValue(team2.innerText)) ? team2.innerText : "Team 2";
-
-	let path = location.href.replace("/board/", `/faceoff/faceoff.html?team1=${team1Name}&team2=${team2Name}`)
-	window.open(path, "_blank", `toolbar=yes,scrollbars=yes,resizable=yes,top=10,left=100,width=${width},height=${height}`);
-}
-
 /**************************** BOARD ACTIONS: LOADING QUESTIONS****************************************/
 
-// Select random question from pool
-function onSelectQuestion()
+// Load the specific card id;
+function loadNextQuestion()
 {
-	MyTrello.get_cards(MyTrello.pool_list_id, function(data){
 
-		response = JSON.parse(data.responseText);
+	// Hide the GIF and show the table
+	mydoc.hideContent("#loading_gif");
+	mydoc.showContent("#game_table");
+	mydoc.showContent("#game_table_section");
 
-		if(response.length >= 1)
+	if(IS_TEST_RUN)
+	{
+		mydoc.showContent("#howToRevealInstructions");
+	}
+	
+
+	console.log("Would load the single card");
+
+	let nextQuestion  = getNextQuestion(CURR_ROUND);
+	if(nextQuestion != undefined)
+	{
+		checklist = nextQuestion["checklists"]?.[0]?.checkItems ?? undefined;
+		if(checklist != undefined)
 		{
-			rand_id = Math.floor(Math.random()*response.length);
-			card = response[rand_id];
-			card_id = card["id"];
-
-			MyTrello.moveCard(card_id, "Current");
-
-			loadCard(card_id);
+			console.log("Loading answers");
+			loadAnswers(checklist);
 		}
-		else
-		{
-			alert("NOT ENOUGH CARDS TO SELECT FROM THE POOL!");
-		}
-	});
+	}
 }
 
-// Load the specific card id;
-function loadCard(card_id)
+function loadExampleAnswers()
 {
-	MyTrello.get_single_card(card_id, function(data){		
-		response = JSON.parse(data.responseText);
-		checklist = response["checklists"][0].checkItems;
-		loadAnswers(checklist);
-	});	
+	let fakeChecklist = [];
+
+	let count = 0;
+	while(count < 8)
+	{
+		count++;
+		let obj = {'pos':count, 'name':`Example #${count} ~ 10`}
+		fakeChecklist.push(obj);
+	}
+	loadAnswers(fakeChecklist);
 }
 
 // Load the checklist answers from the card
@@ -337,15 +344,15 @@ function loadAnswers(checklist)
 	{
 		counter = 0;
 
-		checklist_items = checklist.sort(function(a,b){
+		checklist_items = checklist.sort((a,b)=>{
 			return a.pos - b.pos;
 		});
 
-		checklist_items.forEach(function(obj){
+		checklist_items.forEach( (obj)=>{
 			counter++;
 			splits = obj["name"].split("~");
 			answer_text = splits[0].trim();
-			answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
+			answer_text = (IS_TEST_RUN) ? simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
 			answer_count = splits[1].trim();
 
 			let answer = document.querySelector(`#game_cell_${counter} p.answer`);
@@ -364,19 +371,60 @@ function loadAnswers(checklist)
 	} 
 	catch(error) 
 	{
-		Logger.log(error, true);
-		tryAnotherQuestion();
+		boardNotification("Somethign went wrong! Could not load question");
 	}
 }
 
-// Try another question
-function tryAnotherQuestion()
+// Switch to the next round
+function onNextRound()
 {
-	Logger.log("Trying another question");
-	cleared = onClearBoard(true);
-	if(cleared){
-		onSelectQuestion();
+	Logger.log("Going to Next Round");
+
+	if(NEXT_ROUND_BUTTON_STATE == "disabled"){
+		return;
 	}
+
+	let hidden_cells = document.querySelectorAll("p.circled_number");
+	if(hidden_cells.length > 0)
+	{
+		alert("Cannot go to next round until all answers are revealed!");
+		return;
+	}
+
+	// Making moves based on type of round
+	if(CURR_ROUND == 4 || HAS_WINNER)
+	{
+		location.href = location.origin + "/fastmoney/?gamecode="+CURR_GAME_CODE;
+	}
+	else
+	{
+		// Clear the board of current answer
+		cleared = onClearBoard();
+		if(cleared)
+		{
+			// Temporarily disable button
+			toggleNextRoundButton("disable");
+
+			// Increment round
+			CURR_ROUND++;
+			
+			// Display round information
+			nextRound = "Round #" + (CURR_ROUND);
+			CURR_MULTIPLIER = (CURR_ROUND <= 1) ? 1 : (CURR_ROUND - 1);
+			phrase = CURR_MULTIPLIER > 1 ? `<br/><span class="multiplier_phrase">(${CURR_MULTIPLIER}x points)</span>` : "";
+			document.getElementById("round_name").innerHTML = nextRound + phrase;
+
+			if(CURR_ROUND > 0 )
+			{
+				label = (CURR_ROUND == QUESTION_KEYS.length) ? "FAST MONEY" : "NEXT" 
+				mydoc.loadContent(`${label} ROUND`, "nextRoundButton");
+			}
+
+			// Load the next question
+			loadNextQuestion();
+		}
+	}
+
 }
 
 /****************************BOARD ACTIONS: ANSWERS****************************************/
@@ -393,7 +441,13 @@ function onWrongAnswer()
 
 	for(var idx = 0; idx < amount; idx++)
 	{
-		img += `<img class="wrong_answer_img" src="../assets/img/wrong_answer.png" alt="WRONG"/>`;
+		img += WRONG_ANSWER_IMG;
+		// `<span>
+		// 			<img class="wrong_answer_img" src="../assets/img/wrong_answer.png" alt="WRONG"/>
+		// 			<br/>
+		// 			<span onclick="undoWrongAnswer()" style="color:gray;">undo</span>
+		// 		</span>
+		// `;
 	}
 	
 	// Play the wrong answer sound
@@ -441,6 +495,15 @@ function onRevealAnswer(value)
 	let count_val = document.querySelector(`#game_cell_count_${digit} p`);
 
 	let revealed = document.querySelectorAll(".answer.revealed");
+
+	// If no team has been set to PLAY yet
+	if(!TEAM_IN_PLAY)
+	{
+		mydoc.showContent(".team_in_play");
+		// Show the indicators
+		mydoc.removeClass(".team_indicators", "invisible");
+	}
+
 	if(revealed.length >=2 && TEAM_IN_PLAY === "")
 	{
 		alert("Cannot reveal another answer until a team is selected to \"Play\"");
@@ -453,7 +516,6 @@ function onRevealAnswer(value)
 
 	if(is_hidden && has_value)
 	{
-		
 		// Play the sound
 		rightSound.play();
 
@@ -492,7 +554,7 @@ function onNoCorrectAnswers()
 		IS_FACEOFF = false;
 
 		// Hide the play buttons
-		mydoc.hideContent(".team_in_play");
+		// mydoc.hideContent(".team_in_play");
 
 		// Hide the Face Off things
 		mydoc.hideContent(".face_off_element");
@@ -518,27 +580,43 @@ function setStealOpportunity()
 // Set which team is in play
 function setTeamInPlay(team)
 {
+	
 	// If team already in play, don't do anything
 	let in_play_already = document.querySelectorAll(".in_play");
-	if(in_play_already.length > 0){ return; }
+	// if(in_play_already.length > 0){ return; }
 
-	// Set IN_PLAY to true and IS_FACEOFF to false
-	IN_PLAY = true; 
-	IS_FACEOFF = false;
+	let canContinue = (in_play_already.length == 0) ? true : confirm("Are you sure you want to switch the team in Play?");
 
-	// Set global team in play;
-	TEAM_IN_PLAY = team;
+	if(canContinue)
+	{
 
-	identifier = `#team_${team} .team_name_box`;
-	team_name = document.querySelector(identifier);
-	team_name.classList.add("in_play");
+		// Always clear the team in play before setting
+		clearInPlay();
 
-	// Clear wrong answer count if any
-	clearWrongAnswerCount();
+		// Set IN_PLAY to true and IS_FACEOFF to false
+		IN_PLAY = true; 
+		IS_FACEOFF = false;
 
-	// Hide the PLAY buttons & Face Off things
-	mydoc.hideContent(".team_in_play"); 
-	mydoc.hideContent(".face_off_element");
+		// Set global team in play;
+		TEAM_IN_PLAY = team;
+
+		teamNameIdentifier = (team == "one") ? "#teamOneName": "#teamTwoName";
+		teamIconIdentifier = (team == "one") ? "#teamOneIndicator" : "#teamTwoIndicator";
+
+		// Set team name as in_play
+		team_name = document.querySelector(teamNameIdentifier);
+		team_name.classList.add("in_play");
+
+		// Set team Icon as in_play
+		teamIcon = document.querySelector(teamIconIdentifier);
+		teamIcon.classList.add("in_play")
+
+		// Clear wrong answer count if any
+		clearWrongAnswerCount();
+		// Hide the PLAY buttons & Face Off things
+		mydoc.hideContent(".team_in_play"); 
+		mydoc.hideContent(".face_off_element");
+	}
 }
 
 // Set the countdown timer
@@ -551,10 +629,12 @@ function toggleCountdownTimer(forceHide=false)
 	if(isHidden)
 	{
 		timeView.classList.remove("hidden");
+		mydoc.addClass("#countdownTimerIcon", "invisible");
 		Timer.startTimer();
 	}
 	if (!isHidden || forceHide)
 	{
+		mydoc.removeClass("#countdownTimerIcon", "invisible");
 		timeView.classList.add("hidden");
 		Timer.resetTimer();
 	}
@@ -573,7 +653,8 @@ function undoWrongAnswer()
 
 	for(var idx = 0; idx < CURR_WRONG; idx++)
 	{
-		img += `<img class="wrong_answer_img" src="../assets/img/wrong_answer.png" alt="WRONG"/>`;
+		img += WRONG_ANSWER_IMG; 
+		// `<img class="wrong_answer_img" src="../assets/img/wrong_answer.png" alt="WRONG"/>`;
 	}
 
 	document.getElementById("wrong_answer_section").innerHTML = img;
@@ -583,7 +664,6 @@ function undoWrongAnswer()
 		clearSteal();
 	}
 }
-
 
 
 /**********************BOARD ACTIONS: SCORING*******************************/
@@ -604,31 +684,41 @@ function onUpdateScore(value)
 // Give score to a certain team
 function assignScore(team)
 {
-	// alert("Assigning Team Score");
 	// Make sure no more values are calculated
 	IN_PLAY = false;
 	IS_STEAL = false;
-
-	identifier = `team_${team}_score`;
-
+	var identifier = `team_${team}_score`;
 	try
 	{
-		team_ele = document.getElementById(identifier);
-		existing_score = Number(team_ele.innerText);
-		team_ele.innerText = Number(existing_score + CURR_SCORE)
+		existing_score = mydoc.getContent("#"+identifier)?.innerText; 
+		existing_score_num = (existing_score != undefined) ? Number(existing_score) : 0;
+		newScore = existing_score_num + CURR_SCORE;
+		mydoc.loadContent(newScore,identifier);
 
 		// Clear the score keeper
 		CURR_SCORE = 0;
 		document.getElementById("current_score").innerText = "0";
 
 		clearWrongAnswerCount();
+
+		// Enable the button to go to next round
+		let hidden_cells = document.querySelectorAll("p.circled_number");
+		if(hidden_cells.length == 0)
+		{
+			toggleNextRoundButton('enable');
+		}
+
+		// Check to see if winner
+		checkForWinner();
 	}
 	catch(error)
 	{
 		Logger.log(error);
+		console.log(error);
 	}
 }
 
+// Check who to assign the score too
 function checkToAssignScore(isCorrect)
 {
 
@@ -640,7 +730,7 @@ function checkToAssignScore(isCorrect)
 	Logger.log("Hidden Cells: " + hidden_cells.length);
 
 	let assigne_to_team = "";
-	let delay = 2000;  // delay for 3 seconds
+	let delay = 2000;  // delay for seconds
 
 	if(!IN_PLAY && IS_STEAL && isCorrect)
 	{
@@ -655,44 +745,24 @@ function checkToAssignScore(isCorrect)
 	{
 		setTimeout(function(){assignScore(TEAM_IN_PLAY)}, delay);
 	}
+	else if (hidden_cells.length == 0)
+	{
+		toggleNextRoundButton('enable');
+	}	
 }
 
-/**********************ADMIN/BACK END ACTIONS*******************************/
-
-// Switch to the next round
-function onNextRound()
+// Check to see if a team has won
+function checkForWinner()
 {
-	Logger.log("Going to Next Round");
-	let nextRoundButton = document.getElementById("next_round_button");
+	let teamOneScore = mydoc.getContent("#team_one_score")?.innerText ?? "0";
+	let teamTwoScore = mydoc.getContent("#team_two_score")?.innerText ?? "0";
 
-	if(nextRoundButton.disabled){
-		return;
-	}
+	HAS_WINNER = (Number(teamOneScore) > CURR_TARGET_SCORE) || (Number(teamTwoScore) > CURR_TARGET_SCORE);
 
-	let hidden_cells = document.querySelectorAll("p.circled_number");
-	if(hidden_cells.length > 0)
+	if(HAS_WINNER)
 	{
-		alert("Cannot go to next round until all answers are revealed!");
-		return;
+		mydoc.loadContent(`FAST MONEY ROUND`, "nextRoundButton");
 	}
-
-	cleared = onClearBoard(); //Clear the board of current answer
-	if(cleared)
-	{
-		// Temporarily disable button
-		nextRoundButton.disabled = true;
-
-		onSelectQuestion(); // Select the next option
-		CURR_ROUND++;
-		nextRound = "Round #" + (CURR_ROUND);
-		CURR_MULTIPLIER = (CURR_ROUND <= 1) ? 1 : (CURR_ROUND - 1);
-		phrase = CURR_MULTIPLIER > 1 ? `<br/><span class="multiplier_phrase">(${CURR_MULTIPLIER}x points)</span>` : "";
-		document.getElementById("round_name").innerHTML = nextRound + phrase;
-	}
-
-	setTimeout(function(){
-		nextRoundButton.disabled = false;
-	},5000);
 }
 
 /*****************************CLEAR/RESET*******************************************/
@@ -710,6 +780,9 @@ function onClearBoard(toBeFixed=false)
 		// Show the loading GIF and hide the table
 		mydoc.hideContent("#game_table");
 		mydoc.showContent("#loading_gif");
+
+		// Hide the icons
+		mydoc.addClass(".team_indicators", "invisible");
 
 		// Clear/reset the key FLAGS
 		clearInPlay();
@@ -732,7 +805,6 @@ function onClearBoard(toBeFixed=false)
 // Clear the cells on the board
 function clearCellsOnBoard()
 {
-
 	// Reset aswer cells;
 	cells = document.querySelectorAll(".game_cell p.answer");
 	cells.forEach(function(obj){
@@ -771,20 +843,13 @@ function clearWrongAnswerCount()
 function clearInPlay()
 {
 	IN_PLAY = false;
+	TEAM_IN_PLAY = "";
+
+	//  Clear team name and icon
 	curr = Array.from(document.querySelectorAll(".in_play"));
 	curr.forEach(function(obj){
 		obj.classList.remove("in_play");
 	});
-
-	TEAM_IN_PLAY = "";
-
-	// Hide the Assign Score Buttons
-	// document.querySelector("#team_one button.assign_score").classList.add("hidden");
-	// document.querySelector("#team_two button.assign_score").classList.add("hidden");
-
-	// Show the Play buttons
-	document.querySelector("#team_one button.team_in_play").classList.remove("hidden");
-	document.querySelector("#team_two button.team_in_play").classList.remove("hidden");
 }
 
 function clearSteal()
@@ -808,12 +873,27 @@ function resetFaceOff()
 
 /*****************************HELPER FUNCTIONS*******************************************/
 
+// Set notifications on the board
+function boardNotification(msg)
+{
+	if(msg != "")
+	{
+		MyNotification.notify("#notificationMessage", msg);
+
+	}
+	else 
+	{
+		MyNotification.clear("#notificationMessage");
+	}
+}
+
+
 function setGameCode(value)
 {
 	CURR_GAME_CODE = value;
 	document.getElementById("game_code").innerText = CURR_GAME_CODE;
 	mydoc.showContent("#game_code_label_section");
-	mydoc.setPassThroughParameters(".pass_through_params", "gamecode", value);
+	// mydoc.setPassThroughParameters(".pass_through_params", "gamecode", value);
 }
 
 function toggleThemeSong()
@@ -823,11 +903,16 @@ function toggleThemeSong()
 	if(is_paused)
 	{
 		theme_song.play();
+		mydoc.removeClass("#themeSongIcon", "themeSongPaused");
+		mydoc.addClass("#themeSongIcon", "themeSongPlaying");
 	}
 	else
 	{
 		theme_song.pause();
 		theme_song.currentTime = 0;
+		mydoc.removeClass("#themeSongIcon", "themeSongPlaying");
+		mydoc.addClass("#themeSongIcon", "themeSongPaused");
+
 	}
 }
 
@@ -846,5 +931,29 @@ function toggleGameSettings()
 	{
 		// button.innerText = "Game Settings";
 		section.classList.add("hidden");
+	}
+}
+
+function toggleNextRoundButton(state)
+{
+	let nextRoundButton = document.getElementById("nextRoundButton");
+
+	if(state == "enable")
+	{
+		NEXT_ROUND_BUTTON_STATE = "enabled";
+		// Temporarily disable button
+		nextRoundButton.disabled = false;
+		nextRoundButton.classList.add("dlf_button_limegreen");
+		nextRoundButton.classList.remove("dlf_button_gray");
+
+		nextRoundButton.classList.add("dlf_button_limegreen");
+	}
+	else
+	{
+		NEXT_ROUND_BUTTON_STATE = "disabled";
+
+		// Disable button
+		nextRoundButton.disabled = true;
+		nextRoundButton.classList.add("dlf_button_gray");
 	}
 }

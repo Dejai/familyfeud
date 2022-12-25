@@ -11,111 +11,131 @@ var IS_TEST_RUN = false;
 var CURR_CARD  = "";
 var CURR_QUEST = "";
 
+var CURR_ROUND = 0;
+
+var LOADING_GIF = `<img src="https://dejai.github.io/scripts/img/loading1.gif">`
+
+
 /*****************************GETTING STARTED************************************/
 
 // Once doc is ready
 mydoc.ready(function(){
+
+	// Set the board name
+	MyTrello.SetBoardName("familyfeud");
+
+	// Load the labels
+	getTrelloLabels();
+
 	IS_TEST_RUN = checkTestRun();
+
+	// Get the game code from the URL (if available)
+	let query_map = mydoc.get_query_map();
+	let gameCode = query_map["gamecode"] ?? undefined;
+
+	if(gameCode != undefined)
+	{
+		// Show loading gif while getting things together
+		MyNotification.notify("#loadingSection", LOADING_GIF);
+
+		// Get the set of questions from the
+		getGameQuestions(gameCode,"round",()=>{
+
+			// Set the game code where it should be set;
+			setGameCode(gameCode);
+
+			// Hide loading;
+			MyNotification.clear("#loadingSection");
+
+			// Show game section
+			mydoc.hideContent("#game_code_section");
+			mydoc.showContent("#host_view_section");
+		},
+		// If not successful
+		()=>{
+			errMsg = "Could not find a game code: " + gameCode;
+			MyNotification.notify("#loadingSection", errMsg);
+		});
+	}
+	else
+	{
+		// Show the admin how many questions are left
+		mydoc.showContent("#game_code_section");
+	}
 });
 
 /***************************** LISTENERS**********************************/
 
 function onEnterGame()
 {
-
 	var ele = document.querySelector("#game_code_section input");
 	let entered_code = ele.value.toUpperCase();
 
-	if(entered_code == "TEST")
-	{
-		// mydoc.addTestBanner();
-		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
-	}
+	// Show loading GIF
+	MyNotification.notify("#loadingSection", LOADING_GIF);
+	let errMsg = "Could not find game code: " + entered_code;
 
-	MyTrello.get_lists(function(data){
-		response = JSON.parse(data.responseText);
+	MyTrello.get_list_by_name(entered_code, (listData)=>{
+		let resp = myajax.GetJSON(listData.responseText);
 
-		var game_found;
-		for(var idx = 0; idx < response.length; idx++)
+		console.log(resp);
+		if(resp.length > 0)
 		{
-			var obj = response[idx];
-			let list_name = obj["name"].toUpperCase();
-			let list_id = obj["id"];
-
-			if(list_name == entered_code)
-			{
-				game_found = true;
-				CURR_GAME_CODE = list_name;
-				MyTrello.setCurrentGameListID(list_id);
-				mydoc.setPassThroughParameters(".pass_through_params", "listid", list_id);	
-				setGameCode(list_name);
-				showHostSection();
-				break;
-			}
-		}
-		if(!game_found)
-		{
-			alert("Game Not Found with Given Game Code!");
-		}
-	});
-}
-
-// Get the card that is currently selected
-function onGetCurrentCard()
-{
-
-	// Reset the question
-	setQuestion("");
-	
-	// Get the current card
-	MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
-
-		response = JSON.parse(data.responseText);
-
-		console.log(response);
-
-		if(response.length >= 1)
-		{
-			card = response[0];
-			card_id = card["id"];
-			loadCurrentQuestion(card_id);
+			location.href = location + "?gamecode="+entered_code.toUpperCase();
 		}
 		else
 		{
-			msg = "ERROR: Something went wrong;";
-			if(response.length == 0){
-				msg = "A card has not been selected yet; Use the game board to select the next one";
-			}
-			alert(msg);
+			MyNotification.notify("#loadingSection", errMsg);
 		}
+	},()=>{
+		MyNotification.notify("#loadingSection", errMsg);
 	});
+}
+
+// Going to the next round;
+function onNextRound(increment=1)
+{
+
+	Logger.log("Going to Next Round");
+
+	// Increment round
+	CURR_ROUND += increment;
+	
+	// Display round information
+	nextRound = "Round #" + (CURR_ROUND);
+	CURR_MULTIPLIER = (CURR_ROUND <= 1) ? 1 : (CURR_ROUND - 1);
+	phrase = CURR_MULTIPLIER > 1 ? `<br/><span class="multiplier_phrase">(${CURR_MULTIPLIER}x points)</span>` : "";
+	document.getElementById("round_name").innerHTML = nextRound + phrase;
+
+	if(CURR_ROUND > 0 )
+	{
+		mydoc.loadContent(`NEXT ROUND`, "nextRoundButton");
+		mydoc.showContent("#playFastMoneyLink");
+	}
+
+	// Load the next question
+	loadNextQuestion();
+
+	// Hide/show the next/prev round buttons accordingly. 
+	let prevButtonState = (CURR_ROUND > 1) ? mydoc.showContent("#prevRoundButton") : mydoc.hideContent("#prevRoundButton");
+	let nextButtonState = (CURR_ROUND < 4) ? mydoc.showContent("#nextRoundButton") : mydoc.hideContent("#nextRoundButton");
 }
 
 
 /**************************** LOAD ****************************************/
 
-
-function loadCurrentQuestion(cardId)
+// Load the specific card id;
+function loadNextQuestion()
 {
-	MyTrello.get_single_card(cardId, function(data){
+	let nextQuestion  = getNextQuestion(CURR_ROUND);
 
-		response = JSON.parse(data.responseText);
-
-		question = response["name"];
-		question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode
-
-		CURR_CARD = cardId;
-		CURR_ANSWERS = response["checklists"][0].checkItems;
-
-		// Set the question:
-		setQuestion(question)
-	});	
-}
-
-function showHostSection()
-{
-	mydoc.hideContent("#game_code_section");
-	mydoc.showContent("#host_view_section");
+	if(nextQuestion != undefined)
+	{
+		// Set the question text;
+		let questionText = nextQuestion["name"] ?? "N/A";
+		questionText = (IS_TEST_RUN) ? simpleEncode(questionText) : questionText; //Adjust question if in TEST mode
+		mydoc.loadContent(questionText, "current_question");
+	}
 }
 
 
@@ -125,7 +145,10 @@ function setGameCode(value)
 	CURR_GAME_CODE = value.toUpperCase();
 	document.getElementById("game_code").innerText = CURR_GAME_CODE;
 	mydoc.showContent("#game_code_label_section");
-	mydoc.setPassThroughParameters(".pass_through_params", "gamecode", CURR_GAME_CODE);
+
+	// Set the code in the link to play fast money
+	let fastMoneyLink = document.getElementById("playFastMoneyLink");
+	fastMoneyLink.href += `&gamecode=${CURR_GAME_CODE}`;
 }
 
 function setQuestion(value)

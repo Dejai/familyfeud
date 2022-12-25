@@ -3,8 +3,10 @@
 <html>
 <head>
 	<title>Family Feud - Host</title>
-
+	<link rel="stylesheet" type="text/css" href="https://dejai.github.io/scripts/css/dlf_styles.css"/>
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 </head>
 <body>
 	<div id="menu">
@@ -16,29 +18,48 @@
 		</h1>
 	</div>
 	<hr>
-	<div id="game_code_section" class="centered">
+	<div id="game_code_section" class="hidden centered dlf_center_block_medium">
 		<input type="text" name="game_code" class="input_mash input_large centered" placeholder="Enter Game Code">
-		<br/>
-		<button class="button_mash" onclick="onEnterGame()">Enter</button>
+		<br/><br/>
+		<button class="dlf_button dlf_button_xxxlarge dlf_button_round_corners dlf_button_blue" onclick="onEnterGame()">
+			Enter
+		</button>
 	</div>
+	<div id="loadingSection" class="centered dlf_center_block_small"></div>
+
 	<div id="host_view_section" class="centered hidden">
+		<h2 id="round_name"></h2>
+
+		<div id="current_question_section">
+			<h2 id="current_question"></h2>
+		</div>
+
 		<div id="game_action_buttons2">
-			<button onclick="onGetCurrentCard()" class="button_mash">REFRESH</button>
-			<a href="../fastmoney/questions.html" class="pass_through_params">
-				<button id="fast_money_button" class="button_mash">FAST MONEY</button>	
+
+			<button id="prevRoundButton" onclick="onNextRound(-1)" class="dlf_button_round_corners dlf_button_orange game_action_buttons hidden">
+				PREV ROUND
+			</button>
+			<button id="nextRoundButton" onclick="onNextRound()" class="dlf_button_round_corners dlf_button_green game_action_buttons">
+				FIRST ROUND
+			</button>
+			<br/>
+			<br/>
+			<a id="playFastMoneyLink" href="./fastmoney.html?host=1" style="color:orange;font-style:italic;" class="hidden pass_through_params">
+				Play Fast Money
 			</a>
 		</div>
 
-		<div id="current_question_section">
-			<h3>Question:</h3>
-			<h2 id="current_question"></h2>
-		</div>
+		
 	</div>
 </body>
-		<!-- Common Code -->
-	<script src="../src/common.js"></script>
+
+	<!-- Common Code -->
+	<script src="https://dejai.github.io/scripts/js/common.js"></script>
+
 	<!-- My Trello code -->
-	<script src="../src/trello.js"></script>
+	<script src="https://dejai.github.io/scripts/js/trellowrapper.js"></script>
+	<script src="../src/trellohelper.js"></script>
+
 	<!-- My Source JS -->
 	<script src="../src/checkTestRun.js"></script>
 	<script src="../src/host.js"></script>

@@ -11,127 +11,233 @@ var IS_TEST_RUN = false;
 var CURR_CARD  = "";
 var CURR_QUEST = "";
 
+var CURR_ROUND = 0;
+
+// The loading gif
+var LOADING_GIF = `<img src="https://dejai.github.io/scripts/img/loading1.gif">`
+
+
 /*****************************GETTING STARTED************************************/
 
 // Once doc is ready
 mydoc.ready(function(){
 
+	// Set the board name
+	MyTrello.SetBoardName("familyfeud");
+
+	// Load the labels
+	getTrelloLabels();
+
+	// Get the map of search params
+	let query_map = mydoc.get_query_map();
+
+	// Get the game code from the URL (if available)
+	let gameCode = mydoc.get_query_param("gamecode");
+
+	// Check if we are doing a TEST RUN
 	IS_TEST_RUN = checkTestRun();
+
+	if(gameCode != undefined)
+	{
+		// Show loading gif while getting things together
+		MyNotification.notify("#loadingSection", LOADING_GIF);
+
+		// Get the set of questions from the
+		getGameQuestions(gameCode,"round",()=>{
+
+			// Set the game code where it should be set;
+			setGameCode(gameCode);
+
+			// Hide loading;
+			MyNotification.clear("#loadingSection");
+
+			// Show game section
+			mydoc.showContent("#admin_game_section");
+		},
+		// If not successful
+		()=>{
+			errMsg = "Could not find a game code: " + gameCode;
+			MyNotification.notify("#loadingSection", errMsg);
+		});
+	}
+	else
+	{
+		// Show the admin how many questions are left
+		mydoc.showContent("#newGameSection");
+		getCountOfCardsAvailable();
+	}
+
 });
 
 /***************************** ENTERING GAME **********************************/
 
-// Prevent the page accidentally closing
-function onClosePage(event)
+// Get the total amount of cards available to play with
+function getCountOfCardsAvailable()
 {
-	event.preventDefault();
-	event.returnValue='';
+	// Get count of regular questions
+	getPoolQuestions("Pool", (response)=>{
+		mydoc.loadContent(response.length, "regularQuestionsAvailable");
+		QUESTION_POOL["regular"] = response;
+
+		if(QUESTION_POOL["fastMoney"].length > 0)
+		{
+			mydoc.showContent("#newGameRow");
+			mydoc.showContent("#testRunRow");
+		}
+	});
+
+	// Get count of fast money questions
+	getPoolQuestions("Fast Money Pool", (response)=>{
+		mydoc.loadContent(response.length, "fastMoneyQuestionsAvailable");
+		QUESTION_POOL["fastMoney"] = response;
+
+		if(QUESTION_POOL["regular"].length > 0)
+		{
+			mydoc.showContent("#newGameRow");
+			mydoc.showContent("#testRunRow");
+		}
+	});
 }
 
-function onEnterGame()
+// Create a new game - including setting up a new list
+function onNewGame(isRealGame=false)
 {
+	// The game code default
+	let gameCode = "";
 
-	var ele = document.querySelector("#game_code_section input");
-	let entered_code = ele.value.toUpperCase();
+	let regularQuestions = selectRandomPoolQuestions("regular",4);
+	let fastMoneyQuestions = selectRandomPoolQuestions("fastMoney",5);
 
-	if(entered_code == "TEST")
+	let allQuestions = regularQuestions.concat(fastMoneyQuestions);
+
+	// Show loading gif
+	MyNotification.notify("#loadingSection", LOADING_GIF);
+
+	if(isRealGame)
 	{
-		// mydoc.addTestBanner();
-		mydoc.setPassThroughParameters(".pass_through_params", "test", "1");
-	}
+		gameCode = Helper.getCode(4);
+		console.log("Game Code: " + gameCode);
 
-	MyTrello.get_lists(function(data){
-		response = JSON.parse(data.responseText);
+		MyTrello.create_list(gameCode, (newListData)=>{
+			
+			let newListResp = myajax.GetJSON(newListData.responseText);
+			newListID = newListResp?.id;
 
-		var game_found;
-		for(var idx = 0; idx < response.length; idx++)
-		{
-			var obj = response[idx];
-			let list_name = obj["name"].toUpperCase();
-			let list_id = obj["id"];
-
-			if(list_name == entered_code)
+			if(newListID != undefined)
 			{
-				game_found = true;
-				CURR_GAME_CODE = list_name;
-				MyTrello.setCurrentGameListID(list_id);
-				setGameListId(list_id);
-				setGameCode(list_name);
-				showAdminSection();
-
-				break;
+				moveCardsToList(allQuestions, gameCode, newListID, isRealGame);
 			}
-		}
-		if(!game_found)
-		{
-			alert("Game Not Found with Given Game Code!");
-		}
+			else
+			{
+				MyNotification.notify("#loadingSection", "Could not create the new list.");
+			}
+		});
+	}
+	else
+	{
+		gameCode = "TEST"; 
+
+		MyTrello.get_list_by_name("TEST",(listData)=>{
+
+			let listResp = myajax.GetJSON(listData.responseText);
+			let listID = listResp[0]?.id;
+
+			if(listID != undefined)
+			{
+				moveCardsToList(allQuestions, gameCode, listID, isRealGame);
+			}
+			else
+			{
+				MyNotification.notify("#loadingSection", "Could not find the test list.");
+			}
+		});
+	}
+}
+
+// Move cards for the game to the respective list
+function moveCardsToList(questions, gameCode, listID, isRealGame=false)
+{
+	let cardsMoved = 0;
+
+	questions.forEach((card)=>{
+		MyTrello.update_card_list(card.id, listID, (data)=>{
+
+			cardsMoved += 1;
+
+			if(cardsMoved == questions.length)
+			{
+				setTimeout(()=>{
+					location.href = location.origin + location.pathname + "?gamecode="+gameCode.toUpperCase();;
+				},2000);
+			}
+		});
 	});
 }
 
-function onExistingGame()
+// Going to the next round;
+function onNextRound(increment=1)
 {
 
-	mydoc.hideContent("#create_game_section");
-	mydoc.showContent("#game_code_section");
+	Logger.log("Going to Next Round");
+
+	// Clear the board of current answer
+	cleared = onClearBoard();
+
+	if(cleared)
+	{
+		// Increment round
+		CURR_ROUND += increment;
+		
+		// Display round information
+		nextRound = "Round #" + (CURR_ROUND);
+		CURR_MULTIPLIER = (CURR_ROUND <= 1) ? 1 : (CURR_ROUND - 1);
+		phrase = CURR_MULTIPLIER > 1 ? `<br/><span class="multiplier_phrase">(${CURR_MULTIPLIER}x points)</span>` : "";
+		document.getElementById("round_name").innerHTML = nextRound + phrase;
+
+		if(CURR_ROUND > 0 )
+		{
+			mydoc.loadContent(`NEXT ROUND`, "nextRoundButton");
+			mydoc.showContent("#playFastMoneyLink");
+		}
+
+		// Load the next question
+		loadNextQuestion();
+
+		// Hide/show the next/prev round buttons accordingly. 
+		let prevButtonState = (CURR_ROUND > 1) ? mydoc.showContent("#prevRoundButton") : mydoc.hideContent("#prevRoundButton");
+		let nextButtonState = (CURR_ROUND < 4) ? mydoc.showContent("#nextRoundButton") : mydoc.hideContent("#nextRoundButton");
+	}
 }
 
-
-/**************************** LOAD ****************************************/
-
-
-// Get the card that is currently selected
-function onGetCurrentCard()
+// Load the specific card question;
+function loadNextQuestion()
 {
+	let nextQuestion  = getNextQuestion(CURR_ROUND);
 
-	// Reset the question
-	setQuestion("");
+	if(nextQuestion != undefined)
+	{
+		// Set the question text;
+		let questionText = nextQuestion["name"] ?? "N/A";
+		questionText = (IS_TEST_RUN) ? simpleEncode(questionText) : questionText; //Adjust question if in TEST mode
+		mydoc.loadContent(questionText, "current_question");
 
-	// Clear the cells on the board;
-	clearCellsOnBoard();
-	
-	// Get the current card
-	MyTrello.get_cards(MyTrello.curr_game_list_id, function(data){
+		// Setup the Hall of Fame answer option;
+		CURR_CARD = nextQuestion["id"] ?? undefined;
+		setHallOfFameLink(CURR_CARD);
 
-		response = JSON.parse(data.responseText);
 
-		if(response.length >= 1)
+		// Load the answers (already visible);
+		checklist = nextQuestion["checklists"]?.[0]?.checkItems ?? undefined;
+		if(checklist != undefined)
 		{
-			card = response[0];
-			card_id = card["id"];
-			loadCurrentQuestion(card_id);
+			console.log("Loading answers");
+			loadAdminAnswers(checklist);
 		}
-		else
-		{
-			msg = "ERROR: Something went wrong;";
-			if(response.length == 0){
-				msg = "A card has not been selected yet; Use the game board to select the next one";
-			}
-			alert(msg);
-		}
-	});
-}
 
-// Load the Current Question from Trello
-function loadCurrentQuestion(cardId)
-{
-	MyTrello.get_single_card(cardId, function(data){
+		// Show the section
+		mydoc.showContent("#gameQuestionAndAnswerSection");
 
-		response = JSON.parse(data.responseText);
-
-		question = response["name"];
-		question = (IS_TEST_RUN) ? Helper.simpleEncode(question) : question; //Adjust question if in TEST mode
-
-		CURR_CARD = cardId;
-		setHallOfFameLink(CURR_CARD)
-		CURR_ANSWERS = response["checklists"][0].checkItems;
-
-		// Set the question:
-		setQuestion(question);
-
-		// Load the answers into the table; Pass true for admin view
-		loadAdminAnswers(CURR_ANSWERS);
-	});	
+	}
 }
 
 // Load the answers
@@ -147,7 +253,7 @@ function loadAdminAnswers(checklist)
 		counter++;
 		splits = obj["name"].split("~");
 		answer_text = splits[0].trim();
-		answer_text = (IS_TEST_RUN) ? Helper.simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
+		answer_text = (IS_TEST_RUN) ? simpleEncode(answer_text) : answer_text; //Adjust answer if in TEST mode
 		answer_count = splits[1].trim();
 
 
@@ -169,33 +275,19 @@ function loadAdminAnswers(checklist)
 	});
 }
 
-function showAdminSection()
-{
-	mydoc.hideContent("#create_game_section");
-	mydoc.hideContent("#game_code_section");
-	mydoc.showContent("#admin_game_section");
-}
-
-
 /*****************************CLEAR/RESET*******************************************/
 function setGameCode(value)
 {
 	CURR_GAME_CODE = value.toUpperCase();
-	document.getElementById("game_code").innerText = CURR_GAME_CODE;
+	
+	mydoc.loadContent(CURR_GAME_CODE, "game_code");
 	mydoc.showContent("#game_code_label_section");
-	mydoc.setPassThroughParameters(".pass_through_params", "gamecode", CURR_GAME_CODE);
+
+	// Set the code in the link to play fast money
+	let fastMoneyLink = document.getElementById("playFastMoneyLink");
+	fastMoneyLink.href += `&gamecode=${CURR_GAME_CODE}`;
 }
 
-function setGameListId(listID)
-{
-	CURR_GAME_LIST_ID = listID
-	let links = Array.from(document.querySelectorAll(".pass_through_params"));
-	console.log(links);
-	links.forEach(function(obj){
-		let query = (obj.href.includes("?")) ? `&listid=${listID}` : `?listid=${listID}`;
-		obj.href += query;
-	});	
-}
 
 function setHallOfFameLink(cardID)
 {
@@ -203,18 +295,12 @@ function setHallOfFameLink(cardID)
 	if(link)
 	{
 		mydoc.showContent("#enter_hall_of_fame");
-		link.href = link.href += `?card=${cardID}`;
+		link.href = `../hof/?card=${cardID}`;
 	}
 }
 
-function setQuestion(value)
-{
-	CURR_QUEST = value;
-	document.getElementById("current_question").innerText = CURR_QUEST;
-}
-
 // Clear the cells on the board
-function clearCellsOnBoard()
+function onClearBoard()
 {
 
 	// Reset aswer cells;
@@ -243,6 +329,8 @@ function clearCellsOnBoard()
 	countsCells.forEach(function(obj){
 		obj.classList.add("unseen");
 	});
+
+	return true;
 }
 
 

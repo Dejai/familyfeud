@@ -4,124 +4,186 @@
 <head>
 	<title>Family Feud - Admin</title>
 	<link rel="stylesheet" type="text/css" href="../src/game.css">
+	<link rel="stylesheet" type="text/css" href="https://dejai.github.io/scripts/css/dlf_styles.css"/>
+
 </head>
 <body>
 	<div id="menu">
-		<h1 id="game_name">Family Feud &mdash; Admin View
-		<p id="game_code_label_section" style="font-size:75%;" class="hidden">
+		<h1 id="game_name">Family Feud &mdash; Admin View</h1>	
+
+		<p>Use this page to manage a game.</p>
+
+		<p id="game_code_label_section" class="hidden">
 			<span>Game Code: </span>
-			<span id="game_code" class="emphasis_orange"></span></h1>	
+			<span id="game_code" class="emphasis_orange"></span>
 		</p>
+
 	</div>
 	<hr>
-	<div id="game_code_section" class="center_section_50 centered">
-		<input type="text" name="game_code" class="input_mash input_large centered" placeholder="Enter Game Code">
-		<br/>
-		<button class="button_mash" onclick="onEnterGame()">Enter</button>
+	<div id="newGameSection" class="hidden">
+		<div id="cardsAvailableSection" class="dlf_center_block_medium centered">
+			<p>The number of questions left in the pool of questions:</p>
+			<table style="width:50%; margin:auto;" >
+				<tr>
+					<th>
+						<p>Regular Questions:</p>
+					</th>
+					<td>
+						<p id="regularQuestionsAvailable">
+							<img src="https://dejai.github.io/scripts/img/loading1.gif" style="width:25px;height:25px;">
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<p>Fast Money Questions:</p>
+					</th>
+					<td>
+						<p id="fastMoneyQuestionsAvailable">
+							<img src="https://dejai.github.io/scripts/img/loading1.gif" style="width:25px;height:25px;">
+						</p>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<hr>
+		<div class="centered dlf_center_block_medium">
+			<p id="testRunRow" class="hidden">
+				Practice how to play.
+				<br/>
+				<button id="testRunButton" class="dlf_button dlf_button_xxlarge dlf_button_round_corners dlf_button_limegreen" onclick="onNewGame(false)">
+					PRACTICE GAME
+				</button>
+			</p>
+			<br/>
+			<p id="newGameRow" class="hidden">
+				Run a real game!
+				<br/>
+				<button id="newGameButton" class="dlf_button dlf_button_xxxlarge dlf_button_round_corners dlf_button_blue" onclick="onNewGame(true)">
+					NEW GAME
+				</button>
+			</p>
+		</div>
 	</div>
+
+	<div id="loadingSection" class="dlf_center_block_large centered">
+	</div>
+	
 	<div id="admin_game_section" class="centered hidden">
-		<div id="game_action_buttons2">
-			<button id="next_round_button" onclick="onGetCurrentCard()" class="button_mash">REFRESH</button>
-			<a href="../fastmoney/questions.html?admin=1" class="pass_through_params">
-				<button id="fast_money_button" class="button_mash">FAST MONEY</button>	
-			</a>
-		</div>
+		<div id="gameQuestionAndAnswerSection" class="hidden">
 
-		<div id="current_question_section">
-			<h3>Question:</h3>
-			<h2 id="current_question"></h2>
-		</div>
+			<h2 id="round_name"></h2>
+
+			<div id="current_question_section">
+				<h2 id="current_question"></h2>
+			</div>
 		
-		<h3>Answers:</h3>
+			<table id="game_table_admin" cellpadding="0">
+				<colgroup>
+					<col width="250">
+					<col width="21">
+					<col width="250">
+					<col width="21">
+				</colgroup>
+				<tbody>
+					<tr>
+						<td id="game_cell_1" class="game_cell">
+							<p class="game_cell_number hidden">1</p>
+							<p class="answer hidden"></p>
+						</td>
+						<td id="game_cell_count_1" class="game_cell_count unseen">
+							<p class="hidden"></p>
+						</td>
+						<td id="game_cell_5" class="game_cell">
+							<p class="game_cell_number hidden">5</p>
+							<p class="answer hidden"></p>
+						</td>
+						<td id="game_cell_count_5" class="game_cell_count unseen">
+							<p class="hidden"></p>
+						</td>
+					</tr>
+					<tr>
+						<td id="game_cell_2" class="game_cell">
+							<p class="game_cell_number hidden">2</p>
+							<p class="answer hidden"></p>
+						</td>
+						<td id="game_cell_count_2" class="game_cell_count unseen">
+							<p class="hidden"></p>
+						</td>
+						<td id="game_cell_6" class="game_cell">
+							<p class="game_cell_number hidden">6</p>
+							<p class="answer hidden"></p>
+						</td>
+						<td id="game_cell_count_6" class="game_cell_count unseen">
+							<p class="hidden"></p>
+						</td>
+					</tr>
+					<tr>
+						<td id="game_cell_3" class="game_cell">
+							<p class="game_cell_number hidden">3</p>
+							<p class="answer hidden"></p>
+						</td>
+						<td id="game_cell_count_3" class="game_cell_count unseen">
+							<p class="hidden"></p>
+						</td>
+						<td id="game_cell_7" class="game_cell">
+							<p class="game_cell_number hidden">7</p>
+							<p class="answer hidden"></p>
+						</td>
+						<td id="game_cell_count_7" class="game_cell_count unseen">
+							<p class="hidden"></p>
+						</td>
+					</tr>
+					<tr>
+						<td id="game_cell_4" class="game_cell">
+							<p class="game_cell_number hidden">4</p>
+							<p class="answer hidden"></p>
+						</td>
+						<td id="game_cell_count_4" class="game_cell_count unseen">
+							<p class="hidden"></p>
+						</td>
+						<td id="game_cell_8" class="game_cell">
+							<p class="game_cell_number hidden">8</p>
+							<p class="answer hidden"></p>
+						</td>
+						<td id="game_cell_count_8" class="game_cell_count unseen">
+							<p class="hidden"></p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 
-		<a id="enter_hall_of_fame" class="hidden" href="../hof/">
-			<button id="fast_money_button" class="button_mash">Enter "Hall of Fame" Answer</button>	
-		</a>
-
-		<table id="game_table_admin" cellpadding="0">
-			<colgroup>
-				<col width="250">
-				<col width="21">
-				<col width="250">
-				<col width="21">
-			</colgroup>
-			<tbody>
-				<tr>
-					<td id="game_cell_1" class="game_cell">
-						<p class="game_cell_number hidden">1</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_1" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-					<td id="game_cell_5" class="game_cell">
-						<p class="game_cell_number hidden">5</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_5" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-				</tr>
-				<tr>
-					<td id="game_cell_2" class="game_cell">
-						<p class="game_cell_number hidden">2</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_2" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-					<td id="game_cell_6" class="game_cell">
-						<p class="game_cell_number hidden">6</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_6" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-				</tr>
-				<tr>
-					<td id="game_cell_3" class="game_cell">
-						<p class="game_cell_number hidden">3</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_3" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-					<td id="game_cell_7" class="game_cell">
-						<p class="game_cell_number hidden">7</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_7" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-				</tr>
-				<tr>
-					<td id="game_cell_4" class="game_cell">
-						<p class="game_cell_number hidden">4</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_4" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-					<td id="game_cell_8" class="game_cell">
-						<p class="game_cell_number hidden">8</p>
-						<p class="answer hidden"></p>
-					</td>
-					<td id="game_cell_count_8" class="game_cell_count unseen">
-						<p class="hidden"></p>
-					</td>
-				</tr>
-			</tbody>
-		</table>
 		<br/>
+		<br/>
+
+		<button id="prevRoundButton" onclick="onNextRound(-1)" class="dlf_button_round_corners dlf_button_orange game_action_buttons hidden">
+			PREV ROUND
+		</button>
+		<a id="enter_hall_of_fame" class="hidden dlf_notextdecoration" href="../hof/" target="_blank">
+			<button id="fast_money_button" class="dlf_button_round_corners dlf_button_blue">Enter "Hall of Fame" Answer</button>	
+		</a>
+		<button id="nextRoundButton" onclick="onNextRound()" class="dlf_button_round_corners dlf_button_green game_action_buttons">
+			FIRST ROUND
+		</button>
+		<br/>
+		<br/>
+		<a id="playFastMoneyLink" href="./fastmoney.html?admin=1" style="color:orange;font-style:italic;" class="hidden pass_through_params">
+			Play Fast Money
+		</a>
 		
 	</div>
 	
 </body>
 	<!-- Common Code -->
-	<script src="../src/common.js"></script>
+	<script src="https://dejai.github.io/scripts/js/common.js"></script>
+
 	<!-- My Trello code -->
-	<script src="../src/trello.js"></script>
+	<script src="https://dejai.github.io/scripts/js/trellowrapper.js"></script>
+	<script src="../src/trellohelper.js"></script>
+
 	<!-- My Source JS -->
+	<script src="../src/timer.js"></script>
 	<script src="../src/checkTestRun.js"></script>
 	<script src="../src/admin.js"></script>
 </html>

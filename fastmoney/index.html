@@ -9,6 +9,9 @@
 <body>
 	<div id="menu">
 		<h1 id="game_name">Family Feud &mdash; Fast Money
+			<br/>
+			<i id="themeSongIcon" class="fa fa-volume-up pointer themeSongPaused" onclick="toggleThemeSong()" ></i>
+
 			<p style="font-size:75%;">
 				<span>Game Code: </span>
 				<span id="game_code" class="emphasis_orange"></span></h1>	
@@ -45,15 +48,17 @@
 			<button id="show_player_one" onclick="toggleFastMoneyAnswers('show')" class="hidden">Show Player One</button>
 		</div>	
 		<table id="game_table_admin" cellpadding="0">
+			<colgroup>
+				<col width="50%">
+				<col width="50%">
+			</colgroup>
 			<tbody>
 				<tr>
 					<td id="fast_money_player_one">
 						<table style="width:100%;">
 							<colgroup>
-								<col width="250">
-								<col width="21">
-								<col width="250">
-								<col width="21">
+								<col width="75%">
+								<col width="25%">
 							</colgroup>
 							<tr>
 								<td class="game_cell"></td>
@@ -80,10 +85,8 @@
 					<td id="fast_money_player_two">
 						<table style="width:100%;">
 							<colgroup>
-								<col width="250">
-								<col width="21">
-								<col width="250">
-								<col width="21">
+								<col width="75%">
+								<col width="25%">
 							</colgroup>
 							<tr>
 								<td class="game_cell"></td>
@@ -138,12 +141,13 @@
 
 	</div>
 </body>
-		<!-- Common Code -->
-	<script src="../src/common.js"></script>
+	<!-- Common Code -->
+	<script src="https://dejai.github.io/scripts/js/common.js"></script>
+	<!-- <script src="../src/common.js"></script> -->
 	<!-- My Trello code -->
 	<script src="../src/trello.js"></script>
 	<!-- My Source JS -->
 	<script src="../src/timer.js"></script>
 	<script src="../src/checkTestRun.js"></script>
-	<script src="../src/fastmoney.js"></script>
+	<script src="../src/fastmoney-board.js"></script>
 </html>

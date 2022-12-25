@@ -2,11 +2,12 @@
 /* GENERAL */
 	body { background-color:black; color:white; }
 	
+	.invisible { visibility: hidden; }
+
 	#menu { text-align: center; }
 	#menu_table { text-align:center; }
 	body{ font-family:Arial, sans-serif; }
 	button { cursor:pointer; }
-	.centered{ text-align:center; }
 	.center_section_50 { width:50%; margin:auto; }
 	.center_section_60 { width:60%; margin:auto; }
 	.center_section_70 { width:70%; margin:auto; }
@@ -34,14 +35,20 @@
 	#home_button { display:block; margin-left:1%; margin-top:1%; cursor:pointer; }
 	#home_button button { border:none; font-size:25px; cursor:pointer;}
 
+	.team_indicators { color:gray; }
+	.team_indicators.in_play { color:limegreen !important; border:none !important; }
+
 	/*.back_button_link { float:left; clear:both; }*/
 	/*.back_button_link button { border:none; font-size:25px; cursor:pointer;}*/
 
+	.themeSongPaused { color:gray !important; }
+	.themeSongPlaying { color:blue !important; }
+
 /* HOME PAGE */
-	.identify_yourself { display:block; text-align:center; padding:2%; width:40%; margin:auto; cursor:pointer;
+	/* .identify_yourself { display:block; text-align:center; padding:2%; width:40%; margin:auto; cursor:pointer;
 							 background-color:lightgray; margin-bottom:2%;
 			 }
-	.identify_yourself:hover{background-color:blue; color:yellow; }
+	.identify_yourself:hover{background-color:blue; color:yellow; } */
 
 /* FAST MONEY */
 	.blinking { color:red !important; background-color:red !important; border:1px solid red!important;}
@@ -59,8 +66,8 @@
 	#time_view table {width: 100%;}
 	#timer_second { margin-right:2%; }
 
-	.timer_value { font-size:65px; }
-	.timer_buttons {  cursor:pointer; font-size:45px; }
+	.timer_value { font-size:45px; }
+	.timer_buttons {  cursor:pointer; font-size:25px; }
 
 	.fast_money_points { width:21px; background-color:#0046b7; color:#0046b7;}
 
@@ -68,7 +75,7 @@
 	.fastmoney_answers { font-size:200%; } 
 
 /* ADMIN VIEW */
-	#current_question_section{ border:1px solid white; }
+	/* #current_question_section{ border:1px solid white; } */
 	#current_question { color:red; }
 
 	#game_table_admin { border:none; width:100%; border-collapse: collapse; font-size:100%; }
